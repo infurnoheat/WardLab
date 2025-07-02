@@ -13,7 +13,7 @@
 
 <meta name="date" content="2025-07-01" />
 
-<title>Cut and Tag GC</title>
+<title>Cut and Tag QC</title>
 
 <script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -366,7 +366,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Cut and Tag GC</h1>
+<h1 class="title toc-ignore">Cut and Tag QC</h1>
 <h4 class="author">Steven Yu</h4>
 <h4 class="date">2025-07-01</h4>
 
@@ -528,13 +528,13 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong59eb78f">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongca7a59c">
 <span class="glyphicon glyphicon-ok text-success"
-aria-hidden="true"></span> <strong>Repository version:</strong> 59eb78f
+aria-hidden="true"></span> <strong>Repository version:</strong> ca7a59c
 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong59eb78f"
+<div id="strongRepositoryversionstrongca7a59c"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -543,7 +543,7 @@ and connecting the code version to the results is critical for
 reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 59eb78f.
+The results in this page were generated with repository version ca7a59c.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -614,6 +614,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+ca7a59c
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+<td>
+wflow_publish("analysis/multiQC_cut_tag.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+0644589
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -771,6 +805,43 @@ combo_trim_df &lt;- combo_trim_df[(!combo_trim_df$trt %in% &quot;5FU&quot;),]</c
   ylab(&quot;number of samples&quot;)+
   ggtitle(&quot;Breakdown of samples by mark and trt-time&quot;)</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/Data%20Visualization%201-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-Data-Visualization-1-1">
+Past versions of "Data Visualization 1-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-Data-Visualization-1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+0644589
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>combo_trim_df %&gt;% 
   dplyr::filter(read==&quot;R1&quot;) %&gt;% 
   group_by(trt,time,Histone_Mark) %&gt;% 
@@ -944,6 +1015,43 @@ DOX
   ggtitle(&quot;Read counts by sample and histone mark trimmed adapters&quot;)+
   scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/ct%20vis%20histo-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-ct-vis-histo-1">
+Past versions of "ct vis histo-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-ct-vis-histo-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+0644589
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>combo_trim_df %&gt;% 
   dplyr::filter(read==&quot;R1&quot;) %&gt;% 
    ggplot(., aes(x = Histone_Mark, y= `Total Sequences`))+
@@ -954,6 +1062,43 @@ geom_boxplot(aes(fill=Histone_Mark)) +
   theme(axis.text.x=element_text(vjust = .2,angle=90))+
   ggtitle(&quot;Sequence count by trt and time trimmed adapter&quot;)</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/ct%20vis%20box-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-ct-vis-box-1">
+Past versions of "ct vis box-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-ct-vis-box-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+0644589
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="trim-info" class="section level4">
 <h4>Trim Info</h4>
@@ -961,11 +1106,85 @@ geom_boxplot(aes(fill=Histone_Mark)) +
   ggplot(., aes(x = read, y= avg_sequence_length))+
 geom_boxplot(aes(fill=read))</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/trim%20info%201-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-trim-info-1-1">
+Past versions of "trim info 1-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-trim-info-1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+0644589
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>combo_trim_df %&gt;% 
   ggplot(., aes(x = read, y= avg_sequence_length))+
 geom_boxplot(aes(fill=Histone_Mark)) +
   ggtitle(&quot;Boxplot of trim read length across histone marks&quot;)</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/trim%20info%202-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-trim-info-2-1">
+Past versions of "trim info 2-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-trim-info-2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+0644589
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>combo_trim_df %&gt;% 
   datatable(., options = list(scrollX = TRUE, 
                               scrollY = &quot;400px&quot;,
@@ -985,6 +1204,43 @@ geom_col(aes(fill=Histone_Mark)) +
   ggtitle(&quot;Graph of average read length across R1 samples&quot;)+ theme(axis.text.x=element_text(vjust = .2,angle=90))+
   scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/trim%20info%204-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-trim-info-4-1">
+Past versions of "trim info 4-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-trim-info-4-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+0644589
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>combo_trim_df %&gt;% 
   dplyr::filter(read==&quot;R2&quot;) %&gt;% 
   ggplot(., aes(x = Sample, y= avg_sequence_length))+
@@ -994,6 +1250,43 @@ geom_col(aes(fill=Histone_Mark)) +
   ggtitle(&quot;Graph of average read length across R2 samples&quot;)+ theme(axis.text.x=element_text(vjust = .2,angle=90))+
   scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/trim%20info%205-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-trim-info-5-1">
+Past versions of "trim info 5-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-trim-info-5-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+0644589
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>combo_trim_df %&gt;% 
   dplyr::filter(read==&quot;R1&quot;) %&gt;% 
   ggplot(., aes(x = Sample, y= `%GC`))+
@@ -1003,6 +1296,43 @@ geom_col(aes(fill=Histone_Mark)) +
   theme(axis.text.x=element_text(vjust = .2,angle=90))+
   scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/trim%20info%206-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-trim-info-6-1">
+Past versions of "trim info 6-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-trim-info-6-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+0644589
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>combo_trim_df %&gt;% 
   dplyr::filter(read==&quot;R2&quot;) %&gt;% 
   ggplot(., aes(x = Sample, y= `%GC`))+
@@ -1012,6 +1342,43 @@ geom_col(aes(fill=Histone_Mark)) +
   theme(axis.text.x=element_text(vjust = .2,angle=90))+
   scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/trim%20info%207-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-trim-info-7-1">
+Past versions of "trim info 7-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-trim-info-7-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+0644589
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="duplication-info" class="section level4">
 <h4>Duplication Info</h4>
@@ -1025,6 +1392,43 @@ geom_col(aes(fill=Histone_Mark)) +
   theme(axis.text.x=element_text(angle=90))+
   ggtitle(&quot;Duplication percentage (R1 trimmed)&quot;)</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/dup%20info%201-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-dup-info-1-1">
+Past versions of "dup info 1-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-dup-info-1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+0644589
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>combo_trim_df %&gt;% 
   dplyr::filter(read==&quot;R1&quot;) %&gt;% 
   ggplot(., aes(x = interaction(time,trt), y= `FastQC_mqc-generalstats-fastqc-percent_duplicates`))+
@@ -1035,6 +1439,43 @@ facet_wrap(~Histone_Mark)+
   theme(axis.text.x=element_text(angle=90))+
   ggtitle(&quot;Duplication percentage (R1 trimmed)&quot;)</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/dup%20info%202-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-dup-info-2-1">
+Past versions of "dup info 2-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-dup-info-2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+0644589
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>combo_trim_df %&gt;% 
   dplyr::filter(read==&quot;R1&quot;) %&gt;% 
   ggplot(., aes(x = Sample, y= `FastQC_mqc-generalstats-fastqc-percent_duplicates`))+
@@ -1044,6 +1485,43 @@ facet_wrap(~Histone_Mark)+
   theme(axis.text.x=element_text(vjust = .2,angle=90))+
   scale_y_continuous( limits = c(0,100),expand = expansion(mult = c(0, .1)))</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/dup%20info%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-dup-info-3-1">
+Past versions of "dup info 3-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-dup-info-3-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+0644589
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>combo_trim_df %&gt;% 
   dplyr::filter(read==&quot;R2&quot;) %&gt;% 
   ggplot(., aes(x = Sample, y= `FastQC_mqc-generalstats-fastqc-percent_duplicates`))+
@@ -1053,6 +1531,43 @@ facet_wrap(~Histone_Mark)+
   theme(axis.text.x=element_text(vjust = .2,angle=90))+
   scale_y_continuous(limits = c(0,100), expand = expansion(mult = c(0, .1)))</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/dup%20info%204-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-dup-info-4-1">
+Past versions of "dup info 4-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-dup-info-4-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+0644589
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
