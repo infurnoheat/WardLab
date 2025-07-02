@@ -1,5 +1,5 @@
 ---
-title: "Cut and Tag GC"
+title: "Cut and Tag QC"
 author: "Steven Yu"
 date: "2025-07-01"
 output: workflowr::wflow_html
