@@ -8,4 +8,4 @@ editor_options:
   chunk_output_type: console
 ---
 
-[Cut and Tag](https://github.com/infurnoheat/WardLab/blob/2902c7e403b249274d2946d5c33a188eff682b7f/docs/multiQC_cut_tag.html)
+[Cut and Tag](https://infurnoheat.github.io/WardLab/multiQC_cut_tag.html)
