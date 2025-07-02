@@ -1,0 +1,309 @@
+---
+title: "Cut and Tag GC"
+author: "Steven Yu"
+date: "2025-07-01"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE,
+	dev = c("png","pdf")
+)
+```
+
+## Cut And Tag QC
+
+#### Bioconductor
+```{r biocoductor}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install()
+```
+
+#### Loading Packages 
+```{r load packages}
+library(tidyverse)
+library(readr)
+library(kableExtra)
+library(DT)
+library(edgeR)
+library(ComplexHeatmap)
+library(data.table)
+library(genomation)
+library(GenomicRanges)
+```
+
+#### Data Initialization
+```{r init}
+sampleinfo <- read_delim("data/sample_info.tsv", delim = "\t")
+multiqc_gene_stats_trim <- read_delim("data/multiqc_data_trim/multiqc_general_stats.txt",delim = "\t")
+multiqc_fastqc_trim <- read_delim("data/multiqc_data_trim/multiqc_fastqc.txt",delim = "\t")
+```
+
+#### Functions
+```{r functions}
+drug_pal <- c("#8B006D","#DF707E","#F1B72B", "#3386DD","#707031","#41B333")
+pca_plot <-
+  function(df,
+           col_var = NULL,
+           shape_var = NULL,
+           title = "") {
+    ggplot(df) + geom_point(aes_string(
+      x = "PC1",
+      y = "PC2",
+      color = col_var,
+      shape = shape_var
+    ),
+    size = 5) +
+      labs(title = title, x = "PC 1", y = "PC 2") +
+      scale_color_manual(values = c(
+        "#8B006D",
+        "#DF707E",
+        "#F1B72B",
+        "#3386DD",
+        "#707031",
+        "#41B333"
+      ))
+  }
+pca_var_plot <- function(pca) {
+  # x: class == prcomp
+  pca.var <- pca$sdev ^ 2
+  pca.prop <- pca.var / sum(pca.var)
+  var.plot <-
+    qplot(PC, prop, data = data.frame(PC = 1:length(pca.prop),
+                                      prop = pca.prop)) +
+    labs(title = 'Variance contributed by each PC',
+         x = 'PC', y = 'Proportion of variance')
+  plot(var.plot)
+}
+
+calc_pca <- function(x) {
+  # Performs principal components analysis with prcomp
+  # x: a sample-by-gene numeric matrix
+  prcomp(x, scale. = TRUE, retx = TRUE)
+}
+
+get_regr_pval <- function(mod) {
+  # Returns the p-value for the Fstatistic of a linear model
+  # mod: class lm
+  stopifnot(class(mod) == "lm")
+  fstat <- summary(mod)$fstatistic
+  pval <- 1 - pf(fstat[1], fstat[2], fstat[3])
+  return(pval)
+}
+
+plot_versus_pc <- function(df, pc_num, fac) {
+  # df: data.frame
+  # pc_num: numeric, specific PC for plotting
+  # fac: column name of df for plotting against PC
+  pc_char <- paste0("PC", pc_num)
+  # Calculate F-statistic p-value for linear model
+  pval <- get_regr_pval(lm(df[, pc_char] ~ df[, fac]))
+  if (is.numeric(df[, f])) {
+    ggplot(df, aes_string(x = f, y = pc_char)) + geom_point() +
+      geom_smooth(method = "lm") + labs(title = sprintf("p-val: %.2f", pval))
+  } else {
+    ggplot(df, aes_string(x = f, y = pc_char)) + geom_boxplot() +
+      labs(title = sprintf("p-val: %.2f", pval))
+  }
+}
+x_axis_labels = function(labels, every_nth = 1, ...) {
+  axis(side = 1,
+       at = seq_along(labels),
+       labels = F)
+  text(
+    x = (seq_along(labels))[seq_len(every_nth) == 1],
+    y = par("usr")[3] - 0.075 * (par("usr")[4] - par("usr")[3]),
+    labels = labels[seq_len(every_nth) == 1],
+    xpd = TRUE,
+    ...
+  )
+}
+```
+
+### Analysis
+
+#### Data Processing
+```{r Data Processig}
+combo_trim_df <- multiqc_fastqc_trim %>% 
+ extract(., Sample, into = c("prefix","read"), regex= "(.+)_R(\\d+)", remove=FALSE) %>% 
+  mutate(read = paste0("R", read)) %>% 
+  left_join(., sampleinfo, by =c("prefix"="Library ID")) %>% 
+  left_join(., multiqc_gene_stats_trim, by = c("Sample" = "Sample")) %>% 
+  mutate(ind=factor(Individual, levels = c("1","2","3","4","5"))) %>% 
+  mutate(trt=factor(Treatment, levels = c("VEH","5FU","DOX"))) %>% 
+  mutate(time=factor(Timepoint, levels=c("24T","24R","144R")))
+combo_trim_df <- combo_trim_df[(!combo_trim_df$trt %in% "5FU"),]
+```
+
+#### Data Visualization
+```{r Data Visualization 1}
+combo_trim_df %>% 
+  dplyr::filter(read=="R1") %>% 
+  group_by(trt, time, Histone_Mark) %>% 
+  tally() %>% 
+  ggplot(., aes(x = time, y= n))+
+  geom_col(position="dodge",aes(fill=trt)) + 
+  facet_wrap(~Histone_Mark)+
+  theme(axis.text.x=element_text(angle=90))+
+  ylab("number of samples")+
+  ggtitle("Breakdown of samples by mark and trt-time")
+```
+
+```{r Data Visualization 2}
+combo_trim_df %>% 
+  dplyr::filter(read=="R1") %>% 
+  group_by(trt,time,Histone_Mark) %>% 
+  tally() %>% 
+  pivot_wider(., id_cols=c(trt,time), names_from = Histone_Mark, values_from = n) %>% 
+  kable(.,caption = ("Sample counts")) %>% 
+  kable_paper("striped", full_width = FALSE) %>%
+  kable_styling(full_width = FALSE,font_size = 16) %>%
+  scroll_box(width = "100%", height = "500px")
+```
+
+#### Visualization of Counts
+```{r ct vis histo, fig.width = 14}
+combo_trim_df %>% 
+  dplyr::filter(read=="R1") %>% 
+  ggplot(., aes(x = Sample, y= `Total Sequences`))+
+  geom_col(aes(fill=Histone_Mark)) + 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  ylab("sequene count")+
+  ggtitle("Read counts by sample and histone mark trimmed adapters")+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r ct vis box}
+combo_trim_df %>% 
+  dplyr::filter(read=="R1") %>% 
+   ggplot(., aes(x = Histone_Mark, y= `Total Sequences`))+
+geom_boxplot(aes(fill=Histone_Mark)) + 
+    geom_point(aes(color=ind))+
+  facet_wrap(trt~time)+
+  ylab("count")+
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  ggtitle("Sequence count by trt and time trimmed adapter")
+```
+
+#### Trim Info
+```{r trim info 1}
+combo_trim_df %>% 
+  ggplot(., aes(x = read, y= avg_sequence_length))+
+geom_boxplot(aes(fill=read))
+```
+
+```{r trim info 2}
+combo_trim_df %>% 
+  ggplot(., aes(x = read, y= avg_sequence_length))+
+geom_boxplot(aes(fill=Histone_Mark)) +
+  ggtitle("Boxplot of trim read length across histone marks")
+```
+
+```{r trim info 3}
+combo_trim_df %>% 
+  datatable(., options = list(scrollX = TRUE, 
+                              scrollY = "400px",
+                              scrollCollapse = TRUE,
+                              fixedColumns = list(leftColumns =2),
+                              fixedHeader= TRUE),
+            extensions = c("FixedColumns","Scroller"),
+            class = "display")
+```
+
+```{r trim info 4, fig.width = 14}
+combo_trim_df %>% 
+  dplyr::filter(read=="R1") %>% 
+  ggplot(., aes(x = Sample, y= avg_sequence_length))+
+geom_col(aes(fill=Histone_Mark)) +
+  geom_hline( yintercept = 75)+
+  theme_classic()+
+  ggtitle("Graph of average read length across R1 samples")+ theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r trim info 5, fig.width = 14}
+combo_trim_df %>% 
+  dplyr::filter(read=="R2") %>% 
+  ggplot(., aes(x = Sample, y= avg_sequence_length))+
+geom_col(aes(fill=Histone_Mark)) +
+  geom_hline( yintercept = 75)+
+  theme_classic()+
+  ggtitle("Graph of average read length across R2 samples")+ theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r trim info 6, fig.width = 14}
+combo_trim_df %>% 
+  dplyr::filter(read=="R1") %>% 
+  ggplot(., aes(x = Sample, y= `%GC`))+
+  geom_col(aes(fill=Histone_Mark)) +
+  theme_classic()+
+  ggtitle("Graph of %GC for R1 trimmed")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r trim info 7, fig.width = 14}
+combo_trim_df %>% 
+  dplyr::filter(read=="R2") %>% 
+  ggplot(., aes(x = Sample, y= `%GC`))+
+  geom_col(aes(fill=Histone_Mark)) +
+  theme_classic()+
+  ggtitle("Graph of %GC for R2 trimmed")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+#### Duplication Info
+```{r dup info 1}
+combo_trim_df %>% 
+  dplyr::filter(read=="R1") %>% 
+  ggplot(., aes(x = Histone_Mark, y= `FastQC_mqc-generalstats-fastqc-percent_duplicates`))+
+  geom_boxplot(aes(fill=Histone_Mark)) + 
+    geom_point(aes(color=ind))+
+  facet_wrap(trt~time)+
+  ylab("percent duplication")+
+  theme(axis.text.x=element_text(angle=90))+
+  ggtitle("Duplication percentage (R1 trimmed)")
+```
+
+```{r dup info 2}
+combo_trim_df %>% 
+  dplyr::filter(read=="R1") %>% 
+  ggplot(., aes(x = interaction(time,trt), y= `FastQC_mqc-generalstats-fastqc-percent_duplicates`))+
+  geom_boxplot(aes(fill=Histone_Mark)) + 
+  geom_point(aes(color=ind))+
+facet_wrap(~Histone_Mark)+
+  ylab("percent duplication")+
+  theme(axis.text.x=element_text(angle=90))+
+  ggtitle("Duplication percentage (R1 trimmed)")
+```
+
+```{r dup info 3, fig.width = 14}
+combo_trim_df %>% 
+  dplyr::filter(read=="R1") %>% 
+  ggplot(., aes(x = Sample, y= `FastQC_mqc-generalstats-fastqc-percent_duplicates`))+
+  geom_col(aes(fill=Histone_Mark)) +
+  theme_classic()+
+  ggtitle("Graph of percent duplicates for R1 trimmed")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( limits = c(0,100),expand = expansion(mult = c(0, .1)))
+```
+
+```{r dup info 4, fig.width = 14}
+combo_trim_df %>% 
+  dplyr::filter(read=="R2") %>% 
+  ggplot(., aes(x = Sample, y= `FastQC_mqc-generalstats-fastqc-percent_duplicates`))+
+  geom_col(aes(fill=Histone_Mark)) +
+  theme_classic()+
+  ggtitle("Graph of percent duplicates for R2 trimmed")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous(limits = c(0,100), expand = expansion(mult = c(0, .1)))
+```
+
