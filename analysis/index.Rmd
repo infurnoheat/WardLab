@@ -8,4 +8,4 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
+[Cut and Tag](https://github.com/infurnoheat/WardLab/blob/2902c7e403b249274d2946d5c33a188eff682b7f/docs/multiQC_cut_tag.html)
