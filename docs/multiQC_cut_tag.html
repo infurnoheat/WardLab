@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Steven Yu" />
+
+<meta name="date" content="2025-07-01" />
+
+<title>Cut and Tag GC</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+<link href="site_libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet" />
+<script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="site_libs/datatables-binding-0.33/datatables.js"></script>
+<link href="site_libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="site_libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="site_libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+<link href="site_libs/dt-ext-fixedcolumns-1.13.6/css/fixedColumns.dataTables.min.css" rel="stylesheet" />
+<script src="site_libs/dt-ext-fixedcolumns-1.13.6/js/dataTables.fixedColumns.min.js"></script>
+<link href="site_libs/dt-ext-scroller-1.13.6/css/scroller.dataTables.min.css" rel="stylesheet" />
+<script src="site_libs/dt-ext-scroller-1.13.6/js/dataTables.scroller.min.js"></script>
+<link href="site_libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">multiQC_cut&tag</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Cut and Tag GC</h1>
+<h4 class="author">Steven Yu</h4>
+<h4 class="date">2025-07-01</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2025-07-02
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>WardLab/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.1). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20250701code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20250701)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20250701code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20250701)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong59eb78f">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong> 59eb78f
+</a>
+</p>
+</div>
+<div id="strongRepositoryversionstrong59eb78f"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version 59eb78f.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+
+Untracked files:
+    Untracked:  WardLab.Rproj
+    Untracked:  data/multiqc_data_trim/
+    Untracked:  data/sample_info.tsv
+    Untracked:  figure/
+    Untracked:  multiqc_data/
+
+Unstaged changes:
+    Deleted:    WarLab.Rproj
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+These are the previous versions of the repository in which changes were
+made to the R Markdown (<code>analysis/multiQC_cut_tag.Rmd</code>) and
+HTML (<code>docs/multiQC_cut_tag.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+59eb78f
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-02
+</td>
+<td>
+wflow_publish("analysis/multiQC_cut_tag.Rmd")
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="cut-and-tag-qc" class="section level2">
+<h2>Cut And Tag QC</h2>
+<div id="bioconductor" class="section level4">
+<h4>Bioconductor</h4>
+<pre class="r"><code>if (!require(&quot;BiocManager&quot;, quietly = TRUE))
+    install.packages(&quot;BiocManager&quot;)
+BiocManager::install()</code></pre>
+</div>
+<div id="loading-packages" class="section level4">
+<h4>Loading Packages</h4>
+<pre class="r"><code>library(tidyverse)
+library(readr)
+library(kableExtra)
+library(DT)
+library(edgeR)
+library(ComplexHeatmap)
+library(data.table)
+library(genomation)
+library(GenomicRanges)</code></pre>
+</div>
+<div id="data-initialization" class="section level4">
+<h4>Data Initialization</h4>
+<pre class="r"><code>sampleinfo &lt;- read_delim(&quot;data/sample_info.tsv&quot;, delim = &quot;\t&quot;)
+multiqc_gene_stats_trim &lt;- read_delim(&quot;data/multiqc_data_trim/multiqc_general_stats.txt&quot;,delim = &quot;\t&quot;)
+multiqc_fastqc_trim &lt;- read_delim(&quot;data/multiqc_data_trim/multiqc_fastqc.txt&quot;,delim = &quot;\t&quot;)</code></pre>
+</div>
+<div id="functions" class="section level4">
+<h4>Functions</h4>
+<pre class="r"><code>drug_pal &lt;- c(&quot;#8B006D&quot;,&quot;#DF707E&quot;,&quot;#F1B72B&quot;, &quot;#3386DD&quot;,&quot;#707031&quot;,&quot;#41B333&quot;)
+pca_plot &lt;-
+  function(df,
+           col_var = NULL,
+           shape_var = NULL,
+           title = &quot;&quot;) {
+    ggplot(df) + geom_point(aes_string(
+      x = &quot;PC1&quot;,
+      y = &quot;PC2&quot;,
+      color = col_var,
+      shape = shape_var
+    ),
+    size = 5) +
+      labs(title = title, x = &quot;PC 1&quot;, y = &quot;PC 2&quot;) +
+      scale_color_manual(values = c(
+        &quot;#8B006D&quot;,
+        &quot;#DF707E&quot;,
+        &quot;#F1B72B&quot;,
+        &quot;#3386DD&quot;,
+        &quot;#707031&quot;,
+        &quot;#41B333&quot;
+      ))
+  }
+pca_var_plot &lt;- function(pca) {
+  # x: class == prcomp
+  pca.var &lt;- pca$sdev ^ 2
+  pca.prop &lt;- pca.var / sum(pca.var)
+  var.plot &lt;-
+    qplot(PC, prop, data = data.frame(PC = 1:length(pca.prop),
+                                      prop = pca.prop)) +
+    labs(title = &#39;Variance contributed by each PC&#39;,
+         x = &#39;PC&#39;, y = &#39;Proportion of variance&#39;)
+  plot(var.plot)
+}
+
+calc_pca &lt;- function(x) {
+  # Performs principal components analysis with prcomp
+  # x: a sample-by-gene numeric matrix
+  prcomp(x, scale. = TRUE, retx = TRUE)
+}
+
+get_regr_pval &lt;- function(mod) {
+  # Returns the p-value for the Fstatistic of a linear model
+  # mod: class lm
+  stopifnot(class(mod) == &quot;lm&quot;)
+  fstat &lt;- summary(mod)$fstatistic
+  pval &lt;- 1 - pf(fstat[1], fstat[2], fstat[3])
+  return(pval)
+}
+
+plot_versus_pc &lt;- function(df, pc_num, fac) {
+  # df: data.frame
+  # pc_num: numeric, specific PC for plotting
+  # fac: column name of df for plotting against PC
+  pc_char &lt;- paste0(&quot;PC&quot;, pc_num)
+  # Calculate F-statistic p-value for linear model
+  pval &lt;- get_regr_pval(lm(df[, pc_char] ~ df[, fac]))
+  if (is.numeric(df[, f])) {
+    ggplot(df, aes_string(x = f, y = pc_char)) + geom_point() +
+      geom_smooth(method = &quot;lm&quot;) + labs(title = sprintf(&quot;p-val: %.2f&quot;, pval))
+  } else {
+    ggplot(df, aes_string(x = f, y = pc_char)) + geom_boxplot() +
+      labs(title = sprintf(&quot;p-val: %.2f&quot;, pval))
+  }
+}
+x_axis_labels = function(labels, every_nth = 1, ...) {
+  axis(side = 1,
+       at = seq_along(labels),
+       labels = F)
+  text(
+    x = (seq_along(labels))[seq_len(every_nth) == 1],
+    y = par(&quot;usr&quot;)[3] - 0.075 * (par(&quot;usr&quot;)[4] - par(&quot;usr&quot;)[3]),
+    labels = labels[seq_len(every_nth) == 1],
+    xpd = TRUE,
+    ...
+  )
+}</code></pre>
+</div>
+<div id="analysis" class="section level3">
+<h3>Analysis</h3>
+<div id="data-processing" class="section level4">
+<h4>Data Processing</h4>
+<pre class="r"><code>combo_trim_df &lt;- multiqc_fastqc_trim %&gt;% 
+ extract(., Sample, into = c(&quot;prefix&quot;,&quot;read&quot;), regex= &quot;(.+)_R(\\d+)&quot;, remove=FALSE) %&gt;% 
+  mutate(read = paste0(&quot;R&quot;, read)) %&gt;% 
+  left_join(., sampleinfo, by =c(&quot;prefix&quot;=&quot;Library ID&quot;)) %&gt;% 
+  left_join(., multiqc_gene_stats_trim, by = c(&quot;Sample&quot; = &quot;Sample&quot;)) %&gt;% 
+  mutate(ind=factor(Individual, levels = c(&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,&quot;5&quot;))) %&gt;% 
+  mutate(trt=factor(Treatment, levels = c(&quot;VEH&quot;,&quot;5FU&quot;,&quot;DOX&quot;))) %&gt;% 
+  mutate(time=factor(Timepoint, levels=c(&quot;24T&quot;,&quot;24R&quot;,&quot;144R&quot;)))
+combo_trim_df &lt;- combo_trim_df[(!combo_trim_df$trt %in% &quot;5FU&quot;),]</code></pre>
+</div>
+<div id="data-visualization" class="section level4">
+<h4>Data Visualization</h4>
+<pre class="r"><code>combo_trim_df %&gt;% 
+  dplyr::filter(read==&quot;R1&quot;) %&gt;% 
+  group_by(trt, time, Histone_Mark) %&gt;% 
+  tally() %&gt;% 
+  ggplot(., aes(x = time, y= n))+
+  geom_col(position=&quot;dodge&quot;,aes(fill=trt)) + 
+  facet_wrap(~Histone_Mark)+
+  theme(axis.text.x=element_text(angle=90))+
+  ylab(&quot;number of samples&quot;)+
+  ggtitle(&quot;Breakdown of samples by mark and trt-time&quot;)</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/Data%20Visualization%201-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>combo_trim_df %&gt;% 
+  dplyr::filter(read==&quot;R1&quot;) %&gt;% 
+  group_by(trt,time,Histone_Mark) %&gt;% 
+  tally() %&gt;% 
+  pivot_wider(., id_cols=c(trt,time), names_from = Histone_Mark, values_from = n) %&gt;% 
+  kable(.,caption = (&quot;Sample counts&quot;)) %&gt;% 
+  kable_paper(&quot;striped&quot;, full_width = FALSE) %&gt;%
+  kable_styling(full_width = FALSE,font_size = 16) %&gt;%
+  scroll_box(width = &quot;100%&quot;, height = &quot;500px&quot;)</code></pre>
+<div
+style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; overflow-x: scroll; width:100%; ">
+<table class=" lightable-paper lightable-striped table" style="font-family: &quot;Arial Narrow&quot;, arial, helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto; font-size: 16px; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+Sample counts
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+trt
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+time
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+H3K27ac
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+H3K27me3
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+H3K36me3
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+H3K9me3
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+VEH
+</td>
+<td style="text-align:left;">
+24T
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VEH
+</td>
+<td style="text-align:left;">
+24R
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VEH
+</td>
+<td style="text-align:left;">
+144R
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DOX
+</td>
+<td style="text-align:left;">
+24T
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DOX
+</td>
+<td style="text-align:left;">
+24R
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DOX
+</td>
+<td style="text-align:left;">
+144R
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="visualization-of-counts" class="section level4">
+<h4>Visualization of Counts</h4>
+<pre class="r"><code>combo_trim_df %&gt;% 
+  dplyr::filter(read==&quot;R1&quot;) %&gt;% 
+  ggplot(., aes(x = Sample, y= `Total Sequences`))+
+  geom_col(aes(fill=Histone_Mark)) + 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  ylab(&quot;sequene count&quot;)+
+  ggtitle(&quot;Read counts by sample and histone mark trimmed adapters&quot;)+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/ct%20vis%20histo-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>combo_trim_df %&gt;% 
+  dplyr::filter(read==&quot;R1&quot;) %&gt;% 
+   ggplot(., aes(x = Histone_Mark, y= `Total Sequences`))+
+geom_boxplot(aes(fill=Histone_Mark)) + 
+    geom_point(aes(color=ind))+
+  facet_wrap(trt~time)+
+  ylab(&quot;count&quot;)+
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  ggtitle(&quot;Sequence count by trt and time trimmed adapter&quot;)</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/ct%20vis%20box-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="trim-info" class="section level4">
+<h4>Trim Info</h4>
+<pre class="r"><code>combo_trim_df %&gt;% 
+  ggplot(., aes(x = read, y= avg_sequence_length))+
+geom_boxplot(aes(fill=read))</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/trim%20info%201-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>combo_trim_df %&gt;% 
+  ggplot(., aes(x = read, y= avg_sequence_length))+
+geom_boxplot(aes(fill=Histone_Mark)) +
+  ggtitle(&quot;Boxplot of trim read length across histone marks&quot;)</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/trim%20info%202-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>combo_trim_df %&gt;% 
+  datatable(., options = list(scrollX = TRUE, 
+                              scrollY = &quot;400px&quot;,
+                              scrollCollapse = TRUE,
+                              fixedColumns = list(leftColumns =2),
+                              fixedHeader= TRUE),
+            extensions = c(&quot;FixedColumns&quot;,&quot;Scroller&quot;),
+            class = &quot;display&quot;)</code></pre>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-1cc7fc7fd0704f0fe11c" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-1cc7fc7fd0704f0fe11c">{"x":{"filter":"none","vertical":false,"extensions":["FixedColumns","Scroller"],"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96","97","98","99","100","101","102","103","104","105","106","107","108","109","110","111","112","113","114","115","116","117","118","119","120","121","122","123","124","125","126","127","128","129","130","131","132","133","134","135","136","137","138","139","140","141","142","143","144","145","146","147","148","149","150","151","152","153","154","155","156","157","158","159","160","161","162","163","164","165","166","167","168","169","170","171","172","173","174","175","176","177","178","179","180","181","182","183","184","185","186","187","188","189","190","191","192","193","194","195","196","197","198","199","200","201","202","203","204","205","206","207","208","209","210","211","212","213","214","215","216","217","218","219","220","221","222","223","224","225","226","227","228","229","230","231","232"],["MCW_CT_ROA_082_R1_trim","MCW_CT_ROA_082_R2_trim","MCW_CT_ROA_090_R1_trim","MCW_CT_ROA_090_R2_trim","MCW_CT_ROA_091_R1_trim","MCW_CT_ROA_091_R2_trim","MCW_CT_ROA_093_R1_trim","MCW_CT_ROA_093_R2_trim","MCW_CT_ROA_100_R1_trim","MCW_CT_ROA_100_R2_trim","MCW_CT_ROA_102_R1_trim","MCW_CT_ROA_102_R2_trim","MCW_CT_ROA_103_R1_trim","MCW_CT_ROA_103_R2_trim","MCW_CT_ROA_105_R1_trim","MCW_CT_ROA_105_R2_trim","MCW_CT_ROA_106_R1_trim","MCW_CT_ROA_106_R2_trim","MCW_CT_ROA_108_R1_trim","MCW_CT_ROA_108_R2_trim","MCW_CT_ROA_109_R1_trim","MCW_CT_ROA_109_R2_trim","MCW_CT_ROA_111_R1_trim","MCW_CT_ROA_111_R2_trim","MCW_CT_ROA_112_R1_trim","MCW_CT_ROA_112_R2_trim","MCW_CT_ROA_114_R1_trim","MCW_CT_ROA_114_R2_trim","MCW_CT_ROA_115_R1_trim","MCW_CT_ROA_115_R2_trim","MCW_CT_ROA_117_R1_trim","MCW_CT_ROA_117_R2_trim","MCW_CT_ROA_118_R1_trim","MCW_CT_ROA_118_R2_trim","MCW_CT_ROA_120_R1_trim","MCW_CT_ROA_120_R2_trim","MCW_CT_ROA_121_R1_trim","MCW_CT_ROA_121_R2_trim","MCW_CT_ROA_123_R1_trim","MCW_CT_ROA_123_R2_trim","MCW_CT_ROA_124_R1_trim","MCW_CT_ROA_124_R2_trim","MCW_CT_ROA_126_R1_trim","MCW_CT_ROA_126_R2_trim","MCW_CT_ROA_127_R1_trim","MCW_CT_ROA_127_R2_trim","MCW_CT_ROA_130_R1_trim","MCW_CT_ROA_130_R2_trim","MCW_CT_ROA_132_R1_trim","MCW_CT_ROA_132_R2_trim","MCW_CT_ROA_133_R1_trim","MCW_CT_ROA_133_R2_trim","MCW_CT_ROA_135_R1_trim","MCW_CT_ROA_135_R2_trim","MCW_CT_ROA_136_R1_trim","MCW_CT_ROA_136_R2_trim","MCW_CT_ROA_138_R1_trim","MCW_CT_ROA_138_R2_trim","MCW_CT_ROA_139_R1_trim","MCW_CT_ROA_139_R2_trim","MCW_CT_ROA_141_R1_trim","MCW_CT_ROA_141_R2_trim","MCW_CT_ROA_142_R1_trim","MCW_CT_ROA_142_R2_trim","MCW_CT_ROA_144_R1_trim","MCW_CT_ROA_144_R2_trim","MCW_CT_ROA_145_R1_trim","MCW_CT_ROA_145_R2_trim","MCW_CT_ROA_147_R1_trim","MCW_CT_ROA_147_R2_trim","MCW_CT_ROA_148_R1_trim","MCW_CT_ROA_148_R2_trim","MCW_CT_ROA_150_R1_trim","MCW_CT_ROA_150_R2_trim","MCW_CT_ROA_151_R1_trim","MCW_CT_ROA_151_R2_trim","MCW_CT_ROA_153_R1_trim","MCW_CT_ROA_153_R2_trim","MCW_CT_ROA_154_R1_trim","MCW_CT_ROA_154_R2_trim","MCW_CT_ROA_156_R1_trim","MCW_CT_ROA_156_R2_trim","MCW_CT_ROA_157_R1_trim","MCW_CT_ROA_157_R2_trim","MCW_CT_ROA_159_R1_trim","MCW_CT_ROA_159_R2_trim","MCW_CT_ROA_160_R1_trim","MCW_CT_ROA_160_R2_trim","MCW_CT_ROA_162_R1_trim","MCW_CT_ROA_162_R2_trim","MCW_CT_ROA_163_R1_trim","MCW_CT_ROA_163_R2_trim","MCW_CT_ROA_165_R1_trim","MCW_CT_ROA_165_R2_trim","MCW_CT_ROA_166_R1_trim","MCW_CT_ROA_166_R2_trim","MCW_CT_ROA_169_R1_trim","MCW_CT_ROA_169_R2_trim","MCW_CT_ROA_171_R1_trim","MCW_CT_ROA_171_R2_trim","MCW_CT_ROA_172_R1_trim","MCW_CT_ROA_172_R2_trim","MCW_CT_ROA_174_R1_trim","MCW_CT_ROA_174_R2_trim","MCW_CT_ROA_175_R1_trim","MCW_CT_ROA_175_R2_trim","MCW_CT_ROA_177_R1_trim","MCW_CT_ROA_177_R2_trim","MCW_CT_ROA_178_R1_trim","MCW_CT_ROA_178_R2_trim","MCW_CT_ROA_180_R1_trim","MCW_CT_ROA_180_R2_trim","MCW_CT_ROA_181_R1_trim","MCW_CT_ROA_181_R2_trim","MCW_CT_ROA_183_R1_trim","MCW_CT_ROA_183_R2_trim","MCW_CT_ROA_184_R1_trim","MCW_CT_ROA_184_R2_trim","MCW_CT_ROA_186_R1_trim","MCW_CT_ROA_186_R2_trim","MCW_CT_ROA_189_R1_trim","MCW_CT_ROA_189_R2_trim","MCW_CT_ROA_190_R1_trim","MCW_CT_ROA_190_R2_trim","MCW_CT_ROA_192_R1_trim","MCW_CT_ROA_192_R2_trim","MCW_CT_ROA_193_R1_trim","MCW_CT_ROA_193_R2_trim","MCW_CT_ROA_195_R1_trim","MCW_CT_ROA_195_R2_trim","MCW_CT_ROA_196_R1_trim","MCW_CT_ROA_196_R2_trim","MCW_CT_ROA_198_R1_trim","MCW_CT_ROA_198_R2_trim","MCW_CT_ROA_199_R1_trim","MCW_CT_ROA_199_R2_trim","MCW_CT_ROA_201_R1_trim","MCW_CT_ROA_201_R2_trim","MCW_CT_ROA_202_R1_trim","MCW_CT_ROA_202_R2_trim","MCW_CT_ROA_204_R1_trim","MCW_CT_ROA_204_R2_trim","MCW_CT_ROA_205_R1_trim","MCW_CT_ROA_205_R2_trim","MCW_CT_ROA_207_R1_trim","MCW_CT_ROA_207_R2_trim","MCW_CT_ROA_208_R1_trim","MCW_CT_ROA_208_R2_trim","MCW_CT_ROA_210_R1_trim","MCW_CT_ROA_210_R2_trim","MCW_CT_ROA_211_R1_trim","MCW_CT_ROA_211_R2_trim","MCW_CT_ROA_213_R1_trim","MCW_CT_ROA_213_R2_trim","MCW_CT_ROA_214_R1_trim","MCW_CT_ROA_214_R2_trim","MCW_CT_ROA_217_R1_trim","MCW_CT_ROA_217_R2_trim","MCW_CT_ROA_219_R1_trim","MCW_CT_ROA_219_R2_trim","MCW_CT_ROA_220_R1_trim","MCW_CT_ROA_220_R2_trim","MCW_CT_ROA_222_R1_trim","MCW_CT_ROA_222_R2_trim","MCW_CT_ROA_223_R1_trim","MCW_CT_ROA_223_R2_trim","MCW_CT_ROA_225_R1_trim","MCW_CT_ROA_225_R2_trim","MCW_CT_ROA_226_R1_trim","MCW_CT_ROA_226_R2_trim","MCW_CT_ROA_228_R1_trim","MCW_CT_ROA_228_R2_trim","MCW_CT_ROA_229_R1_trim","MCW_CT_ROA_229_R2_trim","MCW_CT_ROA_231_R1_trim","MCW_CT_ROA_231_R2_trim","MCW_CT_ROA_232_R1_trim","MCW_CT_ROA_232_R2_trim","MCW_CT_ROA_234_R1_trim","MCW_CT_ROA_234_R2_trim","MCW_CT_ROA_235_R1_trim","MCW_CT_ROA_235_R2_trim","MCW_CT_ROA_237_R1_trim","MCW_CT_ROA_237_R2_trim","MCW_CT_ROA_238_R1_trim","MCW_CT_ROA_238_R2_trim","MCW_CT_ROA_240_R1_trim","MCW_CT_ROA_240_R2_trim","MCW_CT_ROA_241_R1_trim","MCW_CT_ROA_241_R2_trim","MCW_CT_ROA_243_R1_trim","MCW_CT_ROA_243_R2_trim","MCW_CT_ROA_244_R1_trim","MCW_CT_ROA_244_R2_trim","MCW_CT_ROA_246_R1_trim","MCW_CT_ROA_246_R2_trim","MCW_CT_ROA_247_R1_trim","MCW_CT_ROA_247_R2_trim","MCW_CT_ROA_249_R1_trim","MCW_CT_ROA_249_R2_trim","MCW_CT_ROA_250_R1_trim","MCW_CT_ROA_250_R2_trim","MCW_CT_ROA_252_R1_trim","MCW_CT_ROA_252_R2_trim","MCW_CT_ROA_253_R1_trim","MCW_CT_ROA_253_R2_trim","MCW_CT_ROA_255_R1_trim","MCW_CT_ROA_255_R2_trim","MCW_CT_ROA_256_R1_trim","MCW_CT_ROA_256_R2_trim","MCW_CT_ROA_78_R1_trim","MCW_CT_ROA_78_R2_trim","MCW_CT_ROA_79_R1_trim","MCW_CT_ROA_79_R2_trim","MCW_CT_ROA_81_R1_trim","MCW_CT_ROA_81_R2_trim","MCW_CT_ROA_84_R1_trim","MCW_CT_ROA_84_R2_trim","MCW_CT_ROA_85_R1_trim","MCW_CT_ROA_85_R2_trim","MCW_CT_ROA_87_R1_trim","MCW_CT_ROA_87_R2_trim","MCW_CT_ROA_88_R1_trim","MCW_CT_ROA_88_R2_trim","MCW_CT_ROA_94_R1_trim","MCW_CT_ROA_94_R2_trim","MCW_CT_ROA_96_R1_trim","MCW_CT_ROA_96_R2_trim","MCW_CT_ROA_97_R1_trim","MCW_CT_ROA_97_R2_trim","MCW_CT_ROA_99_R1_trim","MCW_CT_ROA_99_R2_trim"],["MCW_CT_ROA_082","MCW_CT_ROA_082","MCW_CT_ROA_090","MCW_CT_ROA_090","MCW_CT_ROA_091","MCW_CT_ROA_091","MCW_CT_ROA_093","MCW_CT_ROA_093","MCW_CT_ROA_100","MCW_CT_ROA_100","MCW_CT_ROA_102","MCW_CT_ROA_102","MCW_CT_ROA_103","MCW_CT_ROA_103","MCW_CT_ROA_105","MCW_CT_ROA_105","MCW_CT_ROA_106","MCW_CT_ROA_106","MCW_CT_ROA_108","MCW_CT_ROA_108","MCW_CT_ROA_109","MCW_CT_ROA_109","MCW_CT_ROA_111","MCW_CT_ROA_111","MCW_CT_ROA_112","MCW_CT_ROA_112","MCW_CT_ROA_114","MCW_CT_ROA_114","MCW_CT_ROA_115","MCW_CT_ROA_115","MCW_CT_ROA_117","MCW_CT_ROA_117","MCW_CT_ROA_118","MCW_CT_ROA_118","MCW_CT_ROA_120","MCW_CT_ROA_120","MCW_CT_ROA_121","MCW_CT_ROA_121","MCW_CT_ROA_123","MCW_CT_ROA_123","MCW_CT_ROA_124","MCW_CT_ROA_124","MCW_CT_ROA_126","MCW_CT_ROA_126","MCW_CT_ROA_127","MCW_CT_ROA_127","MCW_CT_ROA_130","MCW_CT_ROA_130","MCW_CT_ROA_132","MCW_CT_ROA_132","MCW_CT_ROA_133","MCW_CT_ROA_133","MCW_CT_ROA_135","MCW_CT_ROA_135","MCW_CT_ROA_136","MCW_CT_ROA_136","MCW_CT_ROA_138","MCW_CT_ROA_138","MCW_CT_ROA_139","MCW_CT_ROA_139","MCW_CT_ROA_141","MCW_CT_ROA_141","MCW_CT_ROA_142","MCW_CT_ROA_142","MCW_CT_ROA_144","MCW_CT_ROA_144","MCW_CT_ROA_145","MCW_CT_ROA_145","MCW_CT_ROA_147","MCW_CT_ROA_147","MCW_CT_ROA_148","MCW_CT_ROA_148","MCW_CT_ROA_150","MCW_CT_ROA_150","MCW_CT_ROA_151","MCW_CT_ROA_151","MCW_CT_ROA_153","MCW_CT_ROA_153","MCW_CT_ROA_154","MCW_CT_ROA_154","MCW_CT_ROA_156","MCW_CT_ROA_156","MCW_CT_ROA_157","MCW_CT_ROA_157","MCW_CT_ROA_159","MCW_CT_ROA_159","MCW_CT_ROA_160","MCW_CT_ROA_160","MCW_CT_ROA_162","MCW_CT_ROA_162","MCW_CT_ROA_163","MCW_CT_ROA_163","MCW_CT_ROA_165","MCW_CT_ROA_165","MCW_CT_ROA_166","MCW_CT_ROA_166","MCW_CT_ROA_169","MCW_CT_ROA_169","MCW_CT_ROA_171","MCW_CT_ROA_171","MCW_CT_ROA_172","MCW_CT_ROA_172","MCW_CT_ROA_174","MCW_CT_ROA_174","MCW_CT_ROA_175","MCW_CT_ROA_175","MCW_CT_ROA_177","MCW_CT_ROA_177","MCW_CT_ROA_178","MCW_CT_ROA_178","MCW_CT_ROA_180","MCW_CT_ROA_180","MCW_CT_ROA_181","MCW_CT_ROA_181","MCW_CT_ROA_183","MCW_CT_ROA_183","MCW_CT_ROA_184","MCW_CT_ROA_184","MCW_CT_ROA_186","MCW_CT_ROA_186","MCW_CT_ROA_189","MCW_CT_ROA_189","MCW_CT_ROA_190","MCW_CT_ROA_190","MCW_CT_ROA_192","MCW_CT_ROA_192","MCW_CT_ROA_193","MCW_CT_ROA_193","MCW_CT_ROA_195","MCW_CT_ROA_195","MCW_CT_ROA_196","MCW_CT_ROA_196","MCW_CT_ROA_198","MCW_CT_ROA_198","MCW_CT_ROA_199","MCW_CT_ROA_199","MCW_CT_ROA_201","MCW_CT_ROA_201","MCW_CT_ROA_202","MCW_CT_ROA_202","MCW_CT_ROA_204","MCW_CT_ROA_204","MCW_CT_ROA_205","MCW_CT_ROA_205","MCW_CT_ROA_207","MCW_CT_ROA_207","MCW_CT_ROA_208","MCW_CT_ROA_208","MCW_CT_ROA_210","MCW_CT_ROA_210","MCW_CT_ROA_211","MCW_CT_ROA_211","MCW_CT_ROA_213","MCW_CT_ROA_213","MCW_CT_ROA_214","MCW_CT_ROA_214","MCW_CT_ROA_217","MCW_CT_ROA_217","MCW_CT_ROA_219","MCW_CT_ROA_219","MCW_CT_ROA_220","MCW_CT_ROA_220","MCW_CT_ROA_222","MCW_CT_ROA_222","MCW_CT_ROA_223","MCW_CT_ROA_223","MCW_CT_ROA_225","MCW_CT_ROA_225","MCW_CT_ROA_226","MCW_CT_ROA_226","MCW_CT_ROA_228","MCW_CT_ROA_228","MCW_CT_ROA_229","MCW_CT_ROA_229","MCW_CT_ROA_231","MCW_CT_ROA_231","MCW_CT_ROA_232","MCW_CT_ROA_232","MCW_CT_ROA_234","MCW_CT_ROA_234","MCW_CT_ROA_235","MCW_CT_ROA_235","MCW_CT_ROA_237","MCW_CT_ROA_237","MCW_CT_ROA_238","MCW_CT_ROA_238","MCW_CT_ROA_240","MCW_CT_ROA_240","MCW_CT_ROA_241","MCW_CT_ROA_241","MCW_CT_ROA_243","MCW_CT_ROA_243","MCW_CT_ROA_244","MCW_CT_ROA_244","MCW_CT_ROA_246","MCW_CT_ROA_246","MCW_CT_ROA_247","MCW_CT_ROA_247","MCW_CT_ROA_249","MCW_CT_ROA_249","MCW_CT_ROA_250","MCW_CT_ROA_250","MCW_CT_ROA_252","MCW_CT_ROA_252","MCW_CT_ROA_253","MCW_CT_ROA_253","MCW_CT_ROA_255","MCW_CT_ROA_255","MCW_CT_ROA_256","MCW_CT_ROA_256","MCW_CT_ROA_78","MCW_CT_ROA_78","MCW_CT_ROA_79","MCW_CT_ROA_79","MCW_CT_ROA_81","MCW_CT_ROA_81","MCW_CT_ROA_84","MCW_CT_ROA_84","MCW_CT_ROA_85","MCW_CT_ROA_85","MCW_CT_ROA_87","MCW_CT_ROA_87","MCW_CT_ROA_88","MCW_CT_ROA_88","MCW_CT_ROA_94","MCW_CT_ROA_94","MCW_CT_ROA_96","MCW_CT_ROA_96","MCW_CT_ROA_97","MCW_CT_ROA_97","MCW_CT_ROA_99","MCW_CT_ROA_99"],["R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2","R1","R2"],["MCW_CT_ROA_082_R1_trim.fastq.gz","MCW_CT_ROA_082_R2_trim.fastq.gz","MCW_CT_ROA_090_R1_trim.fastq.gz","MCW_CT_ROA_090_R2_trim.fastq.gz","MCW_CT_ROA_091_R1_trim.fastq.gz","MCW_CT_ROA_091_R2_trim.fastq.gz","MCW_CT_ROA_093_R1_trim.fastq.gz","MCW_CT_ROA_093_R2_trim.fastq.gz","MCW_CT_ROA_100_R1_trim.fastq.gz","MCW_CT_ROA_100_R2_trim.fastq.gz","MCW_CT_ROA_102_R1_trim.fastq.gz","MCW_CT_ROA_102_R2_trim.fastq.gz","MCW_CT_ROA_103_R1_trim.fastq.gz","MCW_CT_ROA_103_R2_trim.fastq.gz","MCW_CT_ROA_105_R1_trim.fastq.gz","MCW_CT_ROA_105_R2_trim.fastq.gz","MCW_CT_ROA_106_R1_trim.fastq.gz","MCW_CT_ROA_106_R2_trim.fastq.gz","MCW_CT_ROA_108_R1_trim.fastq.gz","MCW_CT_ROA_108_R2_trim.fastq.gz","MCW_CT_ROA_109_R1_trim.fastq.gz","MCW_CT_ROA_109_R2_trim.fastq.gz","MCW_CT_ROA_111_R1_trim.fastq.gz","MCW_CT_ROA_111_R2_trim.fastq.gz","MCW_CT_ROA_112_R1_trim.fastq.gz","MCW_CT_ROA_112_R2_trim.fastq.gz","MCW_CT_ROA_114_R1_trim.fastq.gz","MCW_CT_ROA_114_R2_trim.fastq.gz","MCW_CT_ROA_115_R1_trim.fastq.gz","MCW_CT_ROA_115_R2_trim.fastq.gz","MCW_CT_ROA_117_R1_trim.fastq.gz","MCW_CT_ROA_117_R2_trim.fastq.gz","MCW_CT_ROA_118_R1_trim.fastq.gz","MCW_CT_ROA_118_R2_trim.fastq.gz","MCW_CT_ROA_120_R1_trim.fastq.gz","MCW_CT_ROA_120_R2_trim.fastq.gz","MCW_CT_ROA_121_R1_trim.fastq.gz","MCW_CT_ROA_121_R2_trim.fastq.gz","MCW_CT_ROA_123_R1_trim.fastq.gz","MCW_CT_ROA_123_R2_trim.fastq.gz","MCW_CT_ROA_124_R1_trim.fastq.gz","MCW_CT_ROA_124_R2_trim.fastq.gz","MCW_CT_ROA_126_R1_trim.fastq.gz","MCW_CT_ROA_126_R2_trim.fastq.gz","MCW_CT_ROA_127_R1_trim.fastq.gz","MCW_CT_ROA_127_R2_trim.fastq.gz","MCW_CT_ROA_130_R1_trim.fastq.gz","MCW_CT_ROA_130_R2_trim.fastq.gz","MCW_CT_ROA_132_R1_trim.fastq.gz","MCW_CT_ROA_132_R2_trim.fastq.gz","MCW_CT_ROA_133_R1_trim.fastq.gz","MCW_CT_ROA_133_R2_trim.fastq.gz","MCW_CT_ROA_135_R1_trim.fastq.gz","MCW_CT_ROA_135_R2_trim.fastq.gz","MCW_CT_ROA_136_R1_trim.fastq.gz","MCW_CT_ROA_136_R2_trim.fastq.gz","MCW_CT_ROA_138_R1_trim.fastq.gz","MCW_CT_ROA_138_R2_trim.fastq.gz","MCW_CT_ROA_139_R1_trim.fastq.gz","MCW_CT_ROA_139_R2_trim.fastq.gz","MCW_CT_ROA_141_R1_trim.fastq.gz","MCW_CT_ROA_141_R2_trim.fastq.gz","MCW_CT_ROA_142_R1_trim.fastq.gz","MCW_CT_ROA_142_R2_trim.fastq.gz","MCW_CT_ROA_144_R1_trim.fastq.gz","MCW_CT_ROA_144_R2_trim.fastq.gz","MCW_CT_ROA_145_R1_trim.fastq.gz","MCW_CT_ROA_145_R2_trim.fastq.gz","MCW_CT_ROA_147_R1_trim.fastq.gz","MCW_CT_ROA_147_R2_trim.fastq.gz","MCW_CT_ROA_148_R1_trim.fastq.gz","MCW_CT_ROA_148_R2_trim.fastq.gz","MCW_CT_ROA_150_R1_trim.fastq.gz","MCW_CT_ROA_150_R2_trim.fastq.gz","MCW_CT_ROA_151_R1_trim.fastq.gz","MCW_CT_ROA_151_R2_trim.fastq.gz","MCW_CT_ROA_153_R1_trim.fastq.gz","MCW_CT_ROA_153_R2_trim.fastq.gz","MCW_CT_ROA_154_R1_trim.fastq.gz","MCW_CT_ROA_154_R2_trim.fastq.gz","MCW_CT_ROA_156_R1_trim.fastq.gz","MCW_CT_ROA_156_R2_trim.fastq.gz","MCW_CT_ROA_157_R1_trim.fastq.gz","MCW_CT_ROA_157_R2_trim.fastq.gz","MCW_CT_ROA_159_R1_trim.fastq.gz","MCW_CT_ROA_159_R2_trim.fastq.gz","MCW_CT_ROA_160_R1_trim.fastq.gz","MCW_CT_ROA_160_R2_trim.fastq.gz","MCW_CT_ROA_162_R1_trim.fastq.gz","MCW_CT_ROA_162_R2_trim.fastq.gz","MCW_CT_ROA_163_R1_trim.fastq.gz","MCW_CT_ROA_163_R2_trim.fastq.gz","MCW_CT_ROA_165_R1_trim.fastq.gz","MCW_CT_ROA_165_R2_trim.fastq.gz","MCW_CT_ROA_166_R1_trim.fastq.gz","MCW_CT_ROA_166_R2_trim.fastq.gz","MCW_CT_ROA_169_R1_trim.fastq.gz","MCW_CT_ROA_169_R2_trim.fastq.gz","MCW_CT_ROA_171_R1_trim.fastq.gz","MCW_CT_ROA_171_R2_trim.fastq.gz","MCW_CT_ROA_172_R1_trim.fastq.gz","MCW_CT_ROA_172_R2_trim.fastq.gz","MCW_CT_ROA_174_R1_trim.fastq.gz","MCW_CT_ROA_174_R2_trim.fastq.gz","MCW_CT_ROA_175_R1_trim.fastq.gz","MCW_CT_ROA_175_R2_trim.fastq.gz","MCW_CT_ROA_177_R1_trim.fastq.gz","MCW_CT_ROA_177_R2_trim.fastq.gz","MCW_CT_ROA_178_R1_trim.fastq.gz","MCW_CT_ROA_178_R2_trim.fastq.gz","MCW_CT_ROA_180_R1_trim.fastq.gz","MCW_CT_ROA_180_R2_trim.fastq.gz","MCW_CT_ROA_181_R1_trim.fastq.gz","MCW_CT_ROA_181_R2_trim.fastq.gz","MCW_CT_ROA_183_R1_trim.fastq.gz","MCW_CT_ROA_183_R2_trim.fastq.gz","MCW_CT_ROA_184_R1_trim.fastq.gz","MCW_CT_ROA_184_R2_trim.fastq.gz","MCW_CT_ROA_186_R1_trim.fastq.gz","MCW_CT_ROA_186_R2_trim.fastq.gz","MCW_CT_ROA_189_R1_trim.fastq.gz","MCW_CT_ROA_189_R2_trim.fastq.gz","MCW_CT_ROA_190_R1_trim.fastq.gz","MCW_CT_ROA_190_R2_trim.fastq.gz","MCW_CT_ROA_192_R1_trim.fastq.gz","MCW_CT_ROA_192_R2_trim.fastq.gz","MCW_CT_ROA_193_R1_trim.fastq.gz","MCW_CT_ROA_193_R2_trim.fastq.gz","MCW_CT_ROA_195_R1_trim.fastq.gz","MCW_CT_ROA_195_R2_trim.fastq.gz","MCW_CT_ROA_196_R1_trim.fastq.gz","MCW_CT_ROA_196_R2_trim.fastq.gz","MCW_CT_ROA_198_R1_trim.fastq.gz","MCW_CT_ROA_198_R2_trim.fastq.gz","MCW_CT_ROA_199_R1_trim.fastq.gz","MCW_CT_ROA_199_R2_trim.fastq.gz","MCW_CT_ROA_201_R1_trim.fastq.gz","MCW_CT_ROA_201_R2_trim.fastq.gz","MCW_CT_ROA_202_R1_trim.fastq.gz","MCW_CT_ROA_202_R2_trim.fastq.gz","MCW_CT_ROA_204_R1_trim.fastq.gz","MCW_CT_ROA_204_R2_trim.fastq.gz","MCW_CT_ROA_205_R1_trim.fastq.gz","MCW_CT_ROA_205_R2_trim.fastq.gz","MCW_CT_ROA_207_R1_trim.fastq.gz","MCW_CT_ROA_207_R2_trim.fastq.gz","MCW_CT_ROA_208_R1_trim.fastq.gz","MCW_CT_ROA_208_R2_trim.fastq.gz","MCW_CT_ROA_210_R1_trim.fastq.gz","MCW_CT_ROA_210_R2_trim.fastq.gz","MCW_CT_ROA_211_R1_trim.fastq.gz","MCW_CT_ROA_211_R2_trim.fastq.gz","MCW_CT_ROA_213_R1_trim.fastq.gz","MCW_CT_ROA_213_R2_trim.fastq.gz","MCW_CT_ROA_214_R1_trim.fastq.gz","MCW_CT_ROA_214_R2_trim.fastq.gz","MCW_CT_ROA_217_R1_trim.fastq.gz","MCW_CT_ROA_217_R2_trim.fastq.gz","MCW_CT_ROA_219_R1_trim.fastq.gz","MCW_CT_ROA_219_R2_trim.fastq.gz","MCW_CT_ROA_220_R1_trim.fastq.gz","MCW_CT_ROA_220_R2_trim.fastq.gz","MCW_CT_ROA_222_R1_trim.fastq.gz","MCW_CT_ROA_222_R2_trim.fastq.gz","MCW_CT_ROA_223_R1_trim.fastq.gz","MCW_CT_ROA_223_R2_trim.fastq.gz","MCW_CT_ROA_225_R1_trim.fastq.gz","MCW_CT_ROA_225_R2_trim.fastq.gz","MCW_CT_ROA_226_R1_trim.fastq.gz","MCW_CT_ROA_226_R2_trim.fastq.gz","MCW_CT_ROA_228_R1_trim.fastq.gz","MCW_CT_ROA_228_R2_trim.fastq.gz","MCW_CT_ROA_229_R1_trim.fastq.gz","MCW_CT_ROA_229_R2_trim.fastq.gz","MCW_CT_ROA_231_R1_trim.fastq.gz","MCW_CT_ROA_231_R2_trim.fastq.gz","MCW_CT_ROA_232_R1_trim.fastq.gz","MCW_CT_ROA_232_R2_trim.fastq.gz","MCW_CT_ROA_234_R1_trim.fastq.gz","MCW_CT_ROA_234_R2_trim.fastq.gz","MCW_CT_ROA_235_R1_trim.fastq.gz","MCW_CT_ROA_235_R2_trim.fastq.gz","MCW_CT_ROA_237_R1_trim.fastq.gz","MCW_CT_ROA_237_R2_trim.fastq.gz","MCW_CT_ROA_238_R1_trim.fastq.gz","MCW_CT_ROA_238_R2_trim.fastq.gz","MCW_CT_ROA_240_R1_trim.fastq.gz","MCW_CT_ROA_240_R2_trim.fastq.gz","MCW_CT_ROA_241_R1_trim.fastq.gz","MCW_CT_ROA_241_R2_trim.fastq.gz","MCW_CT_ROA_243_R1_trim.fastq.gz","MCW_CT_ROA_243_R2_trim.fastq.gz","MCW_CT_ROA_244_R1_trim.fastq.gz","MCW_CT_ROA_244_R2_trim.fastq.gz","MCW_CT_ROA_246_R1_trim.fastq.gz","MCW_CT_ROA_246_R2_trim.fastq.gz","MCW_CT_ROA_247_R1_trim.fastq.gz","MCW_CT_ROA_247_R2_trim.fastq.gz","MCW_CT_ROA_249_R1_trim.fastq.gz","MCW_CT_ROA_249_R2_trim.fastq.gz","MCW_CT_ROA_250_R1_trim.fastq.gz","MCW_CT_ROA_250_R2_trim.fastq.gz","MCW_CT_ROA_252_R1_trim.fastq.gz","MCW_CT_ROA_252_R2_trim.fastq.gz","MCW_CT_ROA_253_R1_trim.fastq.gz","MCW_CT_ROA_253_R2_trim.fastq.gz","MCW_CT_ROA_255_R1_trim.fastq.gz","MCW_CT_ROA_255_R2_trim.fastq.gz","MCW_CT_ROA_256_R1_trim.fastq.gz","MCW_CT_ROA_256_R2_trim.fastq.gz","MCW_CT_ROA_78_R1_trim.fastq.gz","MCW_CT_ROA_78_R2_trim.fastq.gz","MCW_CT_ROA_79_R1_trim.fastq.gz","MCW_CT_ROA_79_R2_trim.fastq.gz","MCW_CT_ROA_81_R1_trim.fastq.gz","MCW_CT_ROA_81_R2_trim.fastq.gz","MCW_CT_ROA_84_R1_trim.fastq.gz","MCW_CT_ROA_84_R2_trim.fastq.gz","MCW_CT_ROA_85_R1_trim.fastq.gz","MCW_CT_ROA_85_R2_trim.fastq.gz","MCW_CT_ROA_87_R1_trim.fastq.gz","MCW_CT_ROA_87_R2_trim.fastq.gz","MCW_CT_ROA_88_R1_trim.fastq.gz","MCW_CT_ROA_88_R2_trim.fastq.gz","MCW_CT_ROA_94_R1_trim.fastq.gz","MCW_CT_ROA_94_R2_trim.fastq.gz","MCW_CT_ROA_96_R1_trim.fastq.gz","MCW_CT_ROA_96_R2_trim.fastq.gz","MCW_CT_ROA_97_R1_trim.fastq.gz","MCW_CT_ROA_97_R2_trim.fastq.gz","MCW_CT_ROA_99_R1_trim.fastq.gz","MCW_CT_ROA_99_R2_trim.fastq.gz"],["Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls","Conventional base calls"],["Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9","Sanger / Illumina 1.9"],[8830034,8830034,16578704,16578704,9570470,9570470,10733977,10733977,9646404,9646404,8994528,8994528,4663599,4663599,10410306,10410306,16439638,16439638,18259872,18259872,13689268,13689268,11910243,11910243,12803412,12803412,9122059,9122059,11702871,11702871,8839709,8839709,10368651,10368651,8814196,8814196,14847165,14847165,14153840,14153840,5862953,5862953,9817049,9817049,9069762,9069762,10036729,10036729,10953823,10953823,8741438,8741438,6948539,6948539,10720711,10720711,10446106,10446106,10762175,10762175,12193521,12193521,7383669,7383669,7436416,7436416,10381840,10381840,7627631,7627631,8242133,8242133,7813241,7813241,3381332,3381332,17281183,17281183,6988957,6988957,11950951,11950951,13986120,13986120,8134850,8134850,8326979,8326979,5424324,5424324,6954866,6954866,6796188,6796188,9900924,9900924,12361299,12361299,15049027,15049027,11124138,11124138,5638348,5638348,734837,734837,10266750,10266750,10051149,10051149,14437895,14437895,12982038,12982038,11071957,11071957,10755984,10755984,10900502,10900502,9018945,9018945,10900566,10900566,9617315,9617315,7903839,7903839,14457362,14457362,13394379,13394379,12671191,12671191,11060140,11060140,9042663,9042663,7751943,7751943,17543011,17543011,12747766,12747766,11006304,11006304,5856849,5856849,7400743,7400743,8938017,8938017,13499581,13499581,1569281,1569281,13521248,13521248,15900601,15900601,15061110,15061110,17147873,17147873,12465025,12465025,8022702,8022702,11120375,11120375,5703944,5703944,10611034,10611034,7583015,7583015,8665986,8665986,8763664,8763664,12949588,12949588,13450470,13450470,10348384,10348384,13078783,13078783,16654461,16654461,10920806,10920806,8099611,8099611,12674448,12674448,11631878,11631878,9780958,9780958,14577232,14577232,11121551,11121551,12107678,12107678,7255699,7255699,9209722,9209722,8514537,8514537,17230410,17230410,10304161,10304161,9460829,9460829,17871310,17871310,10992015,10992015,6136901,6136901,7398484,7398484,8197575,8197575,6738747,6738747,8097526,8097526],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],["1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","3-75","3-75","1-75","1-75","8-75","8-75","4-75","4-75","19-75","12-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","8-75","8-75","14-75","17-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","9-75","9-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75","1-75"],[52,51,50,49,52,52,52,52,50,50,50,50,50,49,51,51,55,55,54,53,55,54,53,53,53,53,49,49,47,47,49,49,51,50,50,49,49,49,51,51,52,51,53,53,52,52,50,50,49,48,52,52,52,52,53,52,49,49,53,53,48,48,50,50,50,50,52,52,49,49,50,49,55,55,57,57,56,55,53,53,56,56,57,57,50,49,50,50,52,52,53,53,49,48,50,49,49,49,49,48,47,47,47,46,56,56,51,51,47,47,48,48,48,48,49,49,50,49,49,49,49,49,51,51,49,48,47,47,50,50,47,47,50,50,47,47,47,47,49,49,47,47,51,51,50,50,50,50,48,48,51,51,50,50,51,51,50,50,48,47,47,47,52,52,52,52,49,49,52,52,47,47,50,50,47,47,49,49,50,49,48,48,45,45,50,50,50,50,50,50,51,51,53,52,49,49,51,50,50,50,50,50,48,48,49,49,46,46,46,46,49,49,56,56,51,50,49,49,56,55,50,50,51,51,51,50,50,49,50,50,50,50],[74.48377471944583,78.34357846486627,48.4049615310014,50.71426068793144,71.2006559836618,75.23220789764027,52.96195269803993,61.19425584010093,47.63909474909025,51.6693331273103,54.0162987402237,59.38630337084183,75.2916034894733,77.33353633217774,65.7029097955002,71.40273770588959,55.79524781955683,56.15515879953996,41.79938445662287,50.62657543241594,43.07091311951633,50.9514771211614,64.20930051019447,71.77888768009288,70.07233134101696,76.2783104018652,31.29345509047655,37.24194239522116,46.44576776257633,50.40568751486251,40.78445338035775,44.91816040723119,43.52886510548073,50.30584921577786,38.8369228787729,45.35093690312228,30.10603658988746,33.85906862312132,81.84932533918061,84.24906246287892,83.55314188005369,85.68334592129135,69.01898695202759,69.76267566120022,78.16482511683827,82.20030466390439,73.67799378928495,76.7532757959615,77.88434024274507,79.16988718289716,73.64775678208413,75.69841437220242,81.81679354530202,83.82375956031146,73.2113076768141,75.42967765599717,68.29459062513759,71.12014241057626,56.06909987218861,63.52562407359469,61.13050774495667,66.7726286828775,66.83738719604978,70.76859758250798,76.18013791612597,78.8461260033787,59.40272255577136,62.79607205912397,73.24509772608158,78.77926308550482,68.22828739684323,72.07128137741124,65.57437326295955,68.43530151385458,71.4362495896045,72.28337484412846,50.51649519197745,54.93491837818112,76.09634166545706,78.21141702873039,50.15743547973955,53.45074725810279,69.45809375312207,70.43955846902502,63.92285959574453,67.81219363043918,70.89062747249078,74.20875980498792,46.09854823376568,49.93263055633534,41.83621591183776,50.35289912166117,50.84133762089557,56.35279503335045,49.07687975862267,58.67376465964696,31.99196914884517,41.15699453445967,46.87291290617458,49.77030225073058,27.34176373788544,30.42705306414932,66.44195693710223,67.89464426512491,71.30649950298934,71.49929548025159,37.21526998156284,41.7171421745177,40.91737300785186,44.15492139340913,38.30068055180777,41.63128427256419,45.17376542437089,51.47525171125402,36.30695701398286,38.71290255551917,47.25570689500019,47.37549247510221,52.28551931230307,56.19462436700375,37.75303594882227,43.61349389278716,29.07878204535026,29.28527340194036,30.42447059214892,38.74774606752096,50.25409938243921,53.83022413238927,31.19839651773482,35.86956991625236,34.29258273744735,39.12403041724543,32.03675382711567,35.069252181646,26.31900031961293,29.47530177329674,37.06684150918464,38.44027203077741,29.90943087000396,31.41063604254932,24.50929091493526,36.05583941608791,38.08332297373878,43.66531778642238,27.52118974982864,32.10281147137678,41.01129537522176,43.78244621585926,28.22621173928685,33.48212114958532,34.32866236559902,39.72254851081076,81.34309971400867,81.27833807688926,57.7863910019983,59.49017115166304,67.00784398157424,69.18241161852052,62.76712427014689,67.7218696078923,79.63211677754299,80.04010120248604,54.54883560645607,57.20730952269682,56.3472682652025,57.79796700932619,84.16867611988745,85.17335371415474,69.7730515329085,69.93614319600229,82.1814407542069,83.10551069405311,75.25883956388957,77.8613542143171,31.5786592448624,40.00209802605045,70.50569518914375,71.39106448749054,84.33935906240596,85.72369223847153,78.64995826193905,79.0226491002838,53.99368853561478,56.69644333035316,50.19968564134154,51.53974227429497,78.52889444769427,82.59043117800377,66.08321944921252,68.28939692633104,70.6329276119875,71.35948931400321,71.13152897456278,70.56821279770315,60.20118300994973,63.78547970302706,71.69368019648081,76.26437000619097,69.45400687410961,71.44972136867493,52.1282731084827,60.38200459676031,73.4301954329226,75.95986221080018,60.45450292254097,66.70068209259341,34.74955835662566,39.01501166889198,78.58504227270268,80.74832808723575,49.19865135210898,52.77734625028461,42.55165031344755,48.29103714773905,66.38003429029841,68.83994861302152,43.59341067877906,46.29364807104758,59.36155711163623,64.52799027153502,53.5134035153928,56.84928923499481,70.88794514774285,75.22701204935682,74.06816859074991,75.33823812667868,50.9284883557616,55.1439986936786,60.01222624404389,62.34438905755707,65.39247735207918,68.28401563102402],[70.04950105514882,70.00184416050946,70.78322382738723,70.75134160064623,71.93379969844742,71.88987562784273,71.21410507959911,71.20853361247187,70.99450365130882,70.94970104922,71.37048947982596,71.34909513873323,71.46959719306913,71.43402380865079,70.3487811021117,70.36182855720091,61.78600915664931,61.83970425626161,65.68374028032618,65.78994923951274,67.27552444732618,67.29941820117774,70.3886160844913,70.39368869300148,69.81030447196419,69.79794354817294,69.97409488362221,69.94473067977306,70.15564761843483,70.14765641695956,70.52375547656602,70.49129943078442,69.91392978700894,69.94727125061881,70.08431988578425,70.09610088089714,69.5789345642754,69.56648073891547,68.33517900442565,68.37520178269642,72.05675672310524,72.00678088328526,61.20098840293046,61.28996177975683,71.65190133985875,71.57907671667679,71.91457176934836,71.87581551718692,71.67445867986,71.64469099053362,71.43886257615738,71.42360742019791,70.56315982395724,70.53613658928877,70.22951574760293,70.18745342543046,70.86855446421853,70.83251692065924,68.98765258881221,68.97478455795414,70.25664055525881,70.24672496155951,72.48310210005351,72.43550950076445,71.97042661411088,71.93610820050949,69.24075115779091,69.20096206452806,71.83580013243954,71.80596963854177,71.78001932266805,71.7426006107885,64.35247242469546,64.34955711720654,59.85602005363567,59.94763956925851,66.73354561432512,66.71536607187136,70.18240633044387,70.16894967303419,61.04070479412057,61.09720506761344,63.5770330870892,63.51813955550217,70.32276981136714,70.2977670147575,71.02006357888017,71.00285205474879,69.64246604738213,69.61868096374774,69.95278845056109,69.93736615486193,71.80124475661944,71.7619580270587,71.94714695315307,71.93834615839896,69.05505400362858,69.11953169323063,68.97556180874683,68.97502702334178,70.10586582079438,70.10302910661483,71.7617798688552,71.75553158478334,55.45523973343748,55.48629423940275,68.20333484306134,68.21989704629021,68.23158745333494,68.24693296258965,68.97772161385022,68.98681795372525,69.68505052904636,69.71416413971366,67.23826040870642,67.2960704236839,68.21803044705162,68.18378030313173,69.87596662979375,69.88206671582648,69.79594331709529,69.82365653632436,63.3578474732413,63.37502713161867,70.15769078999701,70.17179451853247,70.56785746774447,70.5860061167744,62.89937514188273,62.9960468583411,69.30119358277081,69.33394806881304,64.52161410872901,64.61953371234006,71.12589515141761,71.14375514233997,70.16523451111691,70.13928596034155,66.73800284651216,66.7726021721264,70.94685684230603,70.97887586116204,70.58197318651754,70.60486911981283,69.60418465635694,69.59359218135353,70.19657156945655,70.2076461250751,70.70150307881249,70.68481556513989,66.9108794489874,67.02787542247906,62.83196256239361,62.83632017912259,64.91622214249711,64.98158583453187,62.66981006486975,62.74734388423317,69.67620444032272,69.69409885827586,70.07251059184881,70.05224223181426,62.53963229142179,62.62577906892592,59.37218561535175,59.43218212558739,70.63661170513376,70.61639956214253,64.97572734732417,64.94042116385464,71.43267710903193,71.41957634927692,67.46717124834394,67.53056356242003,70.44186197706321,70.44833723789284,68.69065908945618,68.69845554793189,68.01831266009286,68.06201880857139,71.28807032316395,71.27872824988718,72.33589309518553,72.31783008326103,63.76183701725796,63.75337946485171,67.59326934317971,67.74270220707844,67.56920911460298,67.55063475185418,68.49809876670275,68.50728197167865,61.05113294947127,61.10797197544425,71.33691250301393,71.31655469334838,70.19097707180217,70.19700670863295,68.86341685548594,68.88315807101922,67.40091287564059,67.50604710139757,70.59123929746849,70.60237389551152,68.8285664683187,68.86836138192641,71.51978823818354,71.50662920278253,71.15614608128237,71.1758613343595,66.28385454194397,66.33965041199539,61.02700458085443,61.09410640837914,69.62583853260833,69.59111916050225,69.51590965231482,69.5132916999134,65.59186483811203,65.62366261902457,70.51154115055338,70.47341420112691,70.83638305392249,70.81666398072903,70.52853152078183,70.5056143934352,69.64147299658741,69.61672323827473,71.42908882022132,71.40740585749843,70.87750727814891,70.81753636851552],["pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass"],["pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass"],["fail","warn","pass","warn","pass","warn","pass","warn","fail","warn","fail","warn","fail","warn","fail","warn","fail","warn","fail","warn","fail","warn","pass","warn","fail","warn","fail","warn","fail","warn","fail","warn","pass","warn","fail","warn","fail","warn","pass","warn","pass","warn","fail","warn","pass","warn","pass","warn","pass","warn","pass","warn","fail","warn","fail","warn","pass","warn","pass","warn","pass","warn","pass","warn","pass","warn","pass","warn","pass","warn","pass","warn","fail","warn","fail","warn","pass","warn","pass","warn","pass","warn","pass","warn","pass","warn","fail","warn","pass","warn","pass","warn","fail","warn","pass","warn","pass","warn","warn","pass","warn","pass","warn","pass","warn","warn","warn","pass","pass","warn","warn","pass","warn","pass","warn","pass","pass","warn","pass","warn","warn","pass","fail","warn","warn","pass","fail","warn","warn","pass","fail","warn","pass","warn","pass","warn","fail","warn","warn","pass","fail","warn","fail","warn","warn","pass","warn","pass","warn","pass","warn","pass","fail","fail","pass","warn","fail","fail","pass","warn","pass","warn","pass","warn","fail","fail","pass","warn","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","pass","warn","pass","warn","fail","warn","fail","fail","fail","warn","fail","warn","fail","fail","fail","warn","fail","fail","fail","fail","fail","fail","pass","warn","fail","warn","fail","warn","fail","warn","fail","warn","fail","warn","fail","warn","fail","warn","fail","warn","fail","warn","fail","warn","fail","warn","fail","warn","fail","warn","fail","warn","fail","warn"],["pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass"],["fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail"],["warn","warn","warn","warn","warn","pass","warn","pass","warn","warn","warn","warn","fail","warn","warn","warn","pass","warn","warn","pass","warn","warn","warn","warn","warn","pass","warn","warn","warn","warn","warn","warn","fail","fail","warn","warn","warn","fail","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","warn","warn","warn","warn","warn","warn","warn","pass","pass","pass","fail","fail","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","fail","fail","warn","warn","warn","warn","fail","warn","warn","warn","warn","warn","warn","warn","fail","fail","warn","warn","warn","fail","warn","warn","fail","fail","pass","pass","pass","pass","pass","pass","warn","warn","fail","fail","pass","pass","pass","pass","warn","warn","pass","pass","warn","warn","pass","pass","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","fail","fail","pass","pass","pass","pass","warn","pass","fail","warn","warn","warn","warn","warn","fail","warn","warn","warn","pass","pass","warn","warn","warn","warn","pass","pass","warn","warn","warn","pass","warn","warn","warn","warn","warn","warn","fail","warn"],["pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass"],["warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn","warn"],["pass","pass","fail","warn","pass","pass","warn","warn","fail","warn","warn","warn","pass","pass","warn","pass","warn","warn","fail","warn","fail","warn","warn","pass","pass","pass","fail","fail","fail","warn","fail","fail","fail","warn","fail","fail","fail","fail","pass","pass","pass","pass","warn","warn","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","warn","pass","warn","warn","warn","warn","warn","pass","pass","pass","warn","warn","pass","pass","warn","pass","warn","warn","pass","pass","warn","warn","pass","pass","warn","warn","warn","pass","warn","warn","pass","pass","fail","fail","fail","warn","warn","warn","fail","warn","fail","fail","fail","fail","fail","fail","warn","warn","pass","pass","fail","fail","fail","fail","fail","fail","fail","warn","fail","fail","fail","fail","warn","warn","fail","fail","fail","fail","fail","fail","warn","warn","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","fail","pass","pass","warn","warn","warn","warn","warn","warn","pass","pass","warn","warn","warn","warn","pass","pass","warn","warn","pass","pass","pass","pass","fail","fail","pass","pass","pass","pass","pass","pass","warn","warn","warn","warn","pass","pass","warn","warn","pass","pass","pass","pass","warn","warn","pass","pass","warn","pass","warn","warn","pass","pass","warn","warn","fail","fail","pass","pass","fail","warn","fail","fail","warn","warn","fail","fail","warn","warn","warn","warn","pass","pass","pass","pass","warn","warn","warn","warn","warn","warn"],["pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","warn","warn","pass","pass","pass","pass","warn","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","warn","pass","pass","pass","warn","warn","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass"],["pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass","pass"],["H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27me3","H3K27me3","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K27me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K9me3","H3K9me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K36me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K27ac","H3K27ac","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K9me3","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac","H3K27ac"],[1,1,2,2,2,2,4,4,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,4,4,5,5,5,5,5,5,1,1,5,5,5,5,2,2,1,1,1,1,1,1,1,1,2,2,3,3,2,2,2,2,2,2,2,2,3,3,3,3,4,4,3,3,3,3,3,3,4,4,4,4,4,4,5,5,4,4,4,4,5,5,5,5,5,5,5,5,5,5,1,1,2,2,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,3,3,4,4,3,3,3,3,3,3,3,3,4,4,4,4,4,4,1,1,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,1,1,1,1,1,1,1,1,2,2,2,2,2,2,3,3,2,2,2,2,2,2,3,3,3,3,3,3,5,5,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,5,5,2,2,5,5,5,5,5,5,5,5,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3,3,3],["VEH","VEH","DOX","DOX","DOX","DOX","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","DOX","DOX","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","VEH","VEH","DOX","DOX","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","DOX","DOX","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","DOX","DOX","DOX","DOX","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","DOX","DOX","VEH","VEH","VEH","VEH","DOX","DOX","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX"],["24R","24R","24R","24R","144R","144R","144R","144R","24R","24R","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24R","24R","24R","24R","144R","144R","24T","24T","24T","24T","24R","24R","24T","24T","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24R","24R","144R","144R","24T","24T","24R","24R","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24T","24T","144R","144R","24R","24R","144R","144R","24T","24T","24T","24T","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","144R","144R","24R","24R","24R","24R","144R","144R","24T","24T","24R","24R","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24T","24T","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","144R","144R","24R","24R","144R","144R","24T","24T","24R","24R","24T","24T","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24T","24T","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24R","24R","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24T","24T","144R","144R","24T","24T","24T","24T","24R","24R"],[25.51622528055417,21.65642153513373,51.5950384689986,49.28573931206856,28.7993440163382,24.76779210235973,47.03804730196007,38.80574415989907,52.36090525090975,48.3306668726897,45.9837012597763,40.61369662915817,24.7083965105267,22.66646366782226,34.2970902044998,28.59726229411041,44.20475218044317,43.84484120046004,58.20061554337713,49.37342456758406,56.92908688048367,49.0485228788386,35.79069948980553,28.22111231990712,29.92766865898304,23.7216895981348,68.70654490952344,62.75805760477884,53.55423223742367,49.59431248513749,59.21554661964225,55.08183959276881,56.47113489451927,49.69415078422214,61.1630771212271,54.64906309687772,69.89396341011253,66.14093137687868,18.15067466081939,15.75093753712108,16.44685811994631,14.31665407870865,30.98101304797241,30.23732433879978,21.83517488316173,17.79969533609561,26.32200621071505,23.2467242040385,22.11565975725493,20.83011281710284,26.35224321791587,24.30158562779758,18.18320645469798,16.17624043968854,26.7886923231859,24.57032234400283,31.70540937486241,28.87985758942374,43.93090012781139,36.47437592640531,38.86949225504333,33.2273713171225,33.16261280395022,29.23140241749202,23.81986208387403,21.1538739966213,40.59727744422864,37.20392794087603,26.75490227391841,21.22073691449518,31.77171260315677,27.92871862258876,34.42562673704045,31.56469848614542,28.5637504103955,27.71662515587154,49.48350480802255,45.06508162181888,23.90365833454294,21.78858297126961,49.84256452026045,46.54925274189721,30.54190624687793,29.56044153097498,36.07714040425547,32.18780636956082,29.10937252750922,25.79124019501208,53.90145176623432,50.06736944366466,58.16378408816224,49.64710087833883,49.15866237910443,43.64720496664955,50.92312024137733,41.32623534035304,68.00803085115483,58.84300546554033,53.12708709382542,50.22969774926942,72.65823626211457,69.57294693585068,33.55804306289777,32.10535573487509,28.69350049701066,28.50070451974841,62.78473001843716,58.2828578254823,59.08262699214814,55.84507860659087,61.69931944819223,58.36871572743581,54.82623457562911,48.52474828874598,63.69304298601714,61.28709744448083,52.74429310499981,52.62450752489779,47.71448068769693,43.80537563299625,62.24696405117773,56.38650610721284,70.92121795464975,70.71472659805964,69.57552940785108,61.25225393247904,49.74590061756079,46.16977586761073,68.80160348226518,64.13043008374764,65.70741726255264,60.87596958275457,67.96324617288434,64.93074781835401,73.68099968038706,70.52469822670326,62.93315849081536,61.55972796922259,70.09056912999604,68.58936395745067,75.49070908506474,63.94416058391209,61.91667702626122,56.33468221357762,72.47881025017136,67.89718852862322,58.98870462477824,56.21755378414074,71.77378826071315,66.51787885041469,65.67133763440097,60.27745148918924,18.65690028599133,18.72166192311074,42.2136089980017,40.50982884833696,32.99215601842576,30.81758838147948,37.23287572985311,32.2781303921077,20.36788322245701,19.95989879751396,45.45116439354393,42.79269047730318,43.6527317347975,42.20203299067381,15.83132388011255,14.82664628584526,30.2269484670915,30.06385680399771,17.8185592457931,16.89448930594689,24.74116043611043,22.1386457856829,68.42134075513761,59.99790197394955,29.49430481085625,28.60893551250946,15.66064093759404,14.27630776152847,21.35004173806095,20.9773508997162,46.00631146438522,43.30355666964684,49.80031435865846,48.46025772570503,21.47110555230573,17.40956882199623,33.91678055078748,31.71060307366896,29.3670723880125,28.64051068599679,28.86847102543722,29.43178720229685,39.79881699005027,36.21452029697294,28.30631980351919,23.73562999380903,30.54599312589039,28.55027863132507,47.8717268915173,39.61799540323969,26.5698045670774,24.04013778919981,39.54549707745903,33.29931790740659,65.25044164337434,60.98498833110802,21.41495772729732,19.25167191276425,50.80134864789102,47.22265374971539,57.44834968655245,51.70896285226095,33.61996570970159,31.16005138697848,56.40658932122094,53.70635192895242,40.63844288836377,35.47200972846498,46.4865964846072,43.15071076500519,29.11205485225715,24.77298795064318,25.9318314092501,24.66176187332132,49.0715116442384,44.8560013063214,39.98777375595611,37.65561094244293,34.60752264792082,31.71598436897598],[52,51,50,49,52,52,52,52,50,50,50,50,50,49,51,51,55,55,54,53,55,54,53,53,53,53,49,49,47,47,49,49,51,50,50,49,49,49,51,51,52,51,53,53,52,52,50,50,49,48,52,52,52,52,53,52,49,49,53,53,48,48,50,50,50,50,52,52,49,49,50,49,55,55,57,57,56,55,53,53,56,56,57,57,50,49,50,50,52,52,53,53,49,48,50,49,49,49,49,48,47,47,47,46,56,56,51,51,47,47,48,48,48,48,49,49,50,49,49,49,49,49,51,51,49,48,47,47,50,50,47,47,50,50,47,47,47,47,49,49,47,47,51,51,50,50,50,50,48,48,51,51,50,50,51,51,50,50,48,47,47,47,52,52,52,52,49,49,52,52,47,47,50,50,47,47,49,49,50,49,48,48,45,45,50,50,50,50,50,50,51,51,53,52,49,49,51,50,50,50,50,50,48,48,49,49,46,46,46,46,49,49,56,56,51,50,49,49,56,55,50,50,51,51,51,50,50,49,50,50,50,50],[70.04950105514882,70.00184416050946,70.78322382738723,70.75134160064623,71.93379969844742,71.88987562784273,71.21410507959911,71.20853361247187,70.99450365130882,70.94970104922,71.37048947982596,71.34909513873323,71.46959719306913,71.43402380865079,70.3487811021117,70.36182855720091,61.78600915664931,61.83970425626161,65.68374028032618,65.78994923951274,67.27552444732618,67.29941820117774,70.3886160844913,70.39368869300148,69.81030447196419,69.79794354817294,69.97409488362221,69.94473067977306,70.15564761843483,70.14765641695956,70.52375547656602,70.49129943078442,69.91392978700894,69.94727125061881,70.08431988578425,70.09610088089714,69.5789345642754,69.56648073891547,68.33517900442565,68.37520178269642,72.05675672310524,72.00678088328526,61.20098840293046,61.28996177975683,71.65190133985875,71.57907671667679,71.91457176934836,71.87581551718692,71.67445867986,71.64469099053362,71.43886257615738,71.42360742019791,70.56315982395724,70.53613658928877,70.22951574760293,70.18745342543046,70.86855446421853,70.83251692065924,68.98765258881221,68.97478455795414,70.25664055525881,70.24672496155951,72.48310210005351,72.43550950076445,71.97042661411088,71.93610820050949,69.24075115779091,69.20096206452806,71.83580013243954,71.80596963854177,71.78001932266805,71.7426006107885,64.35247242469546,64.34955711720654,59.85602005363567,59.94763956925851,66.73354561432512,66.71536607187136,70.18240633044387,70.16894967303419,61.04070479412057,61.09720506761344,63.5770330870892,63.51813955550217,70.32276981136714,70.2977670147575,71.02006357888017,71.00285205474879,69.64246604738213,69.61868096374774,69.95278845056109,69.93736615486193,71.80124475661944,71.7619580270587,71.94714695315307,71.93834615839896,69.05505400362858,69.11953169323063,68.97556180874683,68.97502702334178,70.10586582079438,70.10302910661483,71.7617798688552,71.75553158478334,55.45523973343748,55.48629423940275,68.20333484306134,68.21989704629021,68.23158745333494,68.24693296258965,68.97772161385022,68.98681795372525,69.68505052904636,69.71416413971366,67.23826040870642,67.2960704236839,68.21803044705162,68.18378030313173,69.87596662979375,69.88206671582648,69.79594331709529,69.82365653632436,63.3578474732413,63.37502713161867,70.15769078999701,70.17179451853247,70.56785746774447,70.5860061167744,62.89937514188273,62.9960468583411,69.30119358277081,69.33394806881304,64.52161410872901,64.61953371234006,71.12589515141761,71.14375514233997,70.16523451111691,70.13928596034155,66.73800284651216,66.7726021721264,70.94685684230603,70.97887586116204,70.58197318651754,70.60486911981283,69.60418465635694,69.59359218135353,70.19657156945655,70.2076461250751,70.70150307881249,70.68481556513989,66.9108794489874,67.02787542247906,62.83196256239361,62.83632017912259,64.91622214249711,64.98158583453187,62.66981006486975,62.74734388423317,69.67620444032272,69.69409885827586,70.07251059184881,70.05224223181426,62.53963229142179,62.62577906892592,59.37218561535175,59.43218212558739,70.63661170513376,70.61639956214253,64.97572734732417,64.94042116385464,71.43267710903193,71.41957634927692,67.46717124834394,67.53056356242003,70.44186197706321,70.44833723789284,68.69065908945618,68.69845554793189,68.01831266009286,68.06201880857139,71.28807032316395,71.27872824988718,72.33589309518553,72.31783008326103,63.76183701725796,63.75337946485171,67.59326934317971,67.74270220707844,67.56920911460298,67.55063475185418,68.49809876670275,68.50728197167865,61.05113294947127,61.10797197544425,71.33691250301393,71.31655469334838,70.19097707180217,70.19700670863295,68.86341685548594,68.88315807101922,67.40091287564059,67.50604710139757,70.59123929746849,70.60237389551152,68.8285664683187,68.86836138192641,71.51978823818354,71.50662920278253,71.15614608128237,71.1758613343595,66.28385454194397,66.33965041199539,61.02700458085443,61.09410640837914,69.62583853260833,69.59111916050225,69.51590965231482,69.5132916999134,65.59186483811203,65.62366261902457,70.51154115055338,70.47341420112691,70.83638305392249,70.81666398072903,70.52853152078183,70.5056143934352,69.64147299658741,69.61672323827473,71.42908882022132,71.40740585749843,70.87750727814891,70.81753636851552],[18.18181818181818,9.090909090909092,18.18181818181818,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,27.27272727272727,9.090909090909092,18.18181818181818,9.090909090909092,27.27272727272727,9.090909090909092,18.18181818181818,9.090909090909092,18.18181818181818,9.090909090909092,27.27272727272727,9.090909090909092,27.27272727272727,9.090909090909092,9.090909090909092,9.090909090909092,18.18181818181818,9.090909090909092,27.27272727272727,18.18181818181818,27.27272727272727,9.090909090909092,27.27272727272727,18.18181818181818,27.27272727272727,18.18181818181818,27.27272727272727,18.18181818181818,27.27272727272727,27.27272727272727,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,18.18181818181818,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,18.18181818181818,9.090909090909092,18.18181818181818,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,18.18181818181818,9.090909090909092,18.18181818181818,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,18.18181818181818,9.090909090909092,18.18181818181818,18.18181818181818,18.18181818181818,9.090909090909092,18.18181818181818,9.090909090909092,18.18181818181818,9.090909090909092,18.18181818181818,18.18181818181818,18.18181818181818,18.18181818181818,18.18181818181818,18.18181818181818,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,27.27272727272727,27.27272727272727,18.18181818181818,18.18181818181818,18.18181818181818,18.18181818181818,18.18181818181818,9.090909090909092,18.18181818181818,18.18181818181818,18.18181818181818,18.18181818181818,9.090909090909092,9.090909090909092,18.18181818181818,18.18181818181818,27.27272727272727,18.18181818181818,18.18181818181818,18.18181818181818,18.18181818181818,9.090909090909092,27.27272727272727,27.27272727272727,27.27272727272727,18.18181818181818,18.18181818181818,18.18181818181818,27.27272727272727,18.18181818181818,27.27272727272727,18.18181818181818,18.18181818181818,18.18181818181818,27.27272727272727,18.18181818181818,36.36363636363637,27.27272727272727,18.18181818181818,18.18181818181818,18.18181818181818,27.27272727272727,18.18181818181818,18.18181818181818,27.27272727272727,27.27272727272727,18.18181818181818,18.18181818181818,9.090909090909092,9.090909090909092,18.18181818181818,18.18181818181818,9.090909090909092,9.090909090909092,18.18181818181818,18.18181818181818,9.090909090909092,9.090909090909092,18.18181818181818,18.18181818181818,9.090909090909092,9.090909090909092,18.18181818181818,18.18181818181818,18.18181818181818,18.18181818181818,18.18181818181818,18.18181818181818,27.27272727272727,27.27272727272727,18.18181818181818,18.18181818181818,9.090909090909092,9.090909090909092,9.090909090909092,9.090909090909092,18.18181818181818,9.090909090909092,18.18181818181818,18.18181818181818,18.18181818181818,9.090909090909092,18.18181818181818,9.090909090909092,18.18181818181818,18.18181818181818,18.18181818181818,9.090909090909092,27.27272727272727,27.27272727272727,18.18181818181818,18.18181818181818,18.18181818181818,18.18181818181818,9.090909090909092,9.090909090909092,27.27272727272727,9.090909090909092,18.18181818181818,9.090909090909092,27.27272727272727,18.18181818181818,27.27272727272727,9.090909090909092,27.27272727272727,9.090909090909092,27.27272727272727,18.18181818181818,18.18181818181818,9.090909090909092,27.27272727272727,18.18181818181818,18.18181818181818,9.090909090909092,18.18181818181818,9.090909090909092,18.18181818181818,9.090909090909092,18.18181818181818,9.090909090909092,18.18181818181818,9.090909090909092,18.18181818181818,9.090909090909092,27.27272727272727,9.090909090909092],[8830034,8830034,16578704,16578704,9570470,9570470,10733977,10733977,9646404,9646404,8994528,8994528,4663599,4663599,10410306,10410306,16439638,16439638,18259872,18259872,13689268,13689268,11910243,11910243,12803412,12803412,9122059,9122059,11702871,11702871,8839709,8839709,10368651,10368651,8814196,8814196,14847165,14847165,14153840,14153840,5862953,5862953,9817049,9817049,9069762,9069762,10036729,10036729,10953823,10953823,8741438,8741438,6948539,6948539,10720711,10720711,10446106,10446106,10762175,10762175,12193521,12193521,7383669,7383669,7436416,7436416,10381840,10381840,7627631,7627631,8242133,8242133,7813241,7813241,3381332,3381332,17281183,17281183,6988957,6988957,11950951,11950951,13986120,13986120,8134850,8134850,8326979,8326979,5424324,5424324,6954866,6954866,6796188,6796188,9900924,9900924,12361299,12361299,15049027,15049027,11124138,11124138,5638348,5638348,734837,734837,10266750,10266750,10051149,10051149,14437895,14437895,12982038,12982038,11071957,11071957,10755984,10755984,10900502,10900502,9018945,9018945,10900566,10900566,9617315,9617315,7903839,7903839,14457362,14457362,13394379,13394379,12671191,12671191,11060140,11060140,9042663,9042663,7751943,7751943,17543011,17543011,12747766,12747766,11006304,11006304,5856849,5856849,7400743,7400743,8938017,8938017,13499581,13499581,1569281,1569281,13521248,13521248,15900601,15900601,15061110,15061110,17147873,17147873,12465025,12465025,8022702,8022702,11120375,11120375,5703944,5703944,10611034,10611034,7583015,7583015,8665986,8665986,8763664,8763664,12949588,12949588,13450470,13450470,10348384,10348384,13078783,13078783,16654461,16654461,10920806,10920806,8099611,8099611,12674448,12674448,11631878,11631878,9780958,9780958,14577232,14577232,11121551,11121551,12107678,12107678,7255699,7255699,9209722,9209722,8514537,8514537,17230410,17230410,10304161,10304161,9460829,9460829,17871310,17871310,10992015,10992015,6136901,6136901,7398484,7398484,8197575,8197575,6738747,6738747,8097526,8097526],["1","1","2","2","2","2","4","4","3","3","3","3","3","3","4","4","4","4","4","4","4","4","5","5","4","4","5","5","5","5","5","5","1","1","5","5","5","5","2","2","1","1","1","1","1","1","1","1","2","2","3","3","2","2","2","2","2","2","2","2","3","3","3","3","4","4","3","3","3","3","3","3","4","4","4","4","4","4","5","5","4","4","4","4","5","5","5","5","5","5","5","5","5","5","1","1","2","2","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","3","3","4","4","3","3","3","3","3","3","3","3","4","4","4","4","4","4","1","1","4","4","4","4","5","5","5","5","5","5","5","5","5","5","5","5","1","1","1","1","1","1","1","1","2","2","2","2","2","2","3","3","2","2","2","2","2","2","3","3","3","3","3","3","5","5","3","3","3","3","4","4","4","4","4","4","4","4","4","4","4","4","5","5","2","2","5","5","5","5","5","5","5","5","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","3","3","3","3","3","3"],["VEH","VEH","DOX","DOX","DOX","DOX","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","DOX","DOX","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","VEH","VEH","DOX","DOX","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","DOX","DOX","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","DOX","DOX","DOX","DOX","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","DOX","DOX","VEH","VEH","VEH","VEH","DOX","DOX","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX","DOX","DOX","VEH","VEH","DOX","DOX","VEH","VEH","VEH","VEH","DOX","DOX","VEH","VEH","DOX","DOX"],["24R","24R","24R","24R","144R","144R","144R","144R","24R","24R","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24R","24R","24R","24R","144R","144R","24T","24T","24T","24T","24R","24R","24T","24T","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24R","24R","144R","144R","24T","24T","24R","24R","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24T","24T","144R","144R","24R","24R","144R","144R","24T","24T","24T","24T","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","144R","144R","24R","24R","24R","24R","144R","144R","24T","24T","24R","24R","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24T","24T","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","144R","144R","24R","24R","144R","144R","24T","24T","24R","24R","24T","24T","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24T","24T","144R","144R","144R","144R","24T","24T","24T","24T","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24R","24R","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24R","24R","24R","24R","144R","144R","144R","144R","24T","24T","24T","24T","144R","144R","24T","24T","24T","24T","24R","24R"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Sample<\/th>\n      <th>prefix<\/th>\n      <th>read<\/th>\n      <th>Filename<\/th>\n      <th>File type<\/th>\n      <th>Encoding<\/th>\n      <th>Total Sequences<\/th>\n      <th>Sequences flagged as poor quality<\/th>\n      <th>Sequence length<\/th>\n      <th>%GC<\/th>\n      <th>total_deduplicated_percentage<\/th>\n      <th>avg_sequence_length<\/th>\n      <th>basic_statistics<\/th>\n      <th>per_base_sequence_quality<\/th>\n      <th>per_tile_sequence_quality<\/th>\n      <th>per_sequence_quality_scores<\/th>\n      <th>per_base_sequence_content<\/th>\n      <th>per_sequence_gc_content<\/th>\n      <th>per_base_n_content<\/th>\n      <th>sequence_length_distribution<\/th>\n      <th>sequence_duplication_levels<\/th>\n      <th>overrepresented_sequences<\/th>\n      <th>adapter_content<\/th>\n      <th>Histone_Mark<\/th>\n      <th>Individual<\/th>\n      <th>Treatment<\/th>\n      <th>Timepoint<\/th>\n      <th>FastQC_mqc-generalstats-fastqc-percent_duplicates<\/th>\n      <th>FastQC_mqc-generalstats-fastqc-percent_gc<\/th>\n      <th>FastQC_mqc-generalstats-fastqc-avg_sequence_length<\/th>\n      <th>FastQC_mqc-generalstats-fastqc-percent_fails<\/th>\n      <th>FastQC_mqc-generalstats-fastqc-total_sequences<\/th>\n      <th>ind<\/th>\n      <th>trt<\/th>\n      <th>time<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"scrollY":"400px","scrollCollapse":true,"fixedColumns":{"leftColumns":2},"fixedHeader":true,"columnDefs":[{"className":"dt-right","targets":[7,8,10,11,12,25,28,29,30,31,32]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Sample","targets":1},{"name":"prefix","targets":2},{"name":"read","targets":3},{"name":"Filename","targets":4},{"name":"File type","targets":5},{"name":"Encoding","targets":6},{"name":"Total Sequences","targets":7},{"name":"Sequences flagged as poor quality","targets":8},{"name":"Sequence length","targets":9},{"name":"%GC","targets":10},{"name":"total_deduplicated_percentage","targets":11},{"name":"avg_sequence_length","targets":12},{"name":"basic_statistics","targets":13},{"name":"per_base_sequence_quality","targets":14},{"name":"per_tile_sequence_quality","targets":15},{"name":"per_sequence_quality_scores","targets":16},{"name":"per_base_sequence_content","targets":17},{"name":"per_sequence_gc_content","targets":18},{"name":"per_base_n_content","targets":19},{"name":"sequence_length_distribution","targets":20},{"name":"sequence_duplication_levels","targets":21},{"name":"overrepresented_sequences","targets":22},{"name":"adapter_content","targets":23},{"name":"Histone_Mark","targets":24},{"name":"Individual","targets":25},{"name":"Treatment","targets":26},{"name":"Timepoint","targets":27},{"name":"FastQC_mqc-generalstats-fastqc-percent_duplicates","targets":28},{"name":"FastQC_mqc-generalstats-fastqc-percent_gc","targets":29},{"name":"FastQC_mqc-generalstats-fastqc-avg_sequence_length","targets":30},{"name":"FastQC_mqc-generalstats-fastqc-percent_fails","targets":31},{"name":"FastQC_mqc-generalstats-fastqc-total_sequences","targets":32},{"name":"ind","targets":33},{"name":"trt","targets":34},{"name":"time","targets":35}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>combo_trim_df %&gt;% 
+  dplyr::filter(read==&quot;R1&quot;) %&gt;% 
+  ggplot(., aes(x = Sample, y= avg_sequence_length))+
+geom_col(aes(fill=Histone_Mark)) +
+  geom_hline( yintercept = 75)+
+  theme_classic()+
+  ggtitle(&quot;Graph of average read length across R1 samples&quot;)+ theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/trim%20info%204-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>combo_trim_df %&gt;% 
+  dplyr::filter(read==&quot;R2&quot;) %&gt;% 
+  ggplot(., aes(x = Sample, y= avg_sequence_length))+
+geom_col(aes(fill=Histone_Mark)) +
+  geom_hline( yintercept = 75)+
+  theme_classic()+
+  ggtitle(&quot;Graph of average read length across R2 samples&quot;)+ theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/trim%20info%205-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>combo_trim_df %&gt;% 
+  dplyr::filter(read==&quot;R1&quot;) %&gt;% 
+  ggplot(., aes(x = Sample, y= `%GC`))+
+  geom_col(aes(fill=Histone_Mark)) +
+  theme_classic()+
+  ggtitle(&quot;Graph of %GC for R1 trimmed&quot;)+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/trim%20info%206-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>combo_trim_df %&gt;% 
+  dplyr::filter(read==&quot;R2&quot;) %&gt;% 
+  ggplot(., aes(x = Sample, y= `%GC`))+
+  geom_col(aes(fill=Histone_Mark)) +
+  theme_classic()+
+  ggtitle(&quot;Graph of %GC for R2 trimmed&quot;)+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/trim%20info%207-1.png" width="1344" style="display: block; margin: auto;" /></p>
+</div>
+<div id="duplication-info" class="section level4">
+<h4>Duplication Info</h4>
+<pre class="r"><code>combo_trim_df %&gt;% 
+  dplyr::filter(read==&quot;R1&quot;) %&gt;% 
+  ggplot(., aes(x = Histone_Mark, y= `FastQC_mqc-generalstats-fastqc-percent_duplicates`))+
+  geom_boxplot(aes(fill=Histone_Mark)) + 
+    geom_point(aes(color=ind))+
+  facet_wrap(trt~time)+
+  ylab(&quot;percent duplication&quot;)+
+  theme(axis.text.x=element_text(angle=90))+
+  ggtitle(&quot;Duplication percentage (R1 trimmed)&quot;)</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/dup%20info%201-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>combo_trim_df %&gt;% 
+  dplyr::filter(read==&quot;R1&quot;) %&gt;% 
+  ggplot(., aes(x = interaction(time,trt), y= `FastQC_mqc-generalstats-fastqc-percent_duplicates`))+
+  geom_boxplot(aes(fill=Histone_Mark)) + 
+  geom_point(aes(color=ind))+
+facet_wrap(~Histone_Mark)+
+  ylab(&quot;percent duplication&quot;)+
+  theme(axis.text.x=element_text(angle=90))+
+  ggtitle(&quot;Duplication percentage (R1 trimmed)&quot;)</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/dup%20info%202-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>combo_trim_df %&gt;% 
+  dplyr::filter(read==&quot;R1&quot;) %&gt;% 
+  ggplot(., aes(x = Sample, y= `FastQC_mqc-generalstats-fastqc-percent_duplicates`))+
+  geom_col(aes(fill=Histone_Mark)) +
+  theme_classic()+
+  ggtitle(&quot;Graph of percent duplicates for R1 trimmed&quot;)+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( limits = c(0,100),expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/dup%20info%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>combo_trim_df %&gt;% 
+  dplyr::filter(read==&quot;R2&quot;) %&gt;% 
+  ggplot(., aes(x = Sample, y= `FastQC_mqc-generalstats-fastqc-percent_duplicates`))+
+  geom_col(aes(fill=Histone_Mark)) +
+  theme_classic()+
+  ggtitle(&quot;Graph of percent duplicates for R2 trimmed&quot;)+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous(limits = c(0,100), expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/dup%20info%204-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.5.1 (2025-06-13 ucrt)
+Platform: x86_64-w64-mingw32/x64
+Running under: Windows 11 x64 (build 26100)
+
+Matrix products: default
+  LAPACK version 3.12.1
+
+locale:
+[1] LC_COLLATE=English_United States.utf8 
+[2] LC_CTYPE=English_United States.utf8   
+[3] LC_MONETARY=English_United States.utf8
+[4] LC_NUMERIC=C                          
+[5] LC_TIME=English_United States.utf8    
+
+time zone: America/Chicago
+tzcode source: internal
+
+attached base packages:
+[1] stats4    grid      stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] GenomicRanges_1.60.0  GenomeInfoDb_1.44.0   IRanges_2.42.0       
+ [4] S4Vectors_0.46.0      BiocGenerics_0.54.0   generics_0.1.4       
+ [7] genomation_1.40.1     data.table_1.17.6     ComplexHeatmap_2.24.1
+[10] edgeR_4.6.2           limma_3.64.1          DT_0.33              
+[13] kableExtra_1.4.0      lubridate_1.9.4       forcats_1.0.0        
+[16] stringr_1.5.1         dplyr_1.1.4           purrr_1.0.4          
+[19] readr_2.1.5           tidyr_1.3.1           tibble_3.3.0         
+[22] ggplot2_3.5.2         tidyverse_2.0.0       BiocManager_1.30.26  
+[25] workflowr_1.7.1      
+
+loaded via a namespace (and not attached):
+  [1] bitops_1.0-9                rlang_1.1.6                
+  [3] magrittr_2.0.3              gridBase_0.4-7             
+  [5] clue_0.3-66                 GetoptLong_1.0.5           
+  [7] git2r_0.36.2                matrixStats_1.5.0          
+  [9] compiler_4.5.1              getPass_0.2-4              
+ [11] reshape2_1.4.4              png_0.1-8                  
+ [13] systemfonts_1.2.3           callr_3.7.6                
+ [15] vctrs_0.6.5                 pkgconfig_2.0.3            
+ [17] shape_1.4.6.1               crayon_1.5.3               
+ [19] fastmap_1.2.0               XVector_0.48.0             
+ [21] labeling_0.4.3              Rsamtools_2.24.0           
+ [23] promises_1.3.3              rmarkdown_2.29             
+ [25] tzdb_0.5.0                  UCSC.utils_1.4.0           
+ [27] ps_1.9.1                    bit_4.6.0                  
+ [29] xfun_0.52                   cachem_1.1.0               
+ [31] jsonlite_2.0.0              later_1.4.2                
+ [33] DelayedArray_0.34.1         BiocParallel_1.42.1        
+ [35] parallel_4.5.1              cluster_2.1.8.1            
+ [37] R6_2.6.1                    bslib_0.9.0                
+ [39] stringi_1.8.7               RColorBrewer_1.1-3         
+ [41] rtracklayer_1.68.0          jquerylib_0.1.4            
+ [43] SummarizedExperiment_1.38.1 Rcpp_1.0.14                
+ [45] iterators_1.0.14            knitr_1.50                 
+ [47] Matrix_1.7-3                httpuv_1.6.16              
+ [49] timechange_0.3.0            tidyselect_1.2.1           
+ [51] seqPattern_1.40.0           abind_1.4-8                
+ [53] rstudioapi_0.17.1           yaml_2.3.10                
+ [55] doParallel_1.0.17           codetools_0.2-20           
+ [57] curl_6.4.0                  processx_3.8.6             
+ [59] plyr_1.8.9                  lattice_0.22-7             
+ [61] Biobase_2.68.0              withr_3.0.2                
+ [63] evaluate_1.0.4              xml2_1.3.8                 
+ [65] circlize_0.4.16             Biostrings_2.76.0          
+ [67] pillar_1.10.2               MatrixGenerics_1.20.0      
+ [69] KernSmooth_2.23-26          whisker_0.4.1              
+ [71] foreach_1.5.2               vroom_1.6.5                
+ [73] RCurl_1.98-1.17             rprojroot_2.0.4            
+ [75] hms_1.1.3                   scales_1.4.0               
+ [77] glue_1.8.0                  tools_4.5.1                
+ [79] BiocIO_1.18.0               GenomicAlignments_1.44.0   
+ [81] BSgenome_1.76.0             locfit_1.5-9.12            
+ [83] fs_1.6.6                    XML_3.99-0.18              
+ [85] plotrix_3.8-4               impute_1.82.0              
+ [87] crosstalk_1.2.1             colorspace_2.1-1           
+ [89] GenomeInfoDbData_1.2.14     restfulr_0.0.16            
+ [91] cli_3.6.5                   textshaping_1.0.1          
+ [93] S4Arrays_1.8.1              viridisLite_0.4.2          
+ [95] svglite_2.2.1               gtable_0.3.6               
+ [97] sass_0.4.10                 digest_0.6.37              
+ [99] SparseArray_1.8.0           rjson_0.2.23               
+[101] htmlwidgets_1.6.4           farver_2.1.2               
+[103] htmltools_0.5.8.1           lifecycle_1.0.4            
+[105] httr_1.4.7                  GlobalOptions_0.1.2        
+[107] statmod_1.5.0               bit64_4.6.0-1              </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
