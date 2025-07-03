@@ -29,13 +29,21 @@ BiocManager::install()
 ```{r load packages}
 library(tidyverse)
 library(readr)
-library(kableExtra)
-library(DT)
 library(edgeR)
 library(ComplexHeatmap)
 library(data.table)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(viridis)
+library(DT)
+library(kableExtra)
 library(genomation)
 library(GenomicRanges)
+library(chromVAR) ## For FRiP analysis and differential analysis
+library(DESeq2) ## For differential analysis section
+library(ggpubr) ## For customizing figures
+library(corrplot) ## For correlation plot
 ```
 
 #### Data Initialization
@@ -126,7 +134,7 @@ x_axis_labels = function(labels, every_nth = 1, ...) {
 }
 ```
 
-### Analysis
+### Basic Stats
 
 #### Data Processing
 ```{r Data Processig}
@@ -135,7 +143,7 @@ combo_trim_df <- multiqc_fastqc_trim %>%
   mutate(read = paste0("R", read)) %>% 
   left_join(., sampleinfo, by =c("prefix"="Library ID")) %>% 
   left_join(., multiqc_gene_stats_trim, by = c("Sample" = "Sample")) %>% 
-  mutate(ind=factor(Individual, levels = c("1","2","3","4","5"))) %>% 
+  mutate(ind=factor(Individual, levels = c("Ind1","Ind2","Ind3","Ind4","Ind5"))) %>% 
   mutate(trt=factor(Treatment, levels = c("VEH","5FU","DOX"))) %>% 
   mutate(time=factor(Timepoint, levels=c("24T","24R","144R")))
 combo_trim_df <- combo_trim_df[(!combo_trim_df$trt %in% "5FU"),]
@@ -167,7 +175,7 @@ combo_trim_df %>%
   scroll_box(width = "100%", height = "500px")
 ```
 
-#### Visualization of Counts
+### Visualization of Counts
 ```{r ct vis histo, fig.width = 14}
 combo_trim_df %>% 
   dplyr::filter(read=="R1") %>% 
@@ -191,7 +199,7 @@ geom_boxplot(aes(fill=Histone_Mark)) +
   ggtitle("Sequence count by trt and time trimmed adapter")
 ```
 
-#### Trim Info
+### Trim Info
 ```{r trim info 1}
 combo_trim_df %>% 
   ggplot(., aes(x = read, y= avg_sequence_length))+
@@ -260,7 +268,7 @@ combo_trim_df %>%
   scale_y_continuous( expand = expansion(mult = c(0, .1)))
 ```
 
-#### Duplication Info
+### Duplication Info
 ```{r dup info 1}
 combo_trim_df %>% 
   dplyr::filter(read=="R1") %>% 
@@ -307,3 +315,66 @@ combo_trim_df %>%
   scale_y_continuous(limits = c(0,100), expand = expansion(mult = c(0, .1)))
 ```
 
+### Alignment Analysis
+
+#### Data Initialization
+```{r data initialization}
+alignResult = c()
+for(sample in sampleinfo$`Library ID`){
+  alignRes = read.table(paste0("data/sams/", sample, ".log"), header = FALSE, fill = TRUE)
+  alignRate = substr(alignRes$V1[6], 1, nchar(as.character(alignRes$V1[6]))-1)
+  alignResult = data.frame(ID = sample, 
+                           Paired_Reads = alignRes$V1[1] %>% as.character %>% as.numeric, 
+                           aligned_concordant_0 = alignRes$V1[3] %>% as.character %>% as.numeric,
+                           aligned_concordant_1 = alignRes$V1[4] %>% as.character %>% as.numeric,
+                           aligned_concordant_g1 = alignRes$V1[5] %>% as.character %>% as.numeric,
+                           MappedFragNum_hg38 = alignRes$V1[4] %>% as.character %>% as.numeric + alignRes$V1[5] %>% as.character %>% as.numeric, 
+                           percent_alignment = alignRate %>% as.numeric)  %>% rbind(alignResult, .)
+}
+alignResult %>% mutate(percent_alignment = paste0(percent_alignment, "%"))
+
+for_plots <- alignResult %>% 
+  left_join(.,sampleinfo, by=c("ID"="Library ID"))%>% 
+  dplyr::select(ID:aligned_concordant_0,aligned_concordant_1, aligned_concordant_g1,percent_alignment, Histone_Mark, Individual, Treatment, Timepoint) %>% 
+  distinct()
+```
+
+#### Read Visualization
+```{r read vis 1, fig.width = 14}
+for_plots %>% 
+  group_by(Histone_Mark) %>% 
+  ggplot(., aes(x=ID, y=Paired_Reads))+
+    geom_col(aes(fill = Histone_Mark)) +
+  theme_classic()+
+  ggtitle("Graph of total paired reads")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r read vis 2, fig.width = 14}
+for_plots %>% 
+  group_by(Histone_Mark) %>% 
+  ggplot(., aes(x=ID, y=percent_alignment))+
+    geom_col(aes(fill = Histone_Mark)) +
+  theme_classic()+
+  ggtitle("Percent aligned of paired reads") + 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))+
+  coord_cartesian(ylim=c(80,100))
+```
+
+```{r read vis 3, fig.width = 14}
+for_plots %>% 
+  group_by(Histone_Mark) %>% 
+   mutate(percent_aligned_unique = round(aligned_concordant_1 / Paired_Reads * 100, 2)) %>% 
+  ggplot(., aes(x=ID, y=percent_aligned_unique))+
+    geom_col(aes(fill = Histone_Mark)) +
+  theme_classic()+
+  ggtitle("Percentage of paired reads aligning once")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+### Read Analysis
+
+#### WIP
