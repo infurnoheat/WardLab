@@ -340,7 +340,7 @@ for_plots <- alignResult %>%
 ```
 
 #### Read Visualization
-```{r read vis 1, fig.width = 14}
+```{r align vis 1, fig.width = 14}
 for_plots %>% 
   group_by(Histone_Mark) %>% 
   ggplot(., aes(x=ID, y=Paired_Reads))+
@@ -351,7 +351,7 @@ for_plots %>%
   scale_y_continuous( expand = expansion(mult = c(0, .1)))
 ```
 
-```{r read vis 2, fig.width = 14}
+```{r align vis 2, fig.width = 14}
 for_plots %>% 
   group_by(Histone_Mark) %>% 
   ggplot(., aes(x=ID, y=percent_alignment))+
@@ -363,7 +363,7 @@ for_plots %>%
   coord_cartesian(ylim=c(80,100))
 ```
 
-```{r read vis 3, fig.width = 14}
+```{r align vis 3, fig.width = 14}
 for_plots %>% 
   group_by(Histone_Mark) %>% 
    mutate(percent_aligned_unique = round(aligned_concordant_1 / Paired_Reads * 100, 2)) %>% 
@@ -377,4 +377,131 @@ for_plots %>%
 
 ### Read Analysis
 
-#### WIP
+#### Data Initialization
+```{r read data}
+file_list_filter <- list.files(path="data/bam_no_multi",
+           pattern ="frag_len_count\\.txt$",full.names = TRUE)
+read_and_label <- function(file) {
+  df <- read_delim(file, delim = "\t", col_names = c("Col1", "Col2"))  # Adjust delimiter if needed
+  df <- df %>%
+    mutate(File = basename(file),  # Add filename column
+  weight = Col2/sum(Col2))
+  return(df)
+}
+combined_df <- map_df(file_list_filter, read_and_label)
+
+annotated_combo_df <- combined_df %>% 
+  mutate(sample = gsub("_frag_len_count.txt","",File)) %>% 
+  left_join(., sampleinfo, by = c("sample"="Library ID"))
+```
+
+#### Read Visualization
+```{r read vis 1, fig.width = 14}
+annotated_combo_df %>% 
+  dplyr::filter(Histone_Mark=="H3K9me3") %>% 
+  ggplot(., aes(x=Col1, y=Col2, color = sample))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(annotated_combo_df$Col1), by = 50))+
+   facet_wrap(~sample)+
+  labs(title = "Fragment length, H3K9me3",
+       x = "Fragment Length (bp)",
+       y = "Count",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r read vis 2, fig.width = 14}
+annotated_combo_df %>% 
+  dplyr::filter(Histone_Mark=="H3K9me3") %>%
+  ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
+geom_violin(bw = 5) +
+    scale_y_continuous(breaks = seq(0, 800, 50)) +
+   theme_bw(base_size = 20) +
+    ggpubr::rotate_x_text(angle = 90) +
+  ggtitle("Fragment lengths for H3K9me3")+
+    ylab("Fragment Length") +
+    xlab("")
+```
+
+```{r read vis 3, fig.width = 14}
+annotated_combo_df %>% 
+  dplyr::filter(Histone_Mark=="H3K27ac") %>% 
+  ggplot(., aes(x=Col1, y=Col2, color = sample))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(annotated_combo_df$Col1), by = 50))+
+   facet_wrap(~sample)+
+  labs(title = "Fragment length, H3K27ac",
+       x = "Fragment Length (bp)",
+       y = "Count",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r read vis 4, fig.width = 14}
+annotated_combo_df %>% 
+  dplyr::filter(Histone_Mark=="H3K27ac") %>%
+  ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
+geom_violin(bw = 5) +
+    scale_y_continuous(breaks = seq(0, 800, 50)) +
+   theme_bw(base_size = 20) +
+    ggpubr::rotate_x_text(angle = 90) +
+  ggtitle("Fragment lengths for H3K27ac")+
+    ylab("Fragment Length") +
+    xlab("")
+```
+
+```{r read vis 5, fig.width = 14}
+annotated_combo_df %>% 
+  dplyr::filter(Histone_Mark=="H3K27me3") %>% 
+  ggplot(., aes(x=Col1, y=Col2, color = sample))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(annotated_combo_df$Col1), by = 50))+
+   facet_wrap(~sample)+
+  labs(title = "Fragment length, H3K27me3",
+       x = "Fragment Length (bp)",
+       y = "Count",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r read vis 6, fig.width = 14}
+annotated_combo_df %>% 
+  dplyr::filter(Histone_Mark=="H3K27me3") %>%
+  ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
+geom_violin(bw = 5) +
+    scale_y_continuous(breaks = seq(0, 800, 50)) +
+   theme_bw(base_size = 20) +
+    ggpubr::rotate_x_text(angle = 90) +
+  ggtitle("Fragment lengths for H3K27me3")+
+    ylab("Fragment Length") +
+    xlab("")
+```
+
+```{r read vis 7, fig.width = 14}
+annotated_combo_df %>% 
+  dplyr::filter(Histone_Mark=="H3K36me3") %>% 
+  ggplot(., aes(x=Col1, y=Col2, color = sample))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(annotated_combo_df$Col1), by = 50))+
+   facet_wrap(~sample)+
+  labs(title = "Fragment length, H3K36me3",
+       x = "Fragment Length (bp)",
+       y = "Count",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r read vis 8, fig.width = 14}
+annotated_combo_df %>% 
+  dplyr::filter(Histone_Mark=="H3K36me3") %>%
+  ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
+geom_violin(bw = 5) +
+    scale_y_continuous(breaks = seq(0, 800, 50)) +
+   theme_bw(base_size = 20) +
+    ggpubr::rotate_x_text(angle = 90) +
+  ggtitle("Fragment lengths for H3K36me3")+
+    ylab("Fragment Length") +
+    xlab("")
+```
+
+### Peak Calling
