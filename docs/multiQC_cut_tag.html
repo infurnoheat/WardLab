@@ -405,7 +405,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2025-07-03
+<strong>Last updated:</strong> 2025-07-06
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -536,15 +536,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree4d5379f3adb1059ee625066d83f9724a0da1d82btargetblank4d5379fa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreee9cc9abd1fa6bac632398b86acf87e5115c5e6b2targetblanke9cc9aba">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/infurnoheat/WardLab/tree/4d5379f3adb1059ee625066d83f9724a0da1d82b" target="_blank">4d5379f</a>
+<a href="https://github.com/infurnoheat/WardLab/tree/e9cc9abd1fa6bac632398b86acf87e5115c5e6b2" target="_blank">e9cc9ab</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree4d5379f3adb1059ee625066d83f9724a0da1d82btargetblank4d5379fa"
+id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreee9cc9abd1fa6bac632398b86acf87e5115c5e6b2targetblanke9cc9aba"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -554,7 +554,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/infurnoheat/WardLab/tree/4d5379f3adb1059ee625066d83f9724a0da1d82b" target="_blank">4d5379f</a>.
+<a href="https://github.com/infurnoheat/WardLab/tree/e9cc9abd1fa6bac632398b86acf87e5115c5e6b2" target="_blank">e9cc9ab</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -573,6 +573,8 @@ Ignored files:
     Ignored:    .Rproj.user/
 
 Untracked files:
+    Untracked:  data/bam_final/
+    Untracked:  data/bam_no_multi/
     Untracked:  data/multiqc_data_trim/
     Untracked:  data/sample_info.tsv
     Untracked:  data/sams/
@@ -620,6 +622,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/e9cc9abd1fa6bac632398b86acf87e5115c5e6b2/analysis/multiQC_cut_tag.Rmd" target="_blank">e9cc9ab</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-06
+</td>
+<td>
+wflow_publish("analysis/multiQC_cut_tag.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/infurnoheat/WardLab/57a7b553b59542c0906646b3f19cfb6f170455e4/docs/multiQC_cut_tag.html" target="_blank">57a7b55</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-03
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 html
@@ -2148,6 +2184,61 @@ alignResult %&gt;% mutate(percent_alignment = paste0(percent_alignment, &quot;%&
   ggtitle(&quot;Graph of total paired reads&quot;)+ 
   theme(axis.text.x=element_text(vjust = .2,angle=90))+
   scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/align%20vis%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>for_plots %&gt;% 
+  group_by(Histone_Mark) %&gt;% 
+  ggplot(., aes(x=ID, y=percent_alignment))+
+    geom_col(aes(fill = Histone_Mark)) +
+  theme_classic()+
+  ggtitle(&quot;Percent aligned of paired reads&quot;) + 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))+
+  coord_cartesian(ylim=c(80,100))</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/align%20vis%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>for_plots %&gt;% 
+  group_by(Histone_Mark) %&gt;% 
+   mutate(percent_aligned_unique = round(aligned_concordant_1 / Paired_Reads * 100, 2)) %&gt;% 
+  ggplot(., aes(x=ID, y=percent_aligned_unique))+
+    geom_col(aes(fill = Histone_Mark)) +
+  theme_classic()+
+  ggtitle(&quot;Percentage of paired reads aligning once&quot;)+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/align%20vis%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="read-analysis" class="section level3">
+<h3>Read Analysis</h3>
+<div id="data-initialization-2" class="section level4">
+<h4>Data Initialization</h4>
+<pre class="r"><code>file_list_filter &lt;- list.files(path=&quot;data/bam_no_multi&quot;,
+           pattern =&quot;frag_len_count\\.txt$&quot;,full.names = TRUE)
+read_and_label &lt;- function(file) {
+  df &lt;- read_delim(file, delim = &quot;\t&quot;, col_names = c(&quot;Col1&quot;, &quot;Col2&quot;))  # Adjust delimiter if needed
+  df &lt;- df %&gt;%
+    mutate(File = basename(file),  # Add filename column
+  weight = Col2/sum(Col2))
+  return(df)
+}
+combined_df &lt;- map_df(file_list_filter, read_and_label)
+
+annotated_combo_df &lt;- combined_df %&gt;% 
+  mutate(sample = gsub(&quot;_frag_len_count.txt&quot;,&quot;&quot;,File)) %&gt;% 
+  left_join(., sampleinfo, by = c(&quot;sample&quot;=&quot;Library ID&quot;))</code></pre>
+</div>
+<div id="read-visualization-1" class="section level4">
+<h4>Read Visualization</h4>
+<pre class="r"><code>annotated_combo_df %&gt;% 
+  dplyr::filter(Histone_Mark==&quot;H3K9me3&quot;) %&gt;% 
+  ggplot(., aes(x=Col1, y=Col2, color = sample))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(annotated_combo_df$Col1), by = 50))+
+   facet_wrap(~sample)+
+  labs(title = &quot;Fragment length, H3K9me3&quot;,
+       x = &quot;Fragment Length (bp)&quot;,
+       y = &quot;Count&quot;,
+       color= &quot;Sample&quot;)+
+  theme_minimal()</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/read%20vis%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-read-vis-1-1">
@@ -2186,15 +2277,16 @@ infurnoheat
 </table>
 </div>
 </div>
-<pre class="r"><code>for_plots %&gt;% 
-  group_by(Histone_Mark) %&gt;% 
-  ggplot(., aes(x=ID, y=percent_alignment))+
-    geom_col(aes(fill = Histone_Mark)) +
-  theme_classic()+
-  ggtitle(&quot;Percent aligned of paired reads&quot;) + 
-  theme(axis.text.x=element_text(vjust = .2,angle=90))+
-  scale_y_continuous(expand = expansion(mult = c(0, .1)))+
-  coord_cartesian(ylim=c(80,100))</code></pre>
+<pre class="r"><code>annotated_combo_df %&gt;% 
+  dplyr::filter(Histone_Mark==&quot;H3K9me3&quot;) %&gt;%
+  ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
+geom_violin(bw = 5) +
+    scale_y_continuous(breaks = seq(0, 800, 50)) +
+   theme_bw(base_size = 20) +
+    ggpubr::rotate_x_text(angle = 90) +
+  ggtitle(&quot;Fragment lengths for H3K9me3&quot;)+
+    ylab(&quot;Fragment Length&quot;) +
+    xlab(&quot;&quot;)</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/read%20vis%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-read-vis-2-1">
@@ -2233,15 +2325,17 @@ infurnoheat
 </table>
 </div>
 </div>
-<pre class="r"><code>for_plots %&gt;% 
-  group_by(Histone_Mark) %&gt;% 
-   mutate(percent_aligned_unique = round(aligned_concordant_1 / Paired_Reads * 100, 2)) %&gt;% 
-  ggplot(., aes(x=ID, y=percent_aligned_unique))+
-    geom_col(aes(fill = Histone_Mark)) +
-  theme_classic()+
-  ggtitle(&quot;Percentage of paired reads aligning once&quot;)+ 
-  theme(axis.text.x=element_text(vjust = .2,angle=90))+
-  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<pre class="r"><code>annotated_combo_df %&gt;% 
+  dplyr::filter(Histone_Mark==&quot;H3K27ac&quot;) %&gt;% 
+  ggplot(., aes(x=Col1, y=Col2, color = sample))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(annotated_combo_df$Col1), by = 50))+
+   facet_wrap(~sample)+
+  labs(title = &quot;Fragment length, H3K27ac&quot;,
+       x = &quot;Fragment Length (bp)&quot;,
+       y = &quot;Count&quot;,
+       color= &quot;Sample&quot;)+
+  theme_minimal()</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/read%20vis%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-read-vis-3-1">
@@ -2280,12 +2374,67 @@ infurnoheat
 </table>
 </div>
 </div>
+<pre class="r"><code>annotated_combo_df %&gt;% 
+  dplyr::filter(Histone_Mark==&quot;H3K27ac&quot;) %&gt;%
+  ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
+geom_violin(bw = 5) +
+    scale_y_continuous(breaks = seq(0, 800, 50)) +
+   theme_bw(base_size = 20) +
+    ggpubr::rotate_x_text(angle = 90) +
+  ggtitle(&quot;Fragment lengths for H3K27ac&quot;)+
+    ylab(&quot;Fragment Length&quot;) +
+    xlab(&quot;&quot;)</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/read%20vis%204-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>annotated_combo_df %&gt;% 
+  dplyr::filter(Histone_Mark==&quot;H3K27me3&quot;) %&gt;% 
+  ggplot(., aes(x=Col1, y=Col2, color = sample))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(annotated_combo_df$Col1), by = 50))+
+   facet_wrap(~sample)+
+  labs(title = &quot;Fragment length, H3K27me3&quot;,
+       x = &quot;Fragment Length (bp)&quot;,
+       y = &quot;Count&quot;,
+       color= &quot;Sample&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/read%20vis%205-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>annotated_combo_df %&gt;% 
+  dplyr::filter(Histone_Mark==&quot;H3K27me3&quot;) %&gt;%
+  ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
+geom_violin(bw = 5) +
+    scale_y_continuous(breaks = seq(0, 800, 50)) +
+   theme_bw(base_size = 20) +
+    ggpubr::rotate_x_text(angle = 90) +
+  ggtitle(&quot;Fragment lengths for H3K27me3&quot;)+
+    ylab(&quot;Fragment Length&quot;) +
+    xlab(&quot;&quot;)</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/read%20vis%206-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>annotated_combo_df %&gt;% 
+  dplyr::filter(Histone_Mark==&quot;H3K36me3&quot;) %&gt;% 
+  ggplot(., aes(x=Col1, y=Col2, color = sample))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(annotated_combo_df$Col1), by = 50))+
+   facet_wrap(~sample)+
+  labs(title = &quot;Fragment length, H3K36me3&quot;,
+       x = &quot;Fragment Length (bp)&quot;,
+       y = &quot;Count&quot;,
+       color= &quot;Sample&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/read%20vis%207-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>annotated_combo_df %&gt;% 
+  dplyr::filter(Histone_Mark==&quot;H3K36me3&quot;) %&gt;%
+  ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
+geom_violin(bw = 5) +
+    scale_y_continuous(breaks = seq(0, 800, 50)) +
+   theme_bw(base_size = 20) +
+    ggpubr::rotate_x_text(angle = 90) +
+  ggtitle(&quot;Fragment lengths for H3K36me3&quot;)+
+    ylab(&quot;Fragment Length&quot;) +
+    xlab(&quot;&quot;)</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/read%20vis%208-1.png" width="1344" style="display: block; margin: auto;" /></p>
 </div>
 </div>
-<div id="read-analysis" class="section level3">
-<h3>Read Analysis</h3>
-<div id="wip" class="section level4">
-<h4>WIP</h4>
+<div id="peak-calling" class="section level3">
+<h3>Peak Calling</h3>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -2401,7 +2550,6 @@ loaded via a namespace (and not attached):
 [123] statmod_1.5.0               shiny_1.11.1               
 [125] broom_1.0.8                 memoise_2.0.1              
 [127] bslib_0.9.0                 bit_4.6.0                  </code></pre>
-</div>
 </div>
 </div>
 </div>
