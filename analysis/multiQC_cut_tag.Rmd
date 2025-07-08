@@ -520,7 +520,8 @@ for (s in peaks$sample) {
   peaks[peaks$sample == s,"peakNum"] <- sum(as.numeric(weights$peak[-1:-150]))
 }
 questionable_frag = peaks[(peaks$peakNum == 0),]
-questionable_frag
+questionable_frag %>%
+  left_join(., sampleinfo, by =c("sample"="Library ID"))
 ```
 
 ### Read Analysisafter Filtering
@@ -665,7 +666,8 @@ for (s in peaks$sample) {
   peaks[peaks$sample == s,"peakNum"] <- sum(as.numeric(weights$peak[-1:-150]))
 }
 questionable_frag_filter = peaks[(peaks$peakNum == 0),]
-questionable_frag_filter
+questionable_frag_filter %>%
+  left_join(., sampleinfo, by =c("sample"="Library ID"))
 ```
 
 ### Peak Calling
