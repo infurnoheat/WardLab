@@ -18,13 +18,6 @@ knitr::opts_chunk$set(
 
 ## Cut And Tag QC
 
-#### Bioconductor
-```{r biocoductor}
-if (!require("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-BiocManager::install()
-```
-
 #### Loading Packages 
 ```{r load packages}
 library(tidyverse)
@@ -44,6 +37,8 @@ library(chromVAR) ## For FRiP analysis and differential analysis
 library(DESeq2) ## For differential analysis section
 library(ggpubr) ## For customizing figures
 library(corrplot) ## For correlation plot
+library(ggpmisc)
+library(gcplyr)
 ```
 
 #### Data Initialization
@@ -185,6 +180,14 @@ combo_trim_df %>%
   ylab("sequene count")+
   ggtitle("Read counts by sample and histone mark trimmed adapters")+
   scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+#### Tagging Questionable Libraries by Counts
+```{r ct tag}
+questionable_ct <- combo_trim_df %>%
+  dplyr::filter(`Total Sequences` < 2e6) %>%
+  dplyr::select(Sample, `Total Sequences`) %>% distinct()
+questionable_ct
 ```
 
 ```{r ct vis box}
@@ -504,6 +507,22 @@ geom_violin(bw = 5) +
     xlab("")
 ```
 
+#### Tagging Questionable Libraries by Frag Len
+```{r frag tag}
+peaks <- data.frame(sample = unique(annotated_combo_df$sample))
+peaks[,"peakNum"] <- NA
+for (s in peaks$sample) {
+  weights <- annotated_combo_df %>%
+    dplyr::filter(sample==s) %>%
+    dplyr::select(Col1, weight)
+  weights$smooth <- smooth_data(x = weights$Col1, y = weights$weight, sm_method = "moving-average", window_width_n = 15)
+  weights$peak <-find_peaks(weights$smooth, span = 31, ignore_threshold = 0.01)
+  peaks[peaks$sample == s,"peakNum"] <- sum(as.numeric(weights$peak[-1:-150]))
+}
+questionable_frag = peaks[(peaks$peakNum == 0),]
+questionable_frag
+```
+
 ### Read Analysisafter Filtering
 
 #### Data Initialization
@@ -519,14 +538,14 @@ read_and_label <- function(file) {
 }
 combined_df <- map_df(file_list_noM, read_and_label)
 
-annotated_combo_df <- combined_df %>% 
+annotated_noM_df <- combined_df %>% 
   mutate(sample = gsub("_frag_len_noM.txt","",File)) %>% 
   left_join(., sampleinfo, by = c("sample"="Library ID"))
 ```
 
 #### Read Visualization
 ```{r read noM vis 1, fig.width = 14}
-annotated_combo_df %>% 
+annotated_noM_df %>% 
   dplyr::filter(Histone_Mark=="H3K9me3") %>% 
   ggplot(., aes(x=Col1, y=Col2, color = sample))+
   geom_line(size=1)+
@@ -540,7 +559,7 @@ annotated_combo_df %>%
 ```
 
 ```{r read noM vis 2, fig.width = 14}
-annotated_combo_df %>% 
+annotated_noM_df %>% 
   dplyr::filter(Histone_Mark=="H3K9me3") %>%
   ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
 geom_violin(bw = 5) +
@@ -553,7 +572,7 @@ geom_violin(bw = 5) +
 ```
 
 ```{r read noM vis 3, fig.width = 14}
-annotated_combo_df %>% 
+annotated_noM_df %>% 
   dplyr::filter(Histone_Mark=="H3K27ac") %>% 
   ggplot(., aes(x=Col1, y=Col2, color = sample))+
   geom_line(size=1)+
@@ -567,7 +586,7 @@ annotated_combo_df %>%
 ```
 
 ```{r read noM vis 4, fig.width = 14}
-annotated_combo_df %>% 
+annotated_noM_df %>% 
   dplyr::filter(Histone_Mark=="H3K27ac") %>%
   ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
 geom_violin(bw = 5) +
@@ -580,7 +599,7 @@ geom_violin(bw = 5) +
 ```
 
 ```{r read noM vis 5, fig.width = 14}
-annotated_combo_df %>% 
+annotated_noM_df %>% 
   dplyr::filter(Histone_Mark=="H3K27me3") %>% 
   ggplot(., aes(x=Col1, y=Col2, color = sample))+
   geom_line(size=1)+
@@ -594,7 +613,7 @@ annotated_combo_df %>%
 ```
 
 ```{r read noM vis 6, fig.width = 14}
-annotated_combo_df %>% 
+annotated_noM_df %>% 
   dplyr::filter(Histone_Mark=="H3K27me3") %>%
   ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
 geom_violin(bw = 5) +
@@ -607,7 +626,7 @@ geom_violin(bw = 5) +
 ```
 
 ```{r read noM vis 7, fig.width = 14}
-annotated_combo_df %>% 
+annotated_noM_df %>% 
   dplyr::filter(Histone_Mark=="H3K36me3") %>% 
   ggplot(., aes(x=Col1, y=Col2, color = sample))+
   geom_line(size=1)+
@@ -621,7 +640,7 @@ annotated_combo_df %>%
 ```
 
 ```{r read noM vis 8, fig.width = 14}
-annotated_combo_df %>% 
+annotated_noM_df %>% 
   dplyr::filter(Histone_Mark=="H3K36me3") %>%
   ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
 geom_violin(bw = 5) +
@@ -631,6 +650,22 @@ geom_violin(bw = 5) +
   ggtitle("Fragment lengths for H3K36me3")+
     ylab("Fragment Length") +
     xlab("")
+```
+
+#### Tagging Questionable Libraries by Frag Len
+```{r frag tag after filter}
+peaks <- data.frame(sample = unique(annotated_noM_df$sample))
+peaks[,"peakNum"] <- NA
+for (s in peaks$sample) {
+  weights <- annotated_combo_df %>%
+    dplyr::filter(sample==s) %>%
+    dplyr::select(Col1, weight)
+  weights$smooth <- smooth_data(x = weights$Col1, y = weights$weight, sm_method = "moving-average", window_width_n = 15)
+  weights$peak <-find_peaks(weights$smooth, span = 31, ignore_threshold = 0.01)
+  peaks[peaks$sample == s,"peakNum"] <- sum(as.numeric(weights$peak[-1:-150]))
+}
+questionable_frag_filter = peaks[(peaks$peakNum == 0),]
+questionable_frag_filter
 ```
 
 ### Peak Calling
