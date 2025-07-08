@@ -405,7 +405,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2025-07-06
+<strong>Last updated:</strong> 2025-07-08
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -536,15 +536,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreefb62b9f3bc6cef81fe8741d83865524f91b72ceftargetblankfb62b9fa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree5920a6618e9d87fde3120c64375656b77f3b6cbetargetblank5920a66a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/infurnoheat/WardLab/tree/fb62b9f3bc6cef81fe8741d83865524f91b72cef" target="_blank">fb62b9f</a>
+<a href="https://github.com/infurnoheat/WardLab/tree/5920a6618e9d87fde3120c64375656b77f3b6cbe" target="_blank">5920a66</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreefb62b9f3bc6cef81fe8741d83865524f91b72ceftargetblankfb62b9fa"
+id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree5920a6618e9d87fde3120c64375656b77f3b6cbetargetblank5920a66a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -554,7 +554,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/infurnoheat/WardLab/tree/fb62b9f3bc6cef81fe8741d83865524f91b72cef" target="_blank">fb62b9f</a>.
+<a href="https://github.com/infurnoheat/WardLab/tree/5920a6618e9d87fde3120c64375656b77f3b6cbe" target="_blank">5920a66</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -622,6 +622,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/5920a6618e9d87fde3120c64375656b77f3b6cbe/analysis/multiQC_cut_tag.Rmd" target="_blank">5920a66</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-08
+</td>
+<td>
+wflow_publish("analysis/multiQC_cut_tag.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/infurnoheat/WardLab/e3aa827bca5da75fd76f8ee1de226b3795814b1b/docs/multiQC_cut_tag.html" target="_blank">e3aa827</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-06
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -852,12 +886,6 @@ wflow_publish("analysis/multiQC_cut_tag.Rmd")
 </div>
 <div id="cut-and-tag-qc" class="section level2">
 <h2>Cut And Tag QC</h2>
-<div id="bioconductor" class="section level4">
-<h4>Bioconductor</h4>
-<pre class="r"><code>if (!require(&quot;BiocManager&quot;, quietly = TRUE))
-    install.packages(&quot;BiocManager&quot;)
-BiocManager::install()</code></pre>
-</div>
 <div id="loading-packages" class="section level4">
 <h4>Loading Packages</h4>
 <pre class="r"><code>library(tidyverse)
@@ -876,7 +904,9 @@ library(GenomicRanges)
 library(chromVAR) ## For FRiP analysis and differential analysis
 library(DESeq2) ## For differential analysis section
 library(ggpubr) ## For customizing figures
-library(corrplot) ## For correlation plot</code></pre>
+library(corrplot) ## For correlation plot
+library(ggpmisc)
+library(gcplyr)</code></pre>
 </div>
 <div id="data-initialization" class="section level4">
 <h4>Data Initialization</h4>
@@ -1261,6 +1291,20 @@ infurnoheat
 </table>
 </div>
 </div>
+<div id="tagging-questionable-libraries-by-counts"
+class="section level4">
+<h4>Tagging Questionable Libraries by Counts</h4>
+<pre class="r"><code>questionable_ct &lt;- combo_trim_df %&gt;%
+  dplyr::filter(`Total Sequences` &lt; 2e6) %&gt;%
+  dplyr::select(Sample, `Total Sequences`) %&gt;% distinct()
+questionable_ct</code></pre>
+<pre><code># A tibble: 4 × 2
+  Sample                 `Total Sequences`
+  &lt;chr&gt;                              &lt;dbl&gt;
+1 MCW_CT_ROA_175_R1_trim            734837
+2 MCW_CT_ROA_175_R2_trim            734837
+3 MCW_CT_ROA_214_R1_trim           1569281
+4 MCW_CT_ROA_214_R2_trim           1569281</code></pre>
 <pre class="r"><code>combo_trim_df %&gt;% 
   dplyr::filter(read==&quot;R1&quot;) %&gt;% 
    ggplot(., aes(x = Histone_Mark, y= `Total Sequences`))+
@@ -1317,6 +1361,7 @@ infurnoheat
 </tr>
 </tbody>
 </table>
+</div>
 </div>
 </div>
 </div>
@@ -2795,6 +2840,56 @@ infurnoheat
 </div>
 </div>
 </div>
+<div id="tagging-questionable-libraries-by-frag-len"
+class="section level4">
+<h4>Tagging Questionable Libraries by Frag Len</h4>
+<pre class="r"><code>peaks &lt;- data.frame(sample = unique(annotated_combo_df$sample))
+peaks[,&quot;peakNum&quot;] &lt;- NA
+for (s in peaks$sample) {
+  weights &lt;- annotated_combo_df %&gt;%
+    dplyr::filter(sample==s) %&gt;%
+    dplyr::select(Col1, weight)
+  weights$smooth &lt;- smooth_data(x = weights$Col1, y = weights$weight, sm_method = &quot;moving-average&quot;, window_width_n = 15)
+  weights$peak &lt;-find_peaks(weights$smooth, span = 31, ignore_threshold = 0.01)
+  peaks[peaks$sample == s,&quot;peakNum&quot;] &lt;- sum(as.numeric(weights$peak[-1:-150]))
+}
+questionable_frag = peaks[(peaks$peakNum == 0),]
+questionable_frag</code></pre>
+<pre><code>            sample peakNum
+19  MCW_CT_ROA_116       0
+28  MCW_CT_ROA_126       0
+47  MCW_CT_ROA_151       0
+59  MCW_CT_ROA_167       0
+60  MCW_CT_ROA_169       0
+62  MCW_CT_ROA_172       0
+65  MCW_CT_ROA_175       0
+67  MCW_CT_ROA_178       0
+69  MCW_CT_ROA_181       0
+70  MCW_CT_ROA_183       0
+75  MCW_CT_ROA_190       0
+78  MCW_CT_ROA_194       0
+79  MCW_CT_ROA_195       0
+80  MCW_CT_ROA_196       0
+81  MCW_CT_ROA_198       0
+83  MCW_CT_ROA_201       0
+84  MCW_CT_ROA_202       0
+90  MCW_CT_ROA_209       0
+92  MCW_CT_ROA_211       0
+93  MCW_CT_ROA_213       0
+94  MCW_CT_ROA_214       0
+95  MCW_CT_ROA_215       0
+96  MCW_CT_ROA_217       0
+97  MCW_CT_ROA_218       0
+100 MCW_CT_ROA_221       0
+101 MCW_CT_ROA_222       0
+102 MCW_CT_ROA_223       0
+105 MCW_CT_ROA_226       0
+117 MCW_CT_ROA_238       0
+120 MCW_CT_ROA_241       0
+122 MCW_CT_ROA_244       0
+123 MCW_CT_ROA_245       0
+135  MCW_CT_ROA_80       0</code></pre>
+</div>
 </div>
 <div id="read-analysisafter-filtering" class="section level3">
 <h3>Read Analysisafter Filtering</h3>
@@ -2811,13 +2906,13 @@ read_and_label &lt;- function(file) {
 }
 combined_df &lt;- map_df(file_list_noM, read_and_label)
 
-annotated_combo_df &lt;- combined_df %&gt;% 
+annotated_noM_df &lt;- combined_df %&gt;% 
   mutate(sample = gsub(&quot;_frag_len_noM.txt&quot;,&quot;&quot;,File)) %&gt;% 
   left_join(., sampleinfo, by = c(&quot;sample&quot;=&quot;Library ID&quot;))</code></pre>
 </div>
 <div id="read-visualization-2" class="section level4">
 <h4>Read Visualization</h4>
-<pre class="r"><code>annotated_combo_df %&gt;% 
+<pre class="r"><code>annotated_noM_df %&gt;% 
   dplyr::filter(Histone_Mark==&quot;H3K9me3&quot;) %&gt;% 
   ggplot(., aes(x=Col1, y=Col2, color = sample))+
   geom_line(size=1)+
@@ -2829,7 +2924,44 @@ annotated_combo_df &lt;- combined_df %&gt;%
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/read%20noM%20vis%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>annotated_combo_df %&gt;% 
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-read-noM-vis-1-1">
+Past versions of "read noM vis 1-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-read-noM-vis-1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/e3aa827bca5da75fd76f8ee1de226b3795814b1b/docs/figure/multiQC_cut_tag.Rmd/read noM vis 1-1.png" target="_blank">e3aa827</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>annotated_noM_df %&gt;% 
   dplyr::filter(Histone_Mark==&quot;H3K9me3&quot;) %&gt;%
   ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
 geom_violin(bw = 5) +
@@ -2840,7 +2972,44 @@ geom_violin(bw = 5) +
     ylab(&quot;Fragment Length&quot;) +
     xlab(&quot;&quot;)</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/read%20noM%20vis%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>annotated_combo_df %&gt;% 
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-read-noM-vis-2-1">
+Past versions of "read noM vis 2-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-read-noM-vis-2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/e3aa827bca5da75fd76f8ee1de226b3795814b1b/docs/figure/multiQC_cut_tag.Rmd/read noM vis 2-1.png" target="_blank">e3aa827</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>annotated_noM_df %&gt;% 
   dplyr::filter(Histone_Mark==&quot;H3K27ac&quot;) %&gt;% 
   ggplot(., aes(x=Col1, y=Col2, color = sample))+
   geom_line(size=1)+
@@ -2852,7 +3021,44 @@ geom_violin(bw = 5) +
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/read%20noM%20vis%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>annotated_combo_df %&gt;% 
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-read-noM-vis-3-1">
+Past versions of "read noM vis 3-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-read-noM-vis-3-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/e3aa827bca5da75fd76f8ee1de226b3795814b1b/docs/figure/multiQC_cut_tag.Rmd/read noM vis 3-1.png" target="_blank">e3aa827</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>annotated_noM_df %&gt;% 
   dplyr::filter(Histone_Mark==&quot;H3K27ac&quot;) %&gt;%
   ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
 geom_violin(bw = 5) +
@@ -2863,7 +3069,44 @@ geom_violin(bw = 5) +
     ylab(&quot;Fragment Length&quot;) +
     xlab(&quot;&quot;)</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/read%20noM%20vis%204-1.png" width="1344" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>annotated_combo_df %&gt;% 
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-read-noM-vis-4-1">
+Past versions of "read noM vis 4-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-read-noM-vis-4-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/e3aa827bca5da75fd76f8ee1de226b3795814b1b/docs/figure/multiQC_cut_tag.Rmd/read noM vis 4-1.png" target="_blank">e3aa827</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>annotated_noM_df %&gt;% 
   dplyr::filter(Histone_Mark==&quot;H3K27me3&quot;) %&gt;% 
   ggplot(., aes(x=Col1, y=Col2, color = sample))+
   geom_line(size=1)+
@@ -2875,7 +3118,44 @@ geom_violin(bw = 5) +
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/read%20noM%20vis%205-1.png" width="1344" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>annotated_combo_df %&gt;% 
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-read-noM-vis-5-1">
+Past versions of "read noM vis 5-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-read-noM-vis-5-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/e3aa827bca5da75fd76f8ee1de226b3795814b1b/docs/figure/multiQC_cut_tag.Rmd/read noM vis 5-1.png" target="_blank">e3aa827</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>annotated_noM_df %&gt;% 
   dplyr::filter(Histone_Mark==&quot;H3K27me3&quot;) %&gt;%
   ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
 geom_violin(bw = 5) +
@@ -2886,7 +3166,44 @@ geom_violin(bw = 5) +
     ylab(&quot;Fragment Length&quot;) +
     xlab(&quot;&quot;)</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/read%20noM%20vis%206-1.png" width="1344" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>annotated_combo_df %&gt;% 
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-read-noM-vis-6-1">
+Past versions of "read noM vis 6-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-read-noM-vis-6-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/e3aa827bca5da75fd76f8ee1de226b3795814b1b/docs/figure/multiQC_cut_tag.Rmd/read noM vis 6-1.png" target="_blank">e3aa827</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>annotated_noM_df %&gt;% 
   dplyr::filter(Histone_Mark==&quot;H3K36me3&quot;) %&gt;% 
   ggplot(., aes(x=Col1, y=Col2, color = sample))+
   geom_line(size=1)+
@@ -2898,7 +3215,44 @@ geom_violin(bw = 5) +
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/read%20noM%20vis%207-1.png" width="1344" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>annotated_combo_df %&gt;% 
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-read-noM-vis-7-1">
+Past versions of "read noM vis 7-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-read-noM-vis-7-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/e3aa827bca5da75fd76f8ee1de226b3795814b1b/docs/figure/multiQC_cut_tag.Rmd/read noM vis 7-1.png" target="_blank">e3aa827</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>annotated_noM_df %&gt;% 
   dplyr::filter(Histone_Mark==&quot;H3K36me3&quot;) %&gt;%
   ggplot(., aes(x=sample, y=Col1, weight = weight,fill = Histone_Mark))+
 geom_violin(bw = 5) +
@@ -2909,6 +3263,93 @@ geom_violin(bw = 5) +
     ylab(&quot;Fragment Length&quot;) +
     xlab(&quot;&quot;)</code></pre>
 <p><img src="figure/multiQC_cut_tag.Rmd/read%20noM%20vis%208-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-read-noM-vis-8-1">
+Past versions of "read noM vis 8-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-read-noM-vis-8-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/e3aa827bca5da75fd76f8ee1de226b3795814b1b/docs/figure/multiQC_cut_tag.Rmd/read noM vis 8-1.png" target="_blank">e3aa827</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="tagging-questionable-libraries-by-frag-len-1"
+class="section level4">
+<h4>Tagging Questionable Libraries by Frag Len</h4>
+<pre class="r"><code>peaks &lt;- data.frame(sample = unique(annotated_noM_df$sample))
+peaks[,&quot;peakNum&quot;] &lt;- NA
+for (s in peaks$sample) {
+  weights &lt;- annotated_combo_df %&gt;%
+    dplyr::filter(sample==s) %&gt;%
+    dplyr::select(Col1, weight)
+  weights$smooth &lt;- smooth_data(x = weights$Col1, y = weights$weight, sm_method = &quot;moving-average&quot;, window_width_n = 15)
+  weights$peak &lt;-find_peaks(weights$smooth, span = 31, ignore_threshold = 0.01)
+  peaks[peaks$sample == s,&quot;peakNum&quot;] &lt;- sum(as.numeric(weights$peak[-1:-150]))
+}
+questionable_frag_filter = peaks[(peaks$peakNum == 0),]
+questionable_frag_filter</code></pre>
+<pre><code>            sample peakNum
+19  MCW_CT_ROA_116       0
+28  MCW_CT_ROA_126       0
+47  MCW_CT_ROA_151       0
+59  MCW_CT_ROA_167       0
+60  MCW_CT_ROA_169       0
+62  MCW_CT_ROA_172       0
+65  MCW_CT_ROA_175       0
+67  MCW_CT_ROA_178       0
+69  MCW_CT_ROA_181       0
+70  MCW_CT_ROA_183       0
+75  MCW_CT_ROA_190       0
+78  MCW_CT_ROA_194       0
+79  MCW_CT_ROA_195       0
+80  MCW_CT_ROA_196       0
+81  MCW_CT_ROA_198       0
+83  MCW_CT_ROA_201       0
+84  MCW_CT_ROA_202       0
+90  MCW_CT_ROA_209       0
+92  MCW_CT_ROA_211       0
+93  MCW_CT_ROA_213       0
+94  MCW_CT_ROA_214       0
+95  MCW_CT_ROA_215       0
+96  MCW_CT_ROA_217       0
+97  MCW_CT_ROA_218       0
+100 MCW_CT_ROA_221       0
+101 MCW_CT_ROA_222       0
+102 MCW_CT_ROA_223       0
+105 MCW_CT_ROA_226       0
+117 MCW_CT_ROA_238       0
+120 MCW_CT_ROA_241       0
+122 MCW_CT_ROA_244       0
+123 MCW_CT_ROA_245       0
+135  MCW_CT_ROA_80       0</code></pre>
 </div>
 </div>
 <div id="peak-calling" class="section level3">
@@ -2944,90 +3385,96 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] corrplot_0.95               ggpubr_0.6.1               
- [3] DESeq2_1.48.1               SummarizedExperiment_1.38.1
- [5] Biobase_2.68.0              MatrixGenerics_1.20.0      
- [7] matrixStats_1.5.0           chromVAR_1.30.1            
- [9] GenomicRanges_1.60.0        GenomeInfoDb_1.44.0        
-[11] IRanges_2.42.0              S4Vectors_0.46.0           
-[13] BiocGenerics_0.54.0         generics_0.1.4             
-[15] genomation_1.40.1           kableExtra_1.4.0           
-[17] DT_0.33                     viridis_0.6.5              
-[19] viridisLite_0.4.2           data.table_1.17.6          
-[21] ComplexHeatmap_2.24.1       edgeR_4.6.2                
-[23] limma_3.64.1                lubridate_1.9.4            
-[25] forcats_1.0.0               stringr_1.5.1              
-[27] dplyr_1.1.4                 purrr_1.0.4                
-[29] readr_2.1.5                 tidyr_1.3.1                
-[31] tibble_3.3.0                ggplot2_3.5.2              
-[33] tidyverse_2.0.0             BiocManager_1.30.26        
-[35] workflowr_1.7.1            
+ [1] gcplyr_1.11.0               ggpmisc_0.6.1              
+ [3] ggpp_0.5.9                  corrplot_0.95              
+ [5] ggpubr_0.6.1                DESeq2_1.48.1              
+ [7] SummarizedExperiment_1.38.1 Biobase_2.68.0             
+ [9] MatrixGenerics_1.20.0       matrixStats_1.5.0          
+[11] chromVAR_1.30.1             GenomicRanges_1.60.0       
+[13] GenomeInfoDb_1.44.0         IRanges_2.42.0             
+[15] S4Vectors_0.46.0            BiocGenerics_0.54.0        
+[17] generics_0.1.4              genomation_1.40.1          
+[19] kableExtra_1.4.0            DT_0.33                    
+[21] viridis_0.6.5               viridisLite_0.4.2          
+[23] data.table_1.17.6           ComplexHeatmap_2.24.1      
+[25] edgeR_4.6.2                 limma_3.64.1               
+[27] lubridate_1.9.4             forcats_1.0.0              
+[29] stringr_1.5.1               dplyr_1.1.4                
+[31] purrr_1.0.4                 readr_2.1.5                
+[33] tidyr_1.3.1                 tibble_3.3.0               
+[35] ggplot2_3.5.2               tidyverse_2.0.0            
+[37] workflowr_1.7.1            
 
 loaded via a namespace (and not attached):
-  [1] later_1.4.2                 BiocIO_1.18.0              
-  [3] bitops_1.0-9                XML_3.99-0.18              
-  [5] DirichletMultinomial_1.50.0 lifecycle_1.0.4            
-  [7] pwalign_1.4.0               rstatix_0.7.2              
-  [9] doParallel_1.0.17           rprojroot_2.0.4            
- [11] vroom_1.6.5                 processx_3.8.6             
- [13] lattice_0.22-7              crosstalk_1.2.1            
- [15] backports_1.5.0             magrittr_2.0.3             
- [17] plotly_4.11.0               sass_0.4.10                
- [19] rmarkdown_2.29              jquerylib_0.1.4            
- [21] yaml_2.3.10                 plotrix_3.8-4              
- [23] httpuv_1.6.16               DBI_1.2.3                  
- [25] RColorBrewer_1.1-3          abind_1.4-8                
- [27] RCurl_1.98-1.17             git2r_0.36.2               
- [29] circlize_0.4.16             GenomeInfoDbData_1.2.14    
- [31] seqLogo_1.74.0              svglite_2.2.1              
- [33] codetools_0.2-20            DelayedArray_0.34.1        
- [35] xml2_1.3.8                  tidyselect_1.2.1           
- [37] shape_1.4.6.1               UCSC.utils_1.4.0           
- [39] farver_2.1.2                GenomicAlignments_1.44.0   
- [41] jsonlite_2.0.0              GetoptLong_1.0.5           
- [43] Formula_1.2-5               iterators_1.0.14           
- [45] systemfonts_1.2.3           foreach_1.5.2              
- [47] tools_4.5.1                 TFMPvalue_0.0.9            
- [49] Rcpp_1.0.14                 glue_1.8.0                 
- [51] gridExtra_2.3               SparseArray_1.8.0          
- [53] xfun_0.52                   withr_3.0.2                
- [55] fastmap_1.2.0               callr_3.7.6                
- [57] caTools_1.18.3              digest_0.6.37              
- [59] timechange_0.3.0            R6_2.6.1                   
- [61] mime_0.13                   seqPattern_1.40.0          
- [63] textshaping_1.0.1           colorspace_2.1-1           
- [65] gtools_3.9.5                RSQLite_2.4.1              
- [67] rtracklayer_1.68.0          httr_1.4.7                 
- [69] htmlwidgets_1.6.4           S4Arrays_1.8.1             
- [71] TFBSTools_1.46.0            whisker_0.4.1              
- [73] pkgconfig_2.0.3             gtable_0.3.6               
- [75] blob_1.2.4                  impute_1.82.0              
- [77] XVector_0.48.0              htmltools_0.5.8.1          
- [79] carData_3.0-5               clue_0.3-66                
- [81] scales_1.4.0                png_0.1-8                  
- [83] knitr_1.50                  rstudioapi_0.17.1          
- [85] tzdb_0.5.0                  reshape2_1.4.4             
- [87] rjson_0.2.23                curl_6.4.0                 
- [89] cachem_1.1.0                GlobalOptions_0.1.2        
- [91] KernSmooth_2.23-26          parallel_4.5.1             
- [93] miniUI_0.1.2                restfulr_0.0.16            
- [95] pillar_1.11.0               vctrs_0.6.5                
- [97] promises_1.3.3              car_3.1-3                  
- [99] xtable_1.8-4                cluster_2.1.8.1            
-[101] evaluate_1.0.4              cli_3.6.5                  
-[103] locfit_1.5-9.12             compiler_4.5.1             
-[105] Rsamtools_2.24.0            rlang_1.1.6                
-[107] crayon_1.5.3                ggsignif_0.6.4             
-[109] labeling_0.4.3              ps_1.9.1                   
-[111] getPass_0.2-4               plyr_1.8.9                 
-[113] fs_1.6.6                    stringi_1.8.7              
-[115] gridBase_0.4-7              BiocParallel_1.42.1        
-[117] Biostrings_2.76.0           lazyeval_0.2.2             
-[119] Matrix_1.7-3                BSgenome_1.76.0            
-[121] hms_1.1.3                   bit64_4.6.0-1              
-[123] statmod_1.5.0               shiny_1.11.1               
-[125] broom_1.0.8                 memoise_2.0.1              
-[127] bslib_0.9.0                 bit_4.6.0                  </code></pre>
+  [1] splines_4.5.1               later_1.4.2                
+  [3] BiocIO_1.18.0               bitops_1.0-9               
+  [5] XML_3.99-0.18               DirichletMultinomial_1.50.0
+  [7] lifecycle_1.0.4             pwalign_1.4.0              
+  [9] rstatix_0.7.2               doParallel_1.0.17          
+ [11] rprojroot_2.0.4             vroom_1.6.5                
+ [13] MASS_7.3-65                 processx_3.8.6             
+ [15] lattice_0.22-7              crosstalk_1.2.1            
+ [17] backports_1.5.0             magrittr_2.0.3             
+ [19] plotly_4.11.0               sass_0.4.10                
+ [21] rmarkdown_2.29              jquerylib_0.1.4            
+ [23] yaml_2.3.10                 plotrix_3.8-4              
+ [25] httpuv_1.6.16               DBI_1.2.3                  
+ [27] RColorBrewer_1.1-3          abind_1.4-8                
+ [29] RCurl_1.98-1.17             git2r_0.36.2               
+ [31] circlize_0.4.16             GenomeInfoDbData_1.2.14    
+ [33] seqLogo_1.74.0              MatrixModels_0.5-4         
+ [35] svglite_2.2.1               codetools_0.2-20           
+ [37] DelayedArray_0.34.1         xml2_1.3.8                 
+ [39] tidyselect_1.2.1            shape_1.4.6.1              
+ [41] UCSC.utils_1.4.0            farver_2.1.2               
+ [43] GenomicAlignments_1.44.0    jsonlite_2.0.0             
+ [45] GetoptLong_1.0.5            Formula_1.2-5              
+ [47] survival_3.8-3              iterators_1.0.14           
+ [49] systemfonts_1.2.3           foreach_1.5.2              
+ [51] splus2R_1.3-5               tools_4.5.1                
+ [53] TFMPvalue_0.0.9             Rcpp_1.0.14                
+ [55] glue_1.8.0                  gridExtra_2.3              
+ [57] SparseArray_1.8.0           xfun_0.52                  
+ [59] withr_3.0.2                 fastmap_1.2.0              
+ [61] SparseM_1.84-2              callr_3.7.6                
+ [63] caTools_1.18.3              digest_0.6.37              
+ [65] timechange_0.3.0            R6_2.6.1                   
+ [67] mime_0.13                   seqPattern_1.40.0          
+ [69] textshaping_1.0.1           colorspace_2.1-1           
+ [71] gtools_3.9.5                RSQLite_2.4.1              
+ [73] utf8_1.2.6                  rtracklayer_1.68.0         
+ [75] httr_1.4.7                  htmlwidgets_1.6.4          
+ [77] S4Arrays_1.8.1              TFBSTools_1.46.0           
+ [79] whisker_0.4.1               pkgconfig_2.0.3            
+ [81] gtable_0.3.6                blob_1.2.4                 
+ [83] impute_1.82.0               XVector_0.48.0             
+ [85] htmltools_0.5.8.1           carData_3.0-5              
+ [87] clue_0.3-66                 scales_1.4.0               
+ [89] png_0.1-8                   knitr_1.50                 
+ [91] rstudioapi_0.17.1           tzdb_0.5.0                 
+ [93] reshape2_1.4.4              rjson_0.2.23               
+ [95] curl_6.4.0                  cachem_1.1.0               
+ [97] GlobalOptions_0.1.2         KernSmooth_2.23-26         
+ [99] parallel_4.5.1              miniUI_0.1.2               
+[101] restfulr_0.0.16             pillar_1.11.0              
+[103] vctrs_0.6.5                 promises_1.3.3             
+[105] car_3.1-3                   xtable_1.8-4               
+[107] cluster_2.1.8.1             evaluate_1.0.4             
+[109] cli_3.6.5                   locfit_1.5-9.12            
+[111] compiler_4.5.1              Rsamtools_2.24.0           
+[113] rlang_1.1.6                 crayon_1.5.3               
+[115] ggsignif_0.6.4              labeling_0.4.3             
+[117] ps_1.9.1                    getPass_0.2-4              
+[119] plyr_1.8.9                  fs_1.6.6                   
+[121] stringi_1.8.7               gridBase_0.4-7             
+[123] BiocParallel_1.42.1         Biostrings_2.76.0          
+[125] lazyeval_0.2.2              quantreg_6.1               
+[127] Matrix_1.7-3                BSgenome_1.76.0            
+[129] hms_1.1.3                   bit64_4.6.0-1              
+[131] statmod_1.5.0               shiny_1.11.1               
+[133] broom_1.0.8                 memoise_2.0.1              
+[135] bslib_0.9.0                 bit_4.6.0                  
+[137] polynom_1.4-1              </code></pre>
 </div>
 </div>
 </div>
