@@ -536,15 +536,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree5920a6618e9d87fde3120c64375656b77f3b6cbetargetblank5920a66a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreead15724bb6352c1bd272a360a0e837c1bff735ebtargetblankad15724a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/infurnoheat/WardLab/tree/5920a6618e9d87fde3120c64375656b77f3b6cbe" target="_blank">5920a66</a>
+<a href="https://github.com/infurnoheat/WardLab/tree/ad15724bb6352c1bd272a360a0e837c1bff735eb" target="_blank">ad15724</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree5920a6618e9d87fde3120c64375656b77f3b6cbetargetblank5920a66a"
+id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreead15724bb6352c1bd272a360a0e837c1bff735ebtargetblankad15724a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -554,7 +554,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/infurnoheat/WardLab/tree/5920a6618e9d87fde3120c64375656b77f3b6cbe" target="_blank">5920a66</a>.
+<a href="https://github.com/infurnoheat/WardLab/tree/ad15724bb6352c1bd272a360a0e837c1bff735eb" target="_blank">ad15724</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -622,6 +622,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/ad15724bb6352c1bd272a360a0e837c1bff735eb/analysis/multiQC_cut_tag.Rmd" target="_blank">ad15724</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-08
+</td>
+<td>
+wflow_publish("analysis/multiQC_cut_tag.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/infurnoheat/WardLab/11520143ed4a91078def7612f90602750afa60be/docs/multiQC_cut_tag.html" target="_blank">1152014</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-08
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -2854,41 +2888,42 @@ for (s in peaks$sample) {
   peaks[peaks$sample == s,&quot;peakNum&quot;] &lt;- sum(as.numeric(weights$peak[-1:-150]))
 }
 questionable_frag = peaks[(peaks$peakNum == 0),]
-questionable_frag</code></pre>
-<pre><code>            sample peakNum
-19  MCW_CT_ROA_116       0
-28  MCW_CT_ROA_126       0
-47  MCW_CT_ROA_151       0
-59  MCW_CT_ROA_167       0
-60  MCW_CT_ROA_169       0
-62  MCW_CT_ROA_172       0
-65  MCW_CT_ROA_175       0
-67  MCW_CT_ROA_178       0
-69  MCW_CT_ROA_181       0
-70  MCW_CT_ROA_183       0
-75  MCW_CT_ROA_190       0
-78  MCW_CT_ROA_194       0
-79  MCW_CT_ROA_195       0
-80  MCW_CT_ROA_196       0
-81  MCW_CT_ROA_198       0
-83  MCW_CT_ROA_201       0
-84  MCW_CT_ROA_202       0
-90  MCW_CT_ROA_209       0
-92  MCW_CT_ROA_211       0
-93  MCW_CT_ROA_213       0
-94  MCW_CT_ROA_214       0
-95  MCW_CT_ROA_215       0
-96  MCW_CT_ROA_217       0
-97  MCW_CT_ROA_218       0
-100 MCW_CT_ROA_221       0
-101 MCW_CT_ROA_222       0
-102 MCW_CT_ROA_223       0
-105 MCW_CT_ROA_226       0
-117 MCW_CT_ROA_238       0
-120 MCW_CT_ROA_241       0
-122 MCW_CT_ROA_244       0
-123 MCW_CT_ROA_245       0
-135  MCW_CT_ROA_80       0</code></pre>
+questionable_frag %&gt;%
+  left_join(., sampleinfo, by =c(&quot;sample&quot;=&quot;Library ID&quot;))</code></pre>
+<pre><code>           sample peakNum Histone_Mark Individual Treatment Timepoint
+1  MCW_CT_ROA_116       0      H3K27ac       Ind5       5FU       24R
+2  MCW_CT_ROA_126       0     H3K27me3       Ind1       DOX       24R
+3  MCW_CT_ROA_151       0     H3K27me3       Ind4       VEH       24T
+4  MCW_CT_ROA_167       0     H3K36me3       Ind1       5FU       24T
+5  MCW_CT_ROA_169       0     H3K36me3       Ind1       VEH       24T
+6  MCW_CT_ROA_172       0     H3K36me3       Ind1       VEH       24R
+7  MCW_CT_ROA_175       0     H3K36me3       Ind1       VEH      144R
+8  MCW_CT_ROA_178       0     H3K36me3       Ind2       VEH       24T
+9  MCW_CT_ROA_181       0     H3K36me3       Ind2       VEH       24R
+10 MCW_CT_ROA_183       0     H3K36me3       Ind2       DOX      144R
+11 MCW_CT_ROA_190       0     H3K36me3       Ind3       VEH       24R
+12 MCW_CT_ROA_194       0     H3K36me3       Ind4       5FU       24T
+13 MCW_CT_ROA_195       0     H3K36me3       Ind4       DOX       24T
+14 MCW_CT_ROA_196       0     H3K36me3       Ind4       VEH       24T
+15 MCW_CT_ROA_198       0     H3K36me3       Ind4       DOX       24R
+16 MCW_CT_ROA_201       0     H3K36me3       Ind4       DOX      144R
+17 MCW_CT_ROA_202       0     H3K36me3       Ind4       VEH      144R
+18 MCW_CT_ROA_209       0     H3K36me3       Ind5       5FU      144R
+19 MCW_CT_ROA_211       0     H3K36me3       Ind5       VEH      144R
+20 MCW_CT_ROA_213       0      H3K9me3       Ind1       DOX       24T
+21 MCW_CT_ROA_214       0      H3K9me3       Ind1       VEH       24T
+22 MCW_CT_ROA_215       0      H3K9me3       Ind1       5FU       24R
+23 MCW_CT_ROA_217       0      H3K9me3       Ind1       VEH       24R
+24 MCW_CT_ROA_218       0      H3K9me3       Ind1       5FU      144R
+25 MCW_CT_ROA_221       0      H3K9me3       Ind2       5FU       24T
+26 MCW_CT_ROA_222       0      H3K9me3       Ind2       DOX       24T
+27 MCW_CT_ROA_223       0      H3K9me3       Ind2       VEH       24T
+28 MCW_CT_ROA_226       0      H3K9me3       Ind2       VEH       24R
+29 MCW_CT_ROA_238       0      H3K9me3       Ind3       VEH      144R
+30 MCW_CT_ROA_241       0      H3K9me3       Ind4       VEH       24T
+31 MCW_CT_ROA_244       0      H3K9me3       Ind4       VEH       24R
+32 MCW_CT_ROA_245       0      H3K9me3       Ind4       5FU      144R
+33  MCW_CT_ROA_80       0      H3K27ac       Ind1       5FU       24R</code></pre>
 </div>
 </div>
 <div id="read-analysisafter-filtering" class="section level3">
@@ -2946,6 +2981,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/11520143ed4a91078def7612f90602750afa60be/docs/figure/multiQC_cut_tag.Rmd/read noM vis 1-1.png" target="_blank">1152014</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-08
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/infurnoheat/WardLab/blob/e3aa827bca5da75fd76f8ee1de226b3795814b1b/docs/figure/multiQC_cut_tag.Rmd/read noM vis 1-1.png" target="_blank">e3aa827</a>
@@ -3045,6 +3091,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/infurnoheat/WardLab/blob/11520143ed4a91078def7612f90602750afa60be/docs/figure/multiQC_cut_tag.Rmd/read noM vis 3-1.png" target="_blank">1152014</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-08
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/infurnoheat/WardLab/blob/e3aa827bca5da75fd76f8ee1de226b3795814b1b/docs/figure/multiQC_cut_tag.Rmd/read noM vis 3-1.png" target="_blank">e3aa827</a>
 </td>
 <td>
@@ -3140,6 +3197,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/11520143ed4a91078def7612f90602750afa60be/docs/figure/multiQC_cut_tag.Rmd/read noM vis 5-1.png" target="_blank">1152014</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-08
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/infurnoheat/WardLab/blob/e3aa827bca5da75fd76f8ee1de226b3795814b1b/docs/figure/multiQC_cut_tag.Rmd/read noM vis 5-1.png" target="_blank">e3aa827</a>
@@ -3239,6 +3307,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/infurnoheat/WardLab/blob/11520143ed4a91078def7612f90602750afa60be/docs/figure/multiQC_cut_tag.Rmd/read noM vis 7-1.png" target="_blank">1152014</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-08
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/infurnoheat/WardLab/blob/e3aa827bca5da75fd76f8ee1de226b3795814b1b/docs/figure/multiQC_cut_tag.Rmd/read noM vis 7-1.png" target="_blank">e3aa827</a>
 </td>
 <td>
@@ -3315,41 +3394,42 @@ for (s in peaks$sample) {
   peaks[peaks$sample == s,&quot;peakNum&quot;] &lt;- sum(as.numeric(weights$peak[-1:-150]))
 }
 questionable_frag_filter = peaks[(peaks$peakNum == 0),]
-questionable_frag_filter</code></pre>
-<pre><code>            sample peakNum
-19  MCW_CT_ROA_116       0
-28  MCW_CT_ROA_126       0
-47  MCW_CT_ROA_151       0
-59  MCW_CT_ROA_167       0
-60  MCW_CT_ROA_169       0
-62  MCW_CT_ROA_172       0
-65  MCW_CT_ROA_175       0
-67  MCW_CT_ROA_178       0
-69  MCW_CT_ROA_181       0
-70  MCW_CT_ROA_183       0
-75  MCW_CT_ROA_190       0
-78  MCW_CT_ROA_194       0
-79  MCW_CT_ROA_195       0
-80  MCW_CT_ROA_196       0
-81  MCW_CT_ROA_198       0
-83  MCW_CT_ROA_201       0
-84  MCW_CT_ROA_202       0
-90  MCW_CT_ROA_209       0
-92  MCW_CT_ROA_211       0
-93  MCW_CT_ROA_213       0
-94  MCW_CT_ROA_214       0
-95  MCW_CT_ROA_215       0
-96  MCW_CT_ROA_217       0
-97  MCW_CT_ROA_218       0
-100 MCW_CT_ROA_221       0
-101 MCW_CT_ROA_222       0
-102 MCW_CT_ROA_223       0
-105 MCW_CT_ROA_226       0
-117 MCW_CT_ROA_238       0
-120 MCW_CT_ROA_241       0
-122 MCW_CT_ROA_244       0
-123 MCW_CT_ROA_245       0
-135  MCW_CT_ROA_80       0</code></pre>
+questionable_frag_filter %&gt;%
+  left_join(., sampleinfo, by =c(&quot;sample&quot;=&quot;Library ID&quot;))</code></pre>
+<pre><code>           sample peakNum Histone_Mark Individual Treatment Timepoint
+1  MCW_CT_ROA_116       0      H3K27ac       Ind5       5FU       24R
+2  MCW_CT_ROA_126       0     H3K27me3       Ind1       DOX       24R
+3  MCW_CT_ROA_151       0     H3K27me3       Ind4       VEH       24T
+4  MCW_CT_ROA_167       0     H3K36me3       Ind1       5FU       24T
+5  MCW_CT_ROA_169       0     H3K36me3       Ind1       VEH       24T
+6  MCW_CT_ROA_172       0     H3K36me3       Ind1       VEH       24R
+7  MCW_CT_ROA_175       0     H3K36me3       Ind1       VEH      144R
+8  MCW_CT_ROA_178       0     H3K36me3       Ind2       VEH       24T
+9  MCW_CT_ROA_181       0     H3K36me3       Ind2       VEH       24R
+10 MCW_CT_ROA_183       0     H3K36me3       Ind2       DOX      144R
+11 MCW_CT_ROA_190       0     H3K36me3       Ind3       VEH       24R
+12 MCW_CT_ROA_194       0     H3K36me3       Ind4       5FU       24T
+13 MCW_CT_ROA_195       0     H3K36me3       Ind4       DOX       24T
+14 MCW_CT_ROA_196       0     H3K36me3       Ind4       VEH       24T
+15 MCW_CT_ROA_198       0     H3K36me3       Ind4       DOX       24R
+16 MCW_CT_ROA_201       0     H3K36me3       Ind4       DOX      144R
+17 MCW_CT_ROA_202       0     H3K36me3       Ind4       VEH      144R
+18 MCW_CT_ROA_209       0     H3K36me3       Ind5       5FU      144R
+19 MCW_CT_ROA_211       0     H3K36me3       Ind5       VEH      144R
+20 MCW_CT_ROA_213       0      H3K9me3       Ind1       DOX       24T
+21 MCW_CT_ROA_214       0      H3K9me3       Ind1       VEH       24T
+22 MCW_CT_ROA_215       0      H3K9me3       Ind1       5FU       24R
+23 MCW_CT_ROA_217       0      H3K9me3       Ind1       VEH       24R
+24 MCW_CT_ROA_218       0      H3K9me3       Ind1       5FU      144R
+25 MCW_CT_ROA_221       0      H3K9me3       Ind2       5FU       24T
+26 MCW_CT_ROA_222       0      H3K9me3       Ind2       DOX       24T
+27 MCW_CT_ROA_223       0      H3K9me3       Ind2       VEH       24T
+28 MCW_CT_ROA_226       0      H3K9me3       Ind2       VEH       24R
+29 MCW_CT_ROA_238       0      H3K9me3       Ind3       VEH      144R
+30 MCW_CT_ROA_241       0      H3K9me3       Ind4       VEH       24T
+31 MCW_CT_ROA_244       0      H3K9me3       Ind4       VEH       24R
+32 MCW_CT_ROA_245       0      H3K9me3       Ind4       5FU      144R
+33  MCW_CT_ROA_80       0      H3K27ac       Ind1       5FU       24R</code></pre>
 </div>
 </div>
 <div id="peak-calling" class="section level3">
