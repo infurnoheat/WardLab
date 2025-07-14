@@ -1,0 +1,221 @@
+---
+title: "Peak Analysis"
+author: "Steven Yu"
+date: "2025-07-14"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE,
+	dev = c("png","pdf")
+)
+```
+
+## Peak Anaylsis
+
+#### Loading Packages 
+```{r load packages}
+library(tidyverse)
+library(readr)
+library(edgeR)
+library(ComplexHeatmap)
+library(data.table)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(viridis)
+library(DT)
+library(kableExtra)
+library(genomation)
+library(GenomicRanges)
+library(chromVAR) ## For FRiP analysis and differential analysis
+library(DESeq2) ## For differential analysis section
+library(ggpubr) ## For customizing figures
+library(corrplot) ## For correlation plot
+library(ggpmisc)
+library(gcplyr)
+```
+
+#### Data Initialization
+```{r init}
+sampleinfo <- read_delim("data/sample_info.tsv", delim = "\t")
+multiqc_gene_stats_trim <- read_delim("data/multiqc_data_trim/multiqc_general_stats.txt",delim = "\t")
+multiqc_fastqc_trim <- read_delim("data/multiqc_data_trim/multiqc_fastqc.txt",delim = "\t")
+```
+
+#### Functions
+```{r functions}
+drug_pal <- c("#8B006D","#DF707E","#F1B72B", "#3386DD","#707031","#41B333")
+pca_plot <-
+  function(df,
+           col_var = NULL,
+           shape_var = NULL,
+           title = "") {
+    ggplot(df) + geom_point(aes_string(
+      x = "PC1",
+      y = "PC2",
+      color = col_var,
+      shape = shape_var
+    ),
+    size = 5) +
+      labs(title = title, x = "PC 1", y = "PC 2") +
+      scale_color_manual(values = c(
+        "#8B006D",
+        "#DF707E",
+        "#F1B72B",
+        "#3386DD",
+        "#707031",
+        "#41B333"
+      ))
+  }
+pca_var_plot <- function(pca) {
+  # x: class == prcomp
+  pca.var <- pca$sdev ^ 2
+  pca.prop <- pca.var / sum(pca.var)
+  var.plot <-
+    qplot(PC, prop, data = data.frame(PC = 1:length(pca.prop),
+                                      prop = pca.prop)) +
+    labs(title = 'Variance contributed by each PC',
+         x = 'PC', y = 'Proportion of variance')
+  plot(var.plot)
+}
+
+calc_pca <- function(x) {
+  # Performs principal components analysis with prcomp
+  # x: a sample-by-gene numeric matrix
+  prcomp(x, scale. = TRUE, retx = TRUE)
+}
+
+get_regr_pval <- function(mod) {
+  # Returns the p-value for the Fstatistic of a linear model
+  # mod: class lm
+  stopifnot(class(mod) == "lm")
+  fstat <- summary(mod)$fstatistic
+  pval <- 1 - pf(fstat[1], fstat[2], fstat[3])
+  return(pval)
+}
+
+plot_versus_pc <- function(df, pc_num, fac) {
+  # df: data.frame
+  # pc_num: numeric, specific PC for plotting
+  # fac: column name of df for plotting against PC
+  pc_char <- paste0("PC", pc_num)
+  # Calculate F-statistic p-value for linear model
+  pval <- get_regr_pval(lm(df[, pc_char] ~ df[, fac]))
+  if (is.numeric(df[, f])) {
+    ggplot(df, aes_string(x = f, y = pc_char)) + geom_point() +
+      geom_smooth(method = "lm") + labs(title = sprintf("p-val: %.2f", pval))
+  } else {
+    ggplot(df, aes_string(x = f, y = pc_char)) + geom_boxplot() +
+      labs(title = sprintf("p-val: %.2f", pval))
+  }
+}
+x_axis_labels = function(labels, every_nth = 1, ...) {
+  axis(side = 1,
+       at = seq_along(labels),
+       labels = F)
+  text(
+    x = (seq_along(labels))[seq_len(every_nth) == 1],
+    y = par("usr")[3] - 0.075 * (par("usr")[4] - par("usr")[3]),
+    labels = labels[seq_len(every_nth) == 1],
+    xpd = TRUE,
+    ...
+  )
+}
+```
+
+### Peak Calling MACS 2
+
+#### Data Initialization
+```{r peak data}
+peak_ct <- read_delim("data/peaks/peaks_cts.tsv", delim = "\t")
+H3K27ac_peaks <- read_delim("data/peaks/H3K27ac_macs2_nolambda_1e5_results.tsv",delim = "\t")
+H3K27ac_peaks_noModel <- read_delim("data/peaks/H3K27ac_macs2_noModel_nolambda_1e5_results.tsv",delim = "\t")
+H3K27me3_peaks <- read_delim("data/peaks/H3K27me3_macs2_broad_results.tsv",delim = "\t")
+H3K36me3_peaks <- read_delim("data/peaks/H3K36me3_macs2_broad_results.tsv",delim = "\t")
+H3K9me3_peaks <- read_delim("data/peaks/H3K9me3_macs2_nolambda_1e5_results.tsv",delim = "\t")
+H3K9me3_peaks_noModel <- read_delim("data/peaks/H3K9me3_macs2_noModel_nolambda_1e5_results.tsv",delim = "\t")
+
+all_peak <- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+all_peak_noModel <- rbind(H3K27ac_peaks_noModel, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks_noModel)
+
+all_peak <- all_peak %>%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %>%
+  left_join(.,sampleinfo, by=c("Sample"="Library ID")) %>%
+  left_join(.,peak_ct, by=c("Sample"="Sample"))
+all_peak <- all_peak[(!all_peak$Treatment %in% "5FU"),]
+all_peak_noModel <- all_peak %>%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %>%
+  left_join(.,sampleinfo, by=c("Sample"="Library ID")) %>%
+  left_join(.,peak_ct, by=c("Sample"="Sample"))
+all_peak_noModel <- all_peak_noModel[(!all_peak_noModel$Treatment %in% "5FU"),]
+```
+
+#### Peak Visualization
+```{r peak ct, fig.width=14}
+all_peak %>% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak number for all samples")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r peak ct box}
+all_peak %>% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptx}
+all_peak %>% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptime}
+all_peak %>% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+#### Renaming sample IDs
+```{r rename}
+all_peak <- all_peak %>%
+  mutate(Sample=paste0(Individual,"_",Treatment,"_",Timepoint,"_",Histone_Mark))
+
+all_peak_noModel <- all_peak_noModel %>%
+  mutate(Sample=paste0(Individual,"_",Treatment,"_",Timepoint,"_",Histone_Mark))
+```
+
+### H3K27ac Count Analysis
+
+### H3K27me3 Count Analysis
+
+### H3K36me3 Count Analysis
+
+### H3K9me3 Count Analysis
+
+### Peak Calling MACS 3
+
+
