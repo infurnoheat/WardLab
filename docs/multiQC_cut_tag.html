@@ -405,7 +405,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2025-07-08
+<strong>Last updated:</strong> 2025-07-14
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -536,15 +536,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreead15724bb6352c1bd272a360a0e837c1bff735ebtargetblankad15724a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreeb81a3e482fdb12b853586b6afaecb1789db248e3targetblankb81a3e4a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/infurnoheat/WardLab/tree/ad15724bb6352c1bd272a360a0e837c1bff735eb" target="_blank">ad15724</a>
+<a href="https://github.com/infurnoheat/WardLab/tree/b81a3e482fdb12b853586b6afaecb1789db248e3" target="_blank">b81a3e4</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreead15724bb6352c1bd272a360a0e837c1bff735ebtargetblankad15724a"
+id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreeb81a3e482fdb12b853586b6afaecb1789db248e3targetblankb81a3e4a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -554,7 +554,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/infurnoheat/WardLab/tree/ad15724bb6352c1bd272a360a0e837c1bff735eb" target="_blank">ad15724</a>.
+<a href="https://github.com/infurnoheat/WardLab/tree/b81a3e482fdb12b853586b6afaecb1789db248e3" target="_blank">b81a3e4</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -576,6 +576,7 @@ Untracked files:
     Untracked:  data/bam_final/
     Untracked:  data/bam_no_multi/
     Untracked:  data/multiqc_data_trim/
+    Untracked:  data/peaks/
     Untracked:  data/sample_info.tsv
     Untracked:  data/sams/
 
@@ -622,6 +623,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/b81a3e482fdb12b853586b6afaecb1789db248e3/analysis/multiQC_cut_tag.Rmd" target="_blank">b81a3e4</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-14
+</td>
+<td>
+wflow_publish("analysis/multiQC_cut_tag.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/infurnoheat/WardLab/d32e3b20e91d6dd8d1729a7a6eb7a7e240ac7942/docs/multiQC_cut_tag.html" target="_blank">d32e3b2</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-08
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -2285,7 +2320,8 @@ alignResult %&gt;% mutate(percent_alignment = paste0(percent_alignment, &quot;%&
 <pre class="r"><code>for_plots &lt;- alignResult %&gt;% 
   left_join(.,sampleinfo, by=c(&quot;ID&quot;=&quot;Library ID&quot;))%&gt;% 
   dplyr::select(ID:aligned_concordant_0,aligned_concordant_1, aligned_concordant_g1,percent_alignment, Histone_Mark, Individual, Treatment, Timepoint) %&gt;% 
-  distinct()</code></pre>
+  distinct()
+for_plots &lt;- for_plots[(!for_plots$Treatment %in% &quot;5FU&quot;),]</code></pre>
 </div>
 <div id="read-visualization" class="section level4">
 <h4>Read Visualization</h4>
@@ -2448,7 +2484,8 @@ combined_df &lt;- map_df(file_list_filter, read_and_label)
 
 annotated_combo_df &lt;- combined_df %&gt;% 
   mutate(sample = gsub(&quot;_frag_len_count.txt&quot;,&quot;&quot;,File)) %&gt;% 
-  left_join(., sampleinfo, by = c(&quot;sample&quot;=&quot;Library ID&quot;))</code></pre>
+  left_join(., sampleinfo, by = c(&quot;sample&quot;=&quot;Library ID&quot;))
+annotated_combo_df &lt;- annotated_combo_df[(!annotated_combo_df$Treatment %in% &quot;5FU&quot;),]</code></pre>
 </div>
 <div id="read-visualization-1" class="section level4">
 <h4>Read Visualization</h4>
@@ -2891,39 +2928,30 @@ questionable_frag = peaks[(peaks$peakNum == 0),]
 questionable_frag %&gt;%
   left_join(., sampleinfo, by =c(&quot;sample&quot;=&quot;Library ID&quot;))</code></pre>
 <pre><code>           sample peakNum Histone_Mark Individual Treatment Timepoint
-1  MCW_CT_ROA_116       0      H3K27ac       Ind5       5FU       24R
-2  MCW_CT_ROA_126       0     H3K27me3       Ind1       DOX       24R
-3  MCW_CT_ROA_151       0     H3K27me3       Ind4       VEH       24T
-4  MCW_CT_ROA_167       0     H3K36me3       Ind1       5FU       24T
-5  MCW_CT_ROA_169       0     H3K36me3       Ind1       VEH       24T
-6  MCW_CT_ROA_172       0     H3K36me3       Ind1       VEH       24R
-7  MCW_CT_ROA_175       0     H3K36me3       Ind1       VEH      144R
-8  MCW_CT_ROA_178       0     H3K36me3       Ind2       VEH       24T
-9  MCW_CT_ROA_181       0     H3K36me3       Ind2       VEH       24R
-10 MCW_CT_ROA_183       0     H3K36me3       Ind2       DOX      144R
-11 MCW_CT_ROA_190       0     H3K36me3       Ind3       VEH       24R
-12 MCW_CT_ROA_194       0     H3K36me3       Ind4       5FU       24T
-13 MCW_CT_ROA_195       0     H3K36me3       Ind4       DOX       24T
-14 MCW_CT_ROA_196       0     H3K36me3       Ind4       VEH       24T
-15 MCW_CT_ROA_198       0     H3K36me3       Ind4       DOX       24R
-16 MCW_CT_ROA_201       0     H3K36me3       Ind4       DOX      144R
-17 MCW_CT_ROA_202       0     H3K36me3       Ind4       VEH      144R
-18 MCW_CT_ROA_209       0     H3K36me3       Ind5       5FU      144R
-19 MCW_CT_ROA_211       0     H3K36me3       Ind5       VEH      144R
-20 MCW_CT_ROA_213       0      H3K9me3       Ind1       DOX       24T
-21 MCW_CT_ROA_214       0      H3K9me3       Ind1       VEH       24T
-22 MCW_CT_ROA_215       0      H3K9me3       Ind1       5FU       24R
-23 MCW_CT_ROA_217       0      H3K9me3       Ind1       VEH       24R
-24 MCW_CT_ROA_218       0      H3K9me3       Ind1       5FU      144R
-25 MCW_CT_ROA_221       0      H3K9me3       Ind2       5FU       24T
-26 MCW_CT_ROA_222       0      H3K9me3       Ind2       DOX       24T
-27 MCW_CT_ROA_223       0      H3K9me3       Ind2       VEH       24T
-28 MCW_CT_ROA_226       0      H3K9me3       Ind2       VEH       24R
-29 MCW_CT_ROA_238       0      H3K9me3       Ind3       VEH      144R
-30 MCW_CT_ROA_241       0      H3K9me3       Ind4       VEH       24T
-31 MCW_CT_ROA_244       0      H3K9me3       Ind4       VEH       24R
-32 MCW_CT_ROA_245       0      H3K9me3       Ind4       5FU      144R
-33  MCW_CT_ROA_80       0      H3K27ac       Ind1       5FU       24R</code></pre>
+1  MCW_CT_ROA_126       0     H3K27me3       Ind1       DOX       24R
+2  MCW_CT_ROA_151       0     H3K27me3       Ind4       VEH       24T
+3  MCW_CT_ROA_169       0     H3K36me3       Ind1       VEH       24T
+4  MCW_CT_ROA_172       0     H3K36me3       Ind1       VEH       24R
+5  MCW_CT_ROA_175       0     H3K36me3       Ind1       VEH      144R
+6  MCW_CT_ROA_178       0     H3K36me3       Ind2       VEH       24T
+7  MCW_CT_ROA_181       0     H3K36me3       Ind2       VEH       24R
+8  MCW_CT_ROA_183       0     H3K36me3       Ind2       DOX      144R
+9  MCW_CT_ROA_190       0     H3K36me3       Ind3       VEH       24R
+10 MCW_CT_ROA_195       0     H3K36me3       Ind4       DOX       24T
+11 MCW_CT_ROA_196       0     H3K36me3       Ind4       VEH       24T
+12 MCW_CT_ROA_198       0     H3K36me3       Ind4       DOX       24R
+13 MCW_CT_ROA_201       0     H3K36me3       Ind4       DOX      144R
+14 MCW_CT_ROA_202       0     H3K36me3       Ind4       VEH      144R
+15 MCW_CT_ROA_211       0     H3K36me3       Ind5       VEH      144R
+16 MCW_CT_ROA_213       0      H3K9me3       Ind1       DOX       24T
+17 MCW_CT_ROA_214       0      H3K9me3       Ind1       VEH       24T
+18 MCW_CT_ROA_217       0      H3K9me3       Ind1       VEH       24R
+19 MCW_CT_ROA_222       0      H3K9me3       Ind2       DOX       24T
+20 MCW_CT_ROA_223       0      H3K9me3       Ind2       VEH       24T
+21 MCW_CT_ROA_226       0      H3K9me3       Ind2       VEH       24R
+22 MCW_CT_ROA_238       0      H3K9me3       Ind3       VEH      144R
+23 MCW_CT_ROA_241       0      H3K9me3       Ind4       VEH       24T
+24 MCW_CT_ROA_244       0      H3K9me3       Ind4       VEH       24R</code></pre>
 </div>
 </div>
 <div id="read-analysisafter-filtering" class="section level3">
@@ -2943,7 +2971,8 @@ combined_df &lt;- map_df(file_list_noM, read_and_label)
 
 annotated_noM_df &lt;- combined_df %&gt;% 
   mutate(sample = gsub(&quot;_frag_len_noM.txt&quot;,&quot;&quot;,File)) %&gt;% 
-  left_join(., sampleinfo, by = c(&quot;sample&quot;=&quot;Library ID&quot;))</code></pre>
+  left_join(., sampleinfo, by = c(&quot;sample&quot;=&quot;Library ID&quot;))
+annotated_noM_df &lt;- annotated_noM_df[(!annotated_noM_df$Treatment %in% &quot;5FU&quot;),]</code></pre>
 </div>
 <div id="read-visualization-2" class="section level4">
 <h4>Read Visualization</h4>
@@ -3397,43 +3426,118 @@ questionable_frag_filter = peaks[(peaks$peakNum == 0),]
 questionable_frag_filter %&gt;%
   left_join(., sampleinfo, by =c(&quot;sample&quot;=&quot;Library ID&quot;))</code></pre>
 <pre><code>           sample peakNum Histone_Mark Individual Treatment Timepoint
-1  MCW_CT_ROA_116       0      H3K27ac       Ind5       5FU       24R
-2  MCW_CT_ROA_126       0     H3K27me3       Ind1       DOX       24R
-3  MCW_CT_ROA_151       0     H3K27me3       Ind4       VEH       24T
-4  MCW_CT_ROA_167       0     H3K36me3       Ind1       5FU       24T
-5  MCW_CT_ROA_169       0     H3K36me3       Ind1       VEH       24T
-6  MCW_CT_ROA_172       0     H3K36me3       Ind1       VEH       24R
-7  MCW_CT_ROA_175       0     H3K36me3       Ind1       VEH      144R
-8  MCW_CT_ROA_178       0     H3K36me3       Ind2       VEH       24T
-9  MCW_CT_ROA_181       0     H3K36me3       Ind2       VEH       24R
-10 MCW_CT_ROA_183       0     H3K36me3       Ind2       DOX      144R
-11 MCW_CT_ROA_190       0     H3K36me3       Ind3       VEH       24R
-12 MCW_CT_ROA_194       0     H3K36me3       Ind4       5FU       24T
-13 MCW_CT_ROA_195       0     H3K36me3       Ind4       DOX       24T
-14 MCW_CT_ROA_196       0     H3K36me3       Ind4       VEH       24T
-15 MCW_CT_ROA_198       0     H3K36me3       Ind4       DOX       24R
-16 MCW_CT_ROA_201       0     H3K36me3       Ind4       DOX      144R
-17 MCW_CT_ROA_202       0     H3K36me3       Ind4       VEH      144R
-18 MCW_CT_ROA_209       0     H3K36me3       Ind5       5FU      144R
-19 MCW_CT_ROA_211       0     H3K36me3       Ind5       VEH      144R
-20 MCW_CT_ROA_213       0      H3K9me3       Ind1       DOX       24T
-21 MCW_CT_ROA_214       0      H3K9me3       Ind1       VEH       24T
-22 MCW_CT_ROA_215       0      H3K9me3       Ind1       5FU       24R
-23 MCW_CT_ROA_217       0      H3K9me3       Ind1       VEH       24R
-24 MCW_CT_ROA_218       0      H3K9me3       Ind1       5FU      144R
-25 MCW_CT_ROA_221       0      H3K9me3       Ind2       5FU       24T
-26 MCW_CT_ROA_222       0      H3K9me3       Ind2       DOX       24T
-27 MCW_CT_ROA_223       0      H3K9me3       Ind2       VEH       24T
-28 MCW_CT_ROA_226       0      H3K9me3       Ind2       VEH       24R
-29 MCW_CT_ROA_238       0      H3K9me3       Ind3       VEH      144R
-30 MCW_CT_ROA_241       0      H3K9me3       Ind4       VEH       24T
-31 MCW_CT_ROA_244       0      H3K9me3       Ind4       VEH       24R
-32 MCW_CT_ROA_245       0      H3K9me3       Ind4       5FU      144R
-33  MCW_CT_ROA_80       0      H3K27ac       Ind1       5FU       24R</code></pre>
+1  MCW_CT_ROA_126       0     H3K27me3       Ind1       DOX       24R
+2  MCW_CT_ROA_151       0     H3K27me3       Ind4       VEH       24T
+3  MCW_CT_ROA_169       0     H3K36me3       Ind1       VEH       24T
+4  MCW_CT_ROA_172       0     H3K36me3       Ind1       VEH       24R
+5  MCW_CT_ROA_175       0     H3K36me3       Ind1       VEH      144R
+6  MCW_CT_ROA_178       0     H3K36me3       Ind2       VEH       24T
+7  MCW_CT_ROA_181       0     H3K36me3       Ind2       VEH       24R
+8  MCW_CT_ROA_183       0     H3K36me3       Ind2       DOX      144R
+9  MCW_CT_ROA_190       0     H3K36me3       Ind3       VEH       24R
+10 MCW_CT_ROA_195       0     H3K36me3       Ind4       DOX       24T
+11 MCW_CT_ROA_196       0     H3K36me3       Ind4       VEH       24T
+12 MCW_CT_ROA_198       0     H3K36me3       Ind4       DOX       24R
+13 MCW_CT_ROA_201       0     H3K36me3       Ind4       DOX      144R
+14 MCW_CT_ROA_202       0     H3K36me3       Ind4       VEH      144R
+15 MCW_CT_ROA_211       0     H3K36me3       Ind5       VEH      144R
+16 MCW_CT_ROA_213       0      H3K9me3       Ind1       DOX       24T
+17 MCW_CT_ROA_214       0      H3K9me3       Ind1       VEH       24T
+18 MCW_CT_ROA_217       0      H3K9me3       Ind1       VEH       24R
+19 MCW_CT_ROA_222       0      H3K9me3       Ind2       DOX       24T
+20 MCW_CT_ROA_223       0      H3K9me3       Ind2       VEH       24T
+21 MCW_CT_ROA_226       0      H3K9me3       Ind2       VEH       24R
+22 MCW_CT_ROA_238       0      H3K9me3       Ind3       VEH      144R
+23 MCW_CT_ROA_241       0      H3K9me3       Ind4       VEH       24T
+24 MCW_CT_ROA_244       0      H3K9me3       Ind4       VEH       24R</code></pre>
 </div>
 </div>
-<div id="peak-calling" class="section level3">
-<h3>Peak Calling</h3>
+<div id="peak-calling-macs-2" class="section level3">
+<h3>Peak Calling MACS 2</h3>
+<div id="data-initialization-4" class="section level4">
+<h4>Data Initialization</h4>
+<pre class="r"><code>peak_ct &lt;- read_delim(&quot;data/peaks/peaks_cts.tsv&quot;, delim = &quot;\t&quot;)
+H3K27ac_peaks &lt;- read_delim(&quot;data/peaks/H3K27ac_macs2_nolambda_1e5_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K27ac_peaks_noModel &lt;- read_delim(&quot;data/peaks/H3K27ac_macs2_noModel_nolambda_1e5_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K27me3_peaks &lt;- read_delim(&quot;data/peaks/H3K27me3_macs2_broad_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K36me3_peaks &lt;- read_delim(&quot;data/peaks/H3K36me3_macs2_broad_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K9me3_peaks &lt;- read_delim(&quot;data/peaks/H3K9me3_macs2_nolambda_1e5_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K9me3_peaks_noModel &lt;- read_delim(&quot;data/peaks/H3K9me3_macs2_noModel_nolambda_1e5_results.tsv&quot;,delim = &quot;\t&quot;)
+
+all_peak &lt;- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+all_peak_noModel &lt;- rbind(H3K27ac_peaks_noModel, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks_noModel)
+
+all_peak &lt;- all_peak %&gt;%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %&gt;%
+  left_join(.,sampleinfo, by=c(&quot;Sample&quot;=&quot;Library ID&quot;)) %&gt;%
+  left_join(.,peak_ct, by=c(&quot;Sample&quot;=&quot;Sample&quot;))
+all_peak &lt;- all_peak[(!all_peak$Treatment %in% &quot;5FU&quot;),]
+all_peak_noModel &lt;- all_peak %&gt;%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %&gt;%
+  left_join(.,sampleinfo, by=c(&quot;Sample&quot;=&quot;Library ID&quot;)) %&gt;%
+  left_join(.,peak_ct, by=c(&quot;Sample&quot;=&quot;Sample&quot;))
+all_peak_noModel &lt;- all_peak_noModel[(!all_peak_noModel$Treatment %in% &quot;5FU&quot;),]</code></pre>
+</div>
+<div id="peak-visualization" class="section level4">
+<h4>Peak Visualization</h4>
+<pre class="r"><code>all_peak %&gt;% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak number for all samples&quot;)+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/peak%20ct-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak %&gt;% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/peak%20ct%20box-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak %&gt;% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/peak%20ct%20grouptx-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak %&gt;% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/multiQC_cut_tag.Rmd/peak%20ct%20grouptime-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="renaming-sample-ids" class="section level4">
+<h4>Renaming sample IDs</h4>
+<pre class="r"><code>all_peak &lt;- all_peak %&gt;%
+  mutate(Sample=paste0(Individual,&quot;_&quot;,Treatment,&quot;_&quot;,Timepoint,&quot;_&quot;,Histone_Mark))
+
+all_peak_noModel &lt;- all_peak_noModel %&gt;%
+  mutate(Sample=paste0(Individual,&quot;_&quot;,Treatment,&quot;_&quot;,Timepoint,&quot;_&quot;,Histone_Mark))</code></pre>
+</div>
+</div>
+<div id="h3k27ac-count-analysis" class="section level3">
+<h3>H3K27ac Count Analysis</h3>
+</div>
+<div id="h3k27me3-count-analysis" class="section level3">
+<h3>H3K27me3 Count Analysis</h3>
+</div>
+<div id="h3k36me3-count-analysis" class="section level3">
+<h3>H3K36me3 Count Analysis</h3>
+</div>
+<div id="h3k9me3-count-analysis" class="section level3">
+<h3>H3K9me3 Count Analysis</h3>
+</div>
+<div id="peak-calling-macs-3" class="section level3">
+<h3>Peak Calling MACS 3</h3>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
