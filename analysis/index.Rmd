@@ -10,4 +10,6 @@ editor_options:
 
 [Cut and Tag](https://infurnoheat.github.io/WardLab/docs/multiQC_cut_tag.html)
 
+[Peak Cutoff](https://infurnoheat.github.io/WardLab/docs/peak_cutoff.html)
+
 [Peak Analysis](https://infurnoheat.github.io/WardLab/docs/peak_analysis.html)
