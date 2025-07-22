@@ -39,6 +39,7 @@ library(ggpubr) ## For customizing figures
 library(corrplot) ## For correlation plot
 library(ggpmisc)
 library(gcplyr)
+library(Rsubread)
 ```
 
 #### Data Initialization
@@ -129,31 +130,23 @@ x_axis_labels = function(labels, every_nth = 1, ...) {
 }
 ```
 
-### Peak Calling MACS 2
+### Peak Calling for Q=0.01 and Broad=0.1 with No Lambda
 
 #### Data Initialization
 ```{r peak data}
-peak_ct <- read_delim("data/peaks/peaks_cts.tsv", delim = "\t")
-H3K27ac_peaks <- read_delim("data/peaks/H3K27ac_macs2_nolambda_1e5_results.tsv",delim = "\t")
-H3K27ac_peaks_noModel <- read_delim("data/peaks/H3K27ac_macs2_noModel_nolambda_1e5_results.tsv",delim = "\t")
-H3K27me3_peaks <- read_delim("data/peaks/H3K27me3_macs2_broad_results.tsv",delim = "\t")
-H3K36me3_peaks <- read_delim("data/peaks/H3K36me3_macs2_broad_results.tsv",delim = "\t")
-H3K9me3_peaks <- read_delim("data/peaks/H3K9me3_macs2_nolambda_1e5_results.tsv",delim = "\t")
-H3K9me3_peaks_noModel <- read_delim("data/peaks/H3K9me3_macs2_noModel_nolambda_1e5_results.tsv",delim = "\t")
+peak_ct <- read_delim("data/peaks/peaks_cts.txt", delim = "\t")
+H3K27ac_peaks <- read_delim("data/peaks/H3K27ac_final_results.tsv",delim = "\t")
+H3K27me3_peaks <- read_delim("data/peaks/H3K27me3_final_results.tsv",delim = "\t")
+H3K36me3_peaks <- read_delim("data/peaks/H3K36me3_final_results.tsv",delim = "\t")
+H3K9me3_peaks <- read_delim("data/peaks/H3K9me3_final_results.tsv",delim = "\t")
 
 all_peak <- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
-all_peak_noModel <- rbind(H3K27ac_peaks_noModel, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks_noModel)
 
 all_peak <- all_peak %>%
   dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %>%
   left_join(.,sampleinfo, by=c("Sample"="Library ID")) %>%
   left_join(.,peak_ct, by=c("Sample"="Sample"))
 all_peak <- all_peak[(!all_peak$Treatment %in% "5FU"),]
-all_peak_noModel <- all_peak %>%
-  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %>%
-  left_join(.,sampleinfo, by=c("Sample"="Library ID")) %>%
-  left_join(.,peak_ct, by=c("Sample"="Sample"))
-all_peak_noModel <- all_peak_noModel[(!all_peak_noModel$Treatment %in% "5FU"),]
 ```
 
 #### Peak Visualization
@@ -199,240 +192,336 @@ all_peak %>%
   ggtitle("Peak count across histones")
 ```
 
+### Peak Calling for Q=0.01 and Broad=0.1 with Lambda
+
+#### Data Initialization
+```{r peak data lq1e2b1e1}
+peak_ct <- read_delim("data/peaks/peaks_cts_lq1e2b1e1.txt", delim = "\t")
+H3K27ac_peaks <- read_delim("data/peaks/H3K27ac_final_results.tsv",delim = "\t")
+H3K27me3_peaks <- read_delim("data/peaks/H3K27me3_lq1e2b1e1_results.tsv",delim = "\t")
+H3K36me3_peaks <- read_delim("data/peaks/H3K36me3_lq1e2b1e1_results.tsv",delim = "\t")
+H3K9me3_peaks <- read_delim("data/peaks/H3K9me3_lq1e2b1e1_results.tsv",delim = "\t")
+
+all_peak_var <- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_var <- all_peak_var %>%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %>%
+  left_join(.,sampleinfo, by=c("Sample"="Library ID")) %>%
+  left_join(.,peak_ct, by=c("Sample"="Sample"))
+all_peak_var <- all_peak_var[(!all_peak_var$Treatment %in% "5FU"),]
+all_peak_var <- all_peak_var[(!all_peak_var$Histone_Mark %in% "H3K27ac"),]
+```
+
+#### Peak Visualization
+```{r peak ct lq1e2b1e1, fig.width=14}
+all_peak_var %>% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak number for all samples")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r peak ct box lq1e2b1e1}
+all_peak_var %>% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptx lq1e2b1e1}
+all_peak_var %>% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptime lq1e2b1e1}
+all_peak_var %>% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+### Peak Calling for Q=0.01 and Broad=0.5 with No Lambda
+
+#### Data Initialization
+```{r peak data nlq1e2b5e}
+peak_ct <- read_delim("data/peaks/peaks_cts_nlq1e2b5e1.txt", delim = "\t")
+H3K27ac_peaks <- read_delim("data/peaks/H3K27ac_final_results.tsv",delim = "\t")
+H3K27me3_peaks <- read_delim("data/peaks/H3K27me3_nlq1e2b5e1_results.tsv",delim = "\t")
+H3K36me3_peaks <- read_delim("data/peaks/H3K36me3_nlq1e2b5e1_results.tsv",delim = "\t")
+H3K9me3_peaks <- read_delim("data/peaks/H3K9me3_nlq1e2b5e1_results.tsv",delim = "\t")
+
+all_peak_var <- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_var <- all_peak_var %>%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %>%
+  left_join(.,sampleinfo, by=c("Sample"="Library ID")) %>%
+  left_join(.,peak_ct, by=c("Sample"="Sample"))
+all_peak_var <- all_peak[(!all_peak$Treatment %in% "5FU"),]
+all_peak_var <- all_peak_var[(!all_peak_var$Histone_Mark %in% "H3K27ac"),]
+```
+
+#### Peak Visualization
+```{r peak ct nlq1e2b5e, fig.width=14}
+all_peak_var %>% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab("Counts")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak number for all samples")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r peak ct box nlq1e2b5e}
+all_peak_var %>% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptx nlq1e2b5e}
+all_peak_var %>% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptime nlq1e2b5e}
+all_peak_var %>% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+### Peak Calling for Q=0.01 and Broad=0.5 with Lambda
+
+#### Data Initialization
+```{r peak data lq1e2b5e1}
+peak_ct_var <- read_delim("data/peaks/peaks_cts_lq1e2b5e1.txt", delim = "\t")
+H3K27ac_peaks <- read_delim("data/peaks/H3K27ac_final_results.tsv",delim = "\t")
+H3K27me3_peaks <- read_delim("data/peaks/H3K27me3_lq1e2b5e1_results.tsv",delim = "\t")
+H3K36me3_peaks <- read_delim("data/peaks/H3K36me3_lq1e2b5e1_results.tsv",delim = "\t")
+H3K9me3_peaks <- read_delim("data/peaks/H3K9me3_lq1e2b5e1_results.tsv",delim = "\t")
+
+all_peak_var <- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_var <- all_peak_var %>%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %>%
+  left_join(.,sampleinfo, by=c("Sample"="Library ID")) %>%
+  left_join(.,peak_ct, by=c("Sample"="Sample"))
+all_peak_var <- all_peak_var[(!all_peak_var$Treatment %in% "5FU"),]
+all_peak_var <- all_peak_var[(!all_peak_var$Histone_Mark %in% "H3K27ac"),]
+```
+
+#### Peak Visualization
+```{r peak ct lq1e2b5e1, fig.width=14}
+all_peak_var %>% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak number for all samples")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r peak ct box lq1e2b5e1}
+all_peak_var %>% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptx lq1e2b5e1}
+all_peak_var %>% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptime lq1e2b5e1}
+all_peak_var %>% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+### Peak Calling for Q=0.005 and Broad=0.01 with No Lambda
+
+#### Data Initialization
+```{r peak data nlq5e3b1e2}
+peak_ct <- read_delim("data/peaks/peaks_cts_nlq5e3b1e2.txt", delim = "\t")
+H3K27ac_peaks <- read_delim("data/peaks/H3K27ac_final_results.tsv",delim = "\t")
+H3K27me3_peaks <- read_delim("data/peaks/H3K27me3_nlq5e3b1e2_results.tsv",delim = "\t")
+H3K36me3_peaks <- read_delim("data/peaks/H3K36me3_nlq5e3b1e2_results.tsv",delim = "\t")
+H3K9me3_peaks <- read_delim("data/peaks/H3K9me3_nlq5e3b1e2_results.tsv",delim = "\t")
+
+all_peak_var <- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_var <- all_peak_var %>%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %>%
+  left_join(.,sampleinfo, by=c("Sample"="Library ID")) %>%
+  left_join(.,peak_ct, by=c("Sample"="Sample"))
+all_peak_var <- all_peak_var[(!all_peak_var$Treatment %in% "5FU"),]
+all_peak_var <- all_peak_var[(!all_peak_var$Histone_Mark %in% "H3K27ac"),]
+```
+
+#### Peak Visualization
+```{r peak ct nlq5e3b1e2, fig.width=14}
+all_peak_var %>% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak number for all samples")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r peak ct box nlq5e3b1e2}
+all_peak_var %>% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptx nlq5e3b1e2}
+all_peak_var %>% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptime nlq5e3b1e2}
+all_peak_var %>% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+### Peak Calling for Q=0.005 and Broad=0.01 with Lambda
+
+#### Data Initialization
+```{r peak data lq5e3b1e2}
+peak_ct <- read_delim("data/peaks/peaks_cts_lq5e3b1e2.txt", delim = "\t")
+H3K27ac_peaks <- read_delim("data/peaks/H3K27ac_final_results.tsv",delim = "\t")
+H3K27me3_peaks <- read_delim("data/peaks/H3K27me3_lq5e3b1e2_results.tsv",delim = "\t")
+H3K36me3_peaks <- read_delim("data/peaks/H3K36me3_lq5e3b1e2_results.tsv",delim = "\t")
+H3K9me3_peaks <- read_delim("data/peaks/H3K9me3_lq5e3b1e2_results.tsv",delim = "\t")
+
+all_peak_var <- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_var <- all_peak_var %>%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %>%
+  left_join(.,sampleinfo, by=c("Sample"="Library ID")) %>%
+  left_join(.,peak_ct, by=c("Sample"="Sample"))
+all_peak_var <- all_peak_var[(!all_peak_var$Treatment %in% "5FU"),]
+all_peak_var <- all_peak_var[(!all_peak_var$Histone_Mark %in% "H3K27ac"),]
+```
+
+#### Peak Visualization
+```{r peak ct lq5e3b1e2, fig.width=14}
+all_peak_var %>% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak number for all samples")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r peak ct box lq5e3b1e2}
+all_peak_var %>% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptx lq5e3b1e2}
+all_peak_var %>% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptime lq5e3b1e2}
+all_peak_var %>% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
 #### Tagging Questionable Libraries by FRiP
 ```{r frip tag}
 questionable_frip = all_peak[(all_peak$FRiP < 0.02),]
 questionable_frip
 ```
 
-```{r frip tag noModel}
-questionable_frip_noModel = all_peak_noModel[(all_peak_noModel$FRiP < 0.02),]
-questionable_frip_noModel
-```
-
 #### Renaming sample IDs
 ```{r rename}
 all_peak <- all_peak %>%
   mutate(Sample=paste0(Individual,"_",Treatment,"_",Timepoint,"_",Histone_Mark))
-
-all_peak_noModel <- all_peak_noModel %>%
-  mutate(Sample=paste0(Individual,"_",Treatment,"_",Timepoint,"_",Histone_Mark))
 ```
 
-### Peak Cut Off Analysis
+### Feature Counts
+```{r feature_cts}
 
-#### Cut Off Analysis for H3K27ac
-```{r peak cutoff H3K27ac 1, fig.width=14, fig.height=28}
-H3K27ac <- sampleinfo %>%
-  dplyr::filter(Histone_Mark=="H3K27ac")
-cutoff <- data.frame(matrix(nrow = 0, ncol = 6))
-colnames(cutoff) = c("Sample", "pscore", "qscore", "npeaks", "lpeaks", "avelpeak")
-for (sample in H3K27ac$`Library ID`) {
-  filename <- paste("data/peaks/H3K27ac/", sample, "_macs3_noModel_cutoff_analysis.txt", sep = "")
-  temp <- read_delim(filename, delim = "\t")
-  temp$Sample <- sample
-  cutoff <- rbind(cutoff, temp)
-}
-H3K27ac <- left_join(H3K27ac, cutoff, by =c("Library ID"="Sample"))
-H3K27ac %>%  
-  ggplot(., aes(x=H3K27ac$qscore, y=H3K27ac$npeaks, color = 'Library ID'))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0, max(H3K27ac$qscore), by = 1))+
-  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
-  labs(title = "",
-       x = "Q Score",
-       y = "Peak Counts",
-       color= "Sample")+
-  theme_minimal()
-```
-
-```{r peak cutoff H3K27ac 2, fig.width=14, fig.height=28}
-H3K27ac %>%  
-  ggplot(., aes(x=H3K27ac$qscore, y=H3K27ac$lpeaks, color = 'Library ID'))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0, max(H3K27ac$qscore), by = 1))+
-  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
-  labs(title = "",
-       x = "Q Score",
-       y = "Total Peak Lengthss",
-       color= "Sample")+
-  theme_minimal()
-```
-
-```{r peak cutoff H3K27ac 3, fig.width=14, fig.height=28}
-H3K27ac %>%  
-  ggplot(., aes(x=H3K27ac$qscore, y=H3K27ac$avelpeak, color = 'Library ID'))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0, max(H3K27ac$qscore), by = 1))+
-  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
-  labs(title = "",
-       x = "Q Score",
-       y = "Average Peak Lengthss",
-       color= "Sample")+
-  theme_minimal()
-```
-
-#### Cut Off Analysis for H3K27me3
-```{r peak cutoff H3K27me3 1, fig.width=14, fig.height=28}
-H3K27me3 <- sampleinfo %>%
-  dplyr::filter(Histone_Mark=="H3K27me3")
-cutoff <- data.frame(matrix(nrow = 0, ncol = 6))
-colnames(cutoff) = c("Sample", "pscore", "qscore", "npeaks", "lpeaks", "avelpeak")
-for (sample in H3K27me3$`Library ID`) {
-  filename <- paste("data/peaks/H3K27me3/", sample, "_macs3_cutoff_analysis.txt", sep = "")
-  temp <- read_delim(filename, delim = "\t")
-  temp$Sample <- sample
-  cutoff <- rbind(cutoff, temp)
-}
-H3K27me3 <- left_join(H3K27me3, cutoff, by =c("Library ID"="Sample"))
-
-H3K27me3 <- H3K27me3[(H3K27me3$pscore >= 0.6),]
-
-H3K27me3 %>%  
-  ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$npeaks, color = 'Library ID'))+
-  geom_line(size=1)+
-  # geom_point(size=2,alpha =0.7)+
-  scale_x_continuous(breaks = seq(0.6, max(H3K27me3$qscore), by = 0.6))+
-  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
-  labs(title = "",
-       x = "Q Score",
-       y = "Peak Counts",
-       color= "Sample")+
-  theme_minimal()
-```
-
-```{r peak cutoff H3K27me3 2, fig.width=14, fig.height=28}
-H3K27me3 %>%  
-  ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$lpeaks, color = 'Library ID'))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0.6, max(H3K27me3$qscore), by = 0.6))+
-  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
-  labs(title = "",
-       x = "Q Score",
-       y = "Total Peak Lengths",
-       color= "Sample")+
-  theme_minimal()
-```
-
-```{r peak cutoff H3K27me3 3, fig.width=14, fig.height=28}
-H3K27me3 %>%  
-  ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$avelpeak, color = 'Library ID'))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0.6, max(H3K27me3$qscore), by = 0.6))+
-  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
-  labs(title = "",
-       x = "Q Score",
-       y = "Average Peak Lengths",
-       color= "Sample")+
-  theme_minimal()
-```
-
-#### Cut Off Analysis for H3K36me3
-```{r peak cutoff H3K36me3 1, fig.width=14, fig.height=28}
-H3K36me3 <- sampleinfo %>%
-  dplyr::filter(Histone_Mark=="H3K36me3")
-cutoff <- data.frame(matrix(nrow = 0, ncol = 6))
-colnames(cutoff) = c("Sample", "pscore", "qscore", "npeaks", "lpeaks", "avelpeak")
-for (sample in H3K36me3$`Library ID`) {
-  filename = paste("data/peaks/H3K36me3/", sample, "_macs3_cutoff_analysis.txt", sep = "")
-  temp <- read_delim(filename, delim = "\t")
-  temp$Sample <- sample
-  cutoff <- rbind(cutoff, temp)
-}
-H3K36me3 <- left_join(H3K36me3, cutoff, by =c("Library ID"="Sample"))
-
-H3K36me3 <- H3K36me3[(H3K36me3$pscore >= 0.6),]
-
-H3K36me3 %>%  
-  ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$npeaks, color = 'Library ID'))+
-  geom_line(size=1)+
-  # geom_point(size=2,alpha =0.7)+
-  scale_x_continuous(breaks = seq(0.6, max(H3K36me3$qscore), by = 0.6))+
-  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
-  labs(title = "",
-       x = "Q Score",
-       y = "Peak Counts",
-       color= "Sample")+
-  theme_minimal()
-```
-
-```{r peak cutoff H3K36me3 2, fig.width=14, fig.height=28}
-H3K36me3 %>%  
-  ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$lpeaks, color = 'Library ID'))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0.6, max(H3K36me3$qscore), by = 0.6))+
-  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
-  labs(title = "",
-       x = "Q Score",
-       y = "Total Peak Lengths",
-       color= "Sample")+
-  theme_minimal()
-```
-
-```{r peak cutoff H3K36me3 3, fig.width=14, fig.height=28}
-H3K36me3 %>%  
-  ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$avelpeak, color = 'Library ID'))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0.6, max(H3K36me3$qscore), by =0.6))+
-  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
-  labs(title = "",
-       x = "Q Score",
-       y = "Average Peak Lengths",
-       color= "Sample")+
-  theme_minimal()
-```
-
-#### Cut Off Analysis for H3K9me3
-```{r peak cutoff H3K9me3 1, fig.width=14, fig.height=28}
-H3K9me3 <- sampleinfo %>%
-  dplyr::filter(Histone_Mark=="H3K9me3")
-cutoff <- data.frame(matrix(nrow = 0, ncol = 6))
-colnames(cutoff) = c("Sample", "pscore", "qscore", "npeaks", "lpeaks", "avelpeak")
-for (sample in H3K9me3$`Library ID`) {
-  filename = paste("data/peaks/H3K9me3/", sample, "_macs3_noModel_cutoff_analysis.txt", sep = "")
-  temp <- read_delim(filename, delim = "\t")
-  temp$Sample <- sample
-  cutoff <- rbind(cutoff, temp)
-}
-H3K9me3 <- left_join(H3K9me3, cutoff, by =c("Library ID"="Sample"))
-
-H3K9me3 %>%  
-  ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$npeaks, color = 'Library ID'))+
-  geom_line(size=1)+
-  # geom_point(size=2,alpha =0.7)+
-  scale_x_continuous(breaks = seq(0, max(H3K9me3$qscore), by = 1))+
-  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
-  labs(title = "",
-       x = "Q Score",
-       y = "Peak Counts",
-       color= "Sample")+
-  theme_minimal()
-```
-
-```{r peak cutoff H3K9me3 2, fig.width=14, fig.height=28}
-H3K9me3 %>%  
-  ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$lpeaks, color = 'Library ID'))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0, max(H3K9me3$qscore), by = 1))+
-  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
-  labs(title = "",
-       x = "Q Score",
-       y = "Total Peak Lengths",
-       color= "Sample")+
-  theme_minimal()
-```
-
-```{r peak cutoff H3K9me3 3, fig.width=14, fig.width=28}
-H3K9me3 %>%  
-  ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$avelpeak, color = 'Library ID'))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0, max(H3K9me3$qscore), by = 1))+
-  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
-  labs(title = "",
-       x = "Q Score",
-       y = "Average Peak Lengths",
-       color= "Sample")+
-  theme_minimal()
 ```
 
 ### H3K27ac Count Analysis
@@ -454,7 +543,5 @@ H3K9me3 %>%
 ### H3K36me3 Count Analysis
 
 ### H3K9me3 Count Analysis
-
-### Peak Calling MACS 3
 
 
