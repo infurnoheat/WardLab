@@ -390,7 +390,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2025-07-15
+<strong>Last updated:</strong> 2025-07-22
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -521,15 +521,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreedd8be1d0f34aa8cc24debfb7fc56cb43bed7c255targetblankdd8be1da">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree0edadf33bd59bfcdc2fabe6e2ebbcaac7d99ea3ctargetblank0edadf3a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/infurnoheat/WardLab/tree/dd8be1d0f34aa8cc24debfb7fc56cb43bed7c255" target="_blank">dd8be1d</a>
+<a href="https://github.com/infurnoheat/WardLab/tree/0edadf33bd59bfcdc2fabe6e2ebbcaac7d99ea3c" target="_blank">0edadf3</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreedd8be1d0f34aa8cc24debfb7fc56cb43bed7c255targetblankdd8be1da"
+id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree0edadf33bd59bfcdc2fabe6e2ebbcaac7d99ea3ctargetblank0edadf3a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -539,7 +539,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/infurnoheat/WardLab/tree/dd8be1d0f34aa8cc24debfb7fc56cb43bed7c255" target="_blank">dd8be1d</a>.
+<a href="https://github.com/infurnoheat/WardLab/tree/0edadf33bd59bfcdc2fabe6e2ebbcaac7d99ea3c" target="_blank">0edadf3</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -556,10 +556,14 @@ were generated:
 Ignored files:
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
+    Ignored:    analysis/figure/
 
 Untracked files:
+    Untracked:  data/RUVs_DEG.tsv
     Untracked:  data/bam_final/
     Untracked:  data/bam_no_multi/
+    Untracked:  data/cutoffs.tsv
+    Untracked:  data/metadata.txt
     Untracked:  data/multiqc_data_trim/
     Untracked:  data/peaks/
     Untracked:  data/sample_info.tsv
@@ -611,6 +615,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/0edadf33bd59bfcdc2fabe6e2ebbcaac7d99ea3c/analysis/peak_analysis.Rmd" target="_blank">0edadf3</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-22
+</td>
+<td>
+wflow_publish("analysis/peak_analysis.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/infurnoheat/WardLab/29d666e34883889f4c3a1c4bd14629087b8e68f5/docs/peak_analysis.html" target="_blank">29d666e</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-15
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -691,7 +729,8 @@ library(DESeq2) ## For differential analysis section
 library(ggpubr) ## For customizing figures
 library(corrplot) ## For correlation plot
 library(ggpmisc)
-library(gcplyr)</code></pre>
+library(gcplyr)
+library(Rsubread)</code></pre>
 </div>
 <div id="data-initialization" class="section level4">
 <h4>Data Initialization</h4>
@@ -779,31 +818,24 @@ x_axis_labels = function(labels, every_nth = 1, ...) {
   )
 }</code></pre>
 </div>
-<div id="peak-calling-macs-2" class="section level3">
-<h3>Peak Calling MACS 2</h3>
+<div id="peak-calling-for-q0.01-and-broad0.1-with-no-lambda"
+class="section level3">
+<h3>Peak Calling for Q=0.01 and Broad=0.1 with No Lambda</h3>
 <div id="data-initialization-1" class="section level4">
 <h4>Data Initialization</h4>
-<pre class="r"><code>peak_ct &lt;- read_delim(&quot;data/peaks/peaks_cts.tsv&quot;, delim = &quot;\t&quot;)
-H3K27ac_peaks &lt;- read_delim(&quot;data/peaks/H3K27ac_macs2_nolambda_1e5_results.tsv&quot;,delim = &quot;\t&quot;)
-H3K27ac_peaks_noModel &lt;- read_delim(&quot;data/peaks/H3K27ac_macs2_noModel_nolambda_1e5_results.tsv&quot;,delim = &quot;\t&quot;)
-H3K27me3_peaks &lt;- read_delim(&quot;data/peaks/H3K27me3_macs2_broad_results.tsv&quot;,delim = &quot;\t&quot;)
-H3K36me3_peaks &lt;- read_delim(&quot;data/peaks/H3K36me3_macs2_broad_results.tsv&quot;,delim = &quot;\t&quot;)
-H3K9me3_peaks &lt;- read_delim(&quot;data/peaks/H3K9me3_macs2_nolambda_1e5_results.tsv&quot;,delim = &quot;\t&quot;)
-H3K9me3_peaks_noModel &lt;- read_delim(&quot;data/peaks/H3K9me3_macs2_noModel_nolambda_1e5_results.tsv&quot;,delim = &quot;\t&quot;)
+<pre class="r"><code>peak_ct &lt;- read_delim(&quot;data/peaks/peaks_cts.txt&quot;, delim = &quot;\t&quot;)
+H3K27ac_peaks &lt;- read_delim(&quot;data/peaks/H3K27ac_final_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K27me3_peaks &lt;- read_delim(&quot;data/peaks/H3K27me3_final_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K36me3_peaks &lt;- read_delim(&quot;data/peaks/H3K36me3_final_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K9me3_peaks &lt;- read_delim(&quot;data/peaks/H3K9me3_final_results.tsv&quot;,delim = &quot;\t&quot;)
 
 all_peak &lt;- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
-all_peak_noModel &lt;- rbind(H3K27ac_peaks_noModel, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks_noModel)
 
 all_peak &lt;- all_peak %&gt;%
   dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %&gt;%
   left_join(.,sampleinfo, by=c(&quot;Sample&quot;=&quot;Library ID&quot;)) %&gt;%
   left_join(.,peak_ct, by=c(&quot;Sample&quot;=&quot;Sample&quot;))
-all_peak &lt;- all_peak[(!all_peak$Treatment %in% &quot;5FU&quot;),]
-all_peak_noModel &lt;- all_peak %&gt;%
-  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %&gt;%
-  left_join(.,sampleinfo, by=c(&quot;Sample&quot;=&quot;Library ID&quot;)) %&gt;%
-  left_join(.,peak_ct, by=c(&quot;Sample&quot;=&quot;Sample&quot;))
-all_peak_noModel &lt;- all_peak_noModel[(!all_peak_noModel$Treatment %in% &quot;5FU&quot;),]</code></pre>
+all_peak &lt;- all_peak[(!all_peak$Treatment %in% &quot;5FU&quot;),]</code></pre>
 </div>
 <div id="peak-visualization" class="section level4">
 <h4>Peak Visualization</h4>
@@ -990,238 +1022,313 @@ infurnoheat
 </div>
 </div>
 </div>
+</div>
+<div id="peak-calling-for-q0.01-and-broad0.1-with-lambda"
+class="section level3">
+<h3>Peak Calling for Q=0.01 and Broad=0.1 with Lambda</h3>
+<div id="data-initialization-2" class="section level4">
+<h4>Data Initialization</h4>
+<pre class="r"><code>peak_ct &lt;- read_delim(&quot;data/peaks/peaks_cts_lq1e2b1e1.txt&quot;, delim = &quot;\t&quot;)
+H3K27ac_peaks &lt;- read_delim(&quot;data/peaks/H3K27ac_final_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K27me3_peaks &lt;- read_delim(&quot;data/peaks/H3K27me3_lq1e2b1e1_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K36me3_peaks &lt;- read_delim(&quot;data/peaks/H3K36me3_lq1e2b1e1_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K9me3_peaks &lt;- read_delim(&quot;data/peaks/H3K9me3_lq1e2b1e1_results.tsv&quot;,delim = &quot;\t&quot;)
+
+all_peak_var &lt;- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_var &lt;- all_peak_var %&gt;%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %&gt;%
+  left_join(.,sampleinfo, by=c(&quot;Sample&quot;=&quot;Library ID&quot;)) %&gt;%
+  left_join(.,peak_ct, by=c(&quot;Sample&quot;=&quot;Sample&quot;))
+all_peak_var &lt;- all_peak_var[(!all_peak_var$Treatment %in% &quot;5FU&quot;),]
+all_peak_var &lt;- all_peak_var[(!all_peak_var$Histone_Mark %in% &quot;H3K27ac&quot;),]</code></pre>
+</div>
+<div id="peak-visualization-1" class="section level4">
+<h4>Peak Visualization</h4>
+<pre class="r"><code>all_peak_var %&gt;% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak number for all samples&quot;)+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20lq1e2b1e1-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_var %&gt;% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20box%20lq1e2b1e1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_var %&gt;% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptx%20lq1e2b1e1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_var %&gt;% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptime%20lq1e2b1e1-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="peak-calling-for-q0.01-and-broad0.5-with-no-lambda"
+class="section level3">
+<h3>Peak Calling for Q=0.01 and Broad=0.5 with No Lambda</h3>
+<div id="data-initialization-3" class="section level4">
+<h4>Data Initialization</h4>
+<pre class="r"><code>peak_ct &lt;- read_delim(&quot;data/peaks/peaks_cts_nlq1e2b5e1.txt&quot;, delim = &quot;\t&quot;)
+H3K27ac_peaks &lt;- read_delim(&quot;data/peaks/H3K27ac_final_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K27me3_peaks &lt;- read_delim(&quot;data/peaks/H3K27me3_nlq1e2b5e1_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K36me3_peaks &lt;- read_delim(&quot;data/peaks/H3K36me3_nlq1e2b5e1_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K9me3_peaks &lt;- read_delim(&quot;data/peaks/H3K9me3_nlq1e2b5e1_results.tsv&quot;,delim = &quot;\t&quot;)
+
+all_peak_var &lt;- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_var &lt;- all_peak_var %&gt;%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %&gt;%
+  left_join(.,sampleinfo, by=c(&quot;Sample&quot;=&quot;Library ID&quot;)) %&gt;%
+  left_join(.,peak_ct, by=c(&quot;Sample&quot;=&quot;Sample&quot;))
+all_peak_var &lt;- all_peak[(!all_peak$Treatment %in% &quot;5FU&quot;),]
+all_peak_var &lt;- all_peak_var[(!all_peak_var$Histone_Mark %in% &quot;H3K27ac&quot;),]</code></pre>
+</div>
+<div id="peak-visualization-2" class="section level4">
+<h4>Peak Visualization</h4>
+<pre class="r"><code>all_peak_var %&gt;% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab(&quot;Counts&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak number for all samples&quot;)+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20nlq1e2b5e-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_var %&gt;% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20box%20nlq1e2b5e-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_var %&gt;% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptx%20nlq1e2b5e-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_var %&gt;% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptime%20nlq1e2b5e-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="peak-calling-for-q0.01-and-broad0.5-with-lambda"
+class="section level3">
+<h3>Peak Calling for Q=0.01 and Broad=0.5 with Lambda</h3>
+<div id="data-initialization-4" class="section level4">
+<h4>Data Initialization</h4>
+<pre class="r"><code>peak_ct_var &lt;- read_delim(&quot;data/peaks/peaks_cts_lq1e2b5e1.txt&quot;, delim = &quot;\t&quot;)
+H3K27ac_peaks &lt;- read_delim(&quot;data/peaks/H3K27ac_final_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K27me3_peaks &lt;- read_delim(&quot;data/peaks/H3K27me3_lq1e2b5e1_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K36me3_peaks &lt;- read_delim(&quot;data/peaks/H3K36me3_lq1e2b5e1_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K9me3_peaks &lt;- read_delim(&quot;data/peaks/H3K9me3_lq1e2b5e1_results.tsv&quot;,delim = &quot;\t&quot;)
+
+all_peak_var &lt;- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_var &lt;- all_peak_var %&gt;%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %&gt;%
+  left_join(.,sampleinfo, by=c(&quot;Sample&quot;=&quot;Library ID&quot;)) %&gt;%
+  left_join(.,peak_ct, by=c(&quot;Sample&quot;=&quot;Sample&quot;))
+all_peak_var &lt;- all_peak_var[(!all_peak_var$Treatment %in% &quot;5FU&quot;),]
+all_peak_var &lt;- all_peak_var[(!all_peak_var$Histone_Mark %in% &quot;H3K27ac&quot;),]</code></pre>
+</div>
+<div id="peak-visualization-3" class="section level4">
+<h4>Peak Visualization</h4>
+<pre class="r"><code>all_peak_var %&gt;% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak number for all samples&quot;)+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20lq1e2b5e1-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_var %&gt;% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20box%20lq1e2b5e1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_var %&gt;% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptx%20lq1e2b5e1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_var %&gt;% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptime%20lq1e2b5e1-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="peak-calling-for-q0.005-and-broad0.01-with-no-lambda"
+class="section level3">
+<h3>Peak Calling for Q=0.005 and Broad=0.01 with No Lambda</h3>
+<div id="data-initialization-5" class="section level4">
+<h4>Data Initialization</h4>
+<pre class="r"><code>peak_ct &lt;- read_delim(&quot;data/peaks/peaks_cts_nlq5e3b1e2.txt&quot;, delim = &quot;\t&quot;)
+H3K27ac_peaks &lt;- read_delim(&quot;data/peaks/H3K27ac_final_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K27me3_peaks &lt;- read_delim(&quot;data/peaks/H3K27me3_nlq5e3b1e2_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K36me3_peaks &lt;- read_delim(&quot;data/peaks/H3K36me3_nlq5e3b1e2_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K9me3_peaks &lt;- read_delim(&quot;data/peaks/H3K9me3_nlq5e3b1e2_results.tsv&quot;,delim = &quot;\t&quot;)
+
+all_peak_var &lt;- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_var &lt;- all_peak_var %&gt;%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %&gt;%
+  left_join(.,sampleinfo, by=c(&quot;Sample&quot;=&quot;Library ID&quot;)) %&gt;%
+  left_join(.,peak_ct, by=c(&quot;Sample&quot;=&quot;Sample&quot;))
+all_peak_var &lt;- all_peak_var[(!all_peak_var$Treatment %in% &quot;5FU&quot;),]
+all_peak_var &lt;- all_peak_var[(!all_peak_var$Histone_Mark %in% &quot;H3K27ac&quot;),]</code></pre>
+</div>
+<div id="peak-visualization-4" class="section level4">
+<h4>Peak Visualization</h4>
+<pre class="r"><code>all_peak_var %&gt;% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak number for all samples&quot;)+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20nlq5e3b1e2-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_var %&gt;% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20box%20nlq5e3b1e2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_var %&gt;% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptx%20nlq5e3b1e2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_var %&gt;% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptime%20nlq5e3b1e2-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="peak-calling-for-q0.005-and-broad0.01-with-lambda"
+class="section level3">
+<h3>Peak Calling for Q=0.005 and Broad=0.01 with Lambda</h3>
+<div id="data-initialization-6" class="section level4">
+<h4>Data Initialization</h4>
+<pre class="r"><code>peak_ct &lt;- read_delim(&quot;data/peaks/peaks_cts_lq5e3b1e2.txt&quot;, delim = &quot;\t&quot;)
+H3K27ac_peaks &lt;- read_delim(&quot;data/peaks/H3K27ac_final_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K27me3_peaks &lt;- read_delim(&quot;data/peaks/H3K27me3_lq5e3b1e2_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K36me3_peaks &lt;- read_delim(&quot;data/peaks/H3K36me3_lq5e3b1e2_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K9me3_peaks &lt;- read_delim(&quot;data/peaks/H3K9me3_lq5e3b1e2_results.tsv&quot;,delim = &quot;\t&quot;)
+
+all_peak_var &lt;- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_var &lt;- all_peak_var %&gt;%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %&gt;%
+  left_join(.,sampleinfo, by=c(&quot;Sample&quot;=&quot;Library ID&quot;)) %&gt;%
+  left_join(.,peak_ct, by=c(&quot;Sample&quot;=&quot;Sample&quot;))
+all_peak_var &lt;- all_peak_var[(!all_peak_var$Treatment %in% &quot;5FU&quot;),]
+all_peak_var &lt;- all_peak_var[(!all_peak_var$Histone_Mark %in% &quot;H3K27ac&quot;),]</code></pre>
+</div>
+<div id="peak-visualization-5" class="section level4">
+<h4>Peak Visualization</h4>
+<pre class="r"><code>all_peak_var %&gt;% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak number for all samples&quot;)+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20lq5e3b1e2-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_var %&gt;% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20box%20lq5e3b1e2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_var %&gt;% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptx%20lq5e3b1e2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_var %&gt;% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptime%20lq5e3b1e2-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
 <div id="tagging-questionable-libraries-by-frip" class="section level4">
 <h4>Tagging Questionable Libraries by FRiP</h4>
 <pre class="r"><code>questionable_frip = all_peak[(all_peak$FRiP &lt; 0.02),]
 questionable_frip</code></pre>
-<pre><code># A tibble: 4 × 10
-  Sample     Total_Reads Fragments Reads_in_Peaks   FRiP Histone_Mark Individual
-  &lt;chr&gt;            &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;     
-1 MCW_CT_RO…    11768048  11768048         209413 0.0177 H3K9me3      Ind2      
-2 MCW_CT_RO…     8366054   8366054          52746 0.0063 H3K9me3      Ind2      
-3 MCW_CT_RO…    12381024  12381024         234516 0.0189 H3K9me3      Ind3      
-4 MCW_CT_RO…    13577790  13577790         173868 0.0128 H3K9me3      Ind5      
-# ℹ 3 more variables: Treatment &lt;chr&gt;, Timepoint &lt;chr&gt;, Count &lt;dbl&gt;</code></pre>
-<pre class="r"><code>questionable_frip_noModel = all_peak_noModel[(all_peak_noModel$FRiP &lt; 0.02),]
-questionable_frip_noModel</code></pre>
-<pre><code># A tibble: 4 × 10
-  Sample     Total_Reads Fragments Reads_in_Peaks   FRiP Histone_Mark Individual
-  &lt;chr&gt;            &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;     
-1 MCW_CT_RO…    11768048  11768048         209413 0.0177 H3K9me3      Ind2      
-2 MCW_CT_RO…     8366054   8366054          52746 0.0063 H3K9me3      Ind2      
-3 MCW_CT_RO…    12381024  12381024         234516 0.0189 H3K9me3      Ind3      
-4 MCW_CT_RO…    13577790  13577790         173868 0.0128 H3K9me3      Ind5      
-# ℹ 3 more variables: Treatment &lt;chr&gt;, Timepoint &lt;chr&gt;, Count &lt;dbl&gt;</code></pre>
+<pre><code># A tibble: 0 × 10
+# ℹ 10 variables: Sample &lt;chr&gt;, Total_Reads &lt;dbl&gt;, Fragments &lt;dbl&gt;,
+#   Reads_in_Peaks &lt;dbl&gt;, FRiP &lt;dbl&gt;, Histone_Mark &lt;chr&gt;, Individual &lt;chr&gt;,
+#   Treatment &lt;chr&gt;, Timepoint &lt;chr&gt;, Count &lt;dbl&gt;</code></pre>
 </div>
 <div id="renaming-sample-ids" class="section level4">
 <h4>Renaming sample IDs</h4>
 <pre class="r"><code>all_peak &lt;- all_peak %&gt;%
-  mutate(Sample=paste0(Individual,&quot;_&quot;,Treatment,&quot;_&quot;,Timepoint,&quot;_&quot;,Histone_Mark))
-
-all_peak_noModel &lt;- all_peak_noModel %&gt;%
   mutate(Sample=paste0(Individual,&quot;_&quot;,Treatment,&quot;_&quot;,Timepoint,&quot;_&quot;,Histone_Mark))</code></pre>
 </div>
 </div>
-<div id="peak-cut-off-analysis" class="section level3">
-<h3>Peak Cut Off Analysis</h3>
-<div id="cut-off-analysis-for-h3k27ac" class="section level4">
-<h4>Cut Off Analysis for H3K27ac</h4>
-<pre class="r"><code>H3K27ac &lt;- sampleinfo %&gt;%
-  dplyr::filter(Histone_Mark==&quot;H3K27ac&quot;)
-cutoff &lt;- data.frame(matrix(nrow = 0, ncol = 6))
-colnames(cutoff) = c(&quot;Sample&quot;, &quot;pscore&quot;, &quot;qscore&quot;, &quot;npeaks&quot;, &quot;lpeaks&quot;, &quot;avelpeak&quot;)
-for (sample in H3K27ac$`Library ID`) {
-  filename &lt;- paste(&quot;data/peaks/H3K27ac/&quot;, sample, &quot;_macs3_noModel_cutoff_analysis.txt&quot;, sep = &quot;&quot;)
-  temp &lt;- read_delim(filename, delim = &quot;\t&quot;)
-  temp$Sample &lt;- sample
-  cutoff &lt;- rbind(cutoff, temp)
-}
-H3K27ac &lt;- left_join(H3K27ac, cutoff, by =c(&quot;Library ID&quot;=&quot;Sample&quot;))
-H3K27ac %&gt;%  
-  ggplot(., aes(x=H3K27ac$qscore, y=H3K27ac$npeaks, color = &#39;Library ID&#39;))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0, max(H3K27ac$qscore), by = 1))+
-  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
-  labs(title = &quot;&quot;,
-       x = &quot;Q Score&quot;,
-       y = &quot;Peak Counts&quot;,
-       color= &quot;Sample&quot;)+
-  theme_minimal()</code></pre>
-<p><img src="figure/peak_analysis.Rmd/peak%20cutoff%20H3K27ac%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>H3K27ac %&gt;%  
-  ggplot(., aes(x=H3K27ac$qscore, y=H3K27ac$lpeaks, color = &#39;Library ID&#39;))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0, max(H3K27ac$qscore), by = 1))+
-  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
-  labs(title = &quot;&quot;,
-       x = &quot;Q Score&quot;,
-       y = &quot;Total Peak Lengthss&quot;,
-       color= &quot;Sample&quot;)+
-  theme_minimal()</code></pre>
-<p><img src="figure/peak_analysis.Rmd/peak%20cutoff%20H3K27ac%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>H3K27ac %&gt;%  
-  ggplot(., aes(x=H3K27ac$qscore, y=H3K27ac$avelpeak, color = &#39;Library ID&#39;))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0, max(H3K27ac$qscore), by = 1))+
-  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
-  labs(title = &quot;&quot;,
-       x = &quot;Q Score&quot;,
-       y = &quot;Average Peak Lengthss&quot;,
-       color= &quot;Sample&quot;)+
-  theme_minimal()</code></pre>
-<p><img src="figure/peak_analysis.Rmd/peak%20cutoff%20H3K27ac%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
-</div>
-<div id="cut-off-analysis-for-h3k27me3" class="section level4">
-<h4>Cut Off Analysis for H3K27me3</h4>
-<pre class="r"><code>H3K27me3 &lt;- sampleinfo %&gt;%
-  dplyr::filter(Histone_Mark==&quot;H3K27me3&quot;)
-cutoff &lt;- data.frame(matrix(nrow = 0, ncol = 6))
-colnames(cutoff) = c(&quot;Sample&quot;, &quot;pscore&quot;, &quot;qscore&quot;, &quot;npeaks&quot;, &quot;lpeaks&quot;, &quot;avelpeak&quot;)
-for (sample in H3K27me3$`Library ID`) {
-  filename &lt;- paste(&quot;data/peaks/H3K27me3/&quot;, sample, &quot;_macs3_cutoff_analysis.txt&quot;, sep = &quot;&quot;)
-  temp &lt;- read_delim(filename, delim = &quot;\t&quot;)
-  temp$Sample &lt;- sample
-  cutoff &lt;- rbind(cutoff, temp)
-}
-H3K27me3 &lt;- left_join(H3K27me3, cutoff, by =c(&quot;Library ID&quot;=&quot;Sample&quot;))
-
-H3K27me3 &lt;- H3K27me3[(H3K27me3$pscore &gt;= 0.6),]
-
-H3K27me3 %&gt;%  
-  ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$npeaks, color = &#39;Library ID&#39;))+
-  geom_line(size=1)+
-  # geom_point(size=2,alpha =0.7)+
-  scale_x_continuous(breaks = seq(0.6, max(H3K27me3$qscore), by = 0.6))+
-  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
-  labs(title = &quot;&quot;,
-       x = &quot;Q Score&quot;,
-       y = &quot;Peak Counts&quot;,
-       color= &quot;Sample&quot;)+
-  theme_minimal()</code></pre>
-<p><img src="figure/peak_analysis.Rmd/peak%20cutoff%20H3K27me3%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>H3K27me3 %&gt;%  
-  ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$lpeaks, color = &#39;Library ID&#39;))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0.6, max(H3K27me3$qscore), by = 0.6))+
-  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
-  labs(title = &quot;&quot;,
-       x = &quot;Q Score&quot;,
-       y = &quot;Total Peak Lengths&quot;,
-       color= &quot;Sample&quot;)+
-  theme_minimal()</code></pre>
-<p><img src="figure/peak_analysis.Rmd/peak%20cutoff%20H3K27me3%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>H3K27me3 %&gt;%  
-  ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$avelpeak, color = &#39;Library ID&#39;))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0.6, max(H3K27me3$qscore), by = 0.6))+
-  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
-  labs(title = &quot;&quot;,
-       x = &quot;Q Score&quot;,
-       y = &quot;Average Peak Lengths&quot;,
-       color= &quot;Sample&quot;)+
-  theme_minimal()</code></pre>
-<p><img src="figure/peak_analysis.Rmd/peak%20cutoff%20H3K27me3%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
-</div>
-<div id="cut-off-analysis-for-h3k36me3" class="section level4">
-<h4>Cut Off Analysis for H3K36me3</h4>
-<pre class="r"><code>H3K36me3 &lt;- sampleinfo %&gt;%
-  dplyr::filter(Histone_Mark==&quot;H3K36me3&quot;)
-cutoff &lt;- data.frame(matrix(nrow = 0, ncol = 6))
-colnames(cutoff) = c(&quot;Sample&quot;, &quot;pscore&quot;, &quot;qscore&quot;, &quot;npeaks&quot;, &quot;lpeaks&quot;, &quot;avelpeak&quot;)
-for (sample in H3K36me3$`Library ID`) {
-  filename = paste(&quot;data/peaks/H3K36me3/&quot;, sample, &quot;_macs3_cutoff_analysis.txt&quot;, sep = &quot;&quot;)
-  temp &lt;- read_delim(filename, delim = &quot;\t&quot;)
-  temp$Sample &lt;- sample
-  cutoff &lt;- rbind(cutoff, temp)
-}
-H3K36me3 &lt;- left_join(H3K36me3, cutoff, by =c(&quot;Library ID&quot;=&quot;Sample&quot;))
-
-H3K36me3 &lt;- H3K36me3[(H3K36me3$pscore &gt;= 0.6),]
-
-H3K36me3 %&gt;%  
-  ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$npeaks, color = &#39;Library ID&#39;))+
-  geom_line(size=1)+
-  # geom_point(size=2,alpha =0.7)+
-  scale_x_continuous(breaks = seq(0.6, max(H3K36me3$qscore), by = 0.6))+
-  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
-  labs(title = &quot;&quot;,
-       x = &quot;Q Score&quot;,
-       y = &quot;Peak Counts&quot;,
-       color= &quot;Sample&quot;)+
-  theme_minimal()</code></pre>
-<p><img src="figure/peak_analysis.Rmd/peak%20cutoff%20H3K36me3%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>H3K36me3 %&gt;%  
-  ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$lpeaks, color = &#39;Library ID&#39;))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0.6, max(H3K36me3$qscore), by = 0.6))+
-  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
-  labs(title = &quot;&quot;,
-       x = &quot;Q Score&quot;,
-       y = &quot;Total Peak Lengths&quot;,
-       color= &quot;Sample&quot;)+
-  theme_minimal()</code></pre>
-<p><img src="figure/peak_analysis.Rmd/peak%20cutoff%20H3K36me3%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>H3K36me3 %&gt;%  
-  ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$avelpeak, color = &#39;Library ID&#39;))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0.6, max(H3K36me3$qscore), by =0.6))+
-  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
-  labs(title = &quot;&quot;,
-       x = &quot;Q Score&quot;,
-       y = &quot;Average Peak Lengths&quot;,
-       color= &quot;Sample&quot;)+
-  theme_minimal()</code></pre>
-<p><img src="figure/peak_analysis.Rmd/peak%20cutoff%20H3K36me3%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
-</div>
-<div id="cut-off-analysis-for-h3k9me3" class="section level4">
-<h4>Cut Off Analysis for H3K9me3</h4>
-<pre class="r"><code>H3K9me3 &lt;- sampleinfo %&gt;%
-  dplyr::filter(Histone_Mark==&quot;H3K9me3&quot;)
-cutoff &lt;- data.frame(matrix(nrow = 0, ncol = 6))
-colnames(cutoff) = c(&quot;Sample&quot;, &quot;pscore&quot;, &quot;qscore&quot;, &quot;npeaks&quot;, &quot;lpeaks&quot;, &quot;avelpeak&quot;)
-for (sample in H3K9me3$`Library ID`) {
-  filename = paste(&quot;data/peaks/H3K9me3/&quot;, sample, &quot;_macs3_noModel_cutoff_analysis.txt&quot;, sep = &quot;&quot;)
-  temp &lt;- read_delim(filename, delim = &quot;\t&quot;)
-  temp$Sample &lt;- sample
-  cutoff &lt;- rbind(cutoff, temp)
-}
-H3K9me3 &lt;- left_join(H3K9me3, cutoff, by =c(&quot;Library ID&quot;=&quot;Sample&quot;))
-
-H3K9me3 %&gt;%  
-  ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$npeaks, color = &#39;Library ID&#39;))+
-  geom_line(size=1)+
-  # geom_point(size=2,alpha =0.7)+
-  scale_x_continuous(breaks = seq(0, max(H3K9me3$qscore), by = 1))+
-  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
-  labs(title = &quot;&quot;,
-       x = &quot;Q Score&quot;,
-       y = &quot;Peak Counts&quot;,
-       color= &quot;Sample&quot;)+
-  theme_minimal()</code></pre>
-<p><img src="figure/peak_analysis.Rmd/peak%20cutoff%20H3K9me3%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>H3K9me3 %&gt;%  
-  ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$lpeaks, color = &#39;Library ID&#39;))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0, max(H3K9me3$qscore), by = 1))+
-  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
-  labs(title = &quot;&quot;,
-       x = &quot;Q Score&quot;,
-       y = &quot;Total Peak Lengths&quot;,
-       color= &quot;Sample&quot;)+
-  theme_minimal()</code></pre>
-<p><img src="figure/peak_analysis.Rmd/peak%20cutoff%20H3K9me3%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>H3K9me3 %&gt;%  
-  ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$avelpeak, color = &#39;Library ID&#39;))+
-  geom_line(size=1)+
-  scale_x_continuous(breaks = seq(0, max(H3K9me3$qscore), by = 1))+
-  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
-  labs(title = &quot;&quot;,
-       x = &quot;Q Score&quot;,
-       y = &quot;Average Peak Lengths&quot;,
-       color= &quot;Sample&quot;)+
-  theme_minimal()</code></pre>
-<p><img src="figure/peak_analysis.Rmd/peak%20cutoff%20H3K9me3%203-1.png" width="2688" style="display: block; margin: auto;" /></p>
-</div>
+<div id="feature-counts" class="section level3">
+<h3>Feature Counts</h3>
 </div>
 <div id="h3k27ac-count-analysis" class="section level3">
 <h3>H3K27ac Count Analysis</h3>
@@ -1245,9 +1352,6 @@ H3K9me3 %&gt;%
 </div>
 <div id="h3k9me3-count-analysis" class="section level3">
 <h3>H3K9me3 Count Analysis</h3>
-</div>
-<div id="peak-calling-macs-3" class="section level3">
-<h3>Peak Calling MACS 3</h3>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1279,25 +1383,25 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] gcplyr_1.11.0               ggpmisc_0.6.1              
- [3] ggpp_0.5.9                  corrplot_0.95              
- [5] ggpubr_0.6.1                DESeq2_1.48.1              
- [7] SummarizedExperiment_1.38.1 Biobase_2.68.0             
- [9] MatrixGenerics_1.20.0       matrixStats_1.5.0          
-[11] chromVAR_1.30.1             GenomicRanges_1.60.0       
-[13] GenomeInfoDb_1.44.0         IRanges_2.42.0             
-[15] S4Vectors_0.46.0            BiocGenerics_0.54.0        
-[17] generics_0.1.4              genomation_1.40.1          
-[19] kableExtra_1.4.0            DT_0.33                    
-[21] viridis_0.6.5               viridisLite_0.4.2          
-[23] data.table_1.17.6           ComplexHeatmap_2.24.1      
-[25] edgeR_4.6.2                 limma_3.64.1               
-[27] lubridate_1.9.4             forcats_1.0.0              
-[29] stringr_1.5.1               dplyr_1.1.4                
-[31] purrr_1.0.4                 readr_2.1.5                
-[33] tidyr_1.3.1                 tibble_3.3.0               
-[35] ggplot2_3.5.2               tidyverse_2.0.0            
-[37] workflowr_1.7.1            
+ [1] Rsubread_2.22.1             gcplyr_1.11.0              
+ [3] ggpmisc_0.6.2               ggpp_0.5.9                 
+ [5] corrplot_0.95               ggpubr_0.6.1               
+ [7] DESeq2_1.48.1               SummarizedExperiment_1.38.1
+ [9] Biobase_2.68.0              MatrixGenerics_1.20.0      
+[11] matrixStats_1.5.0           chromVAR_1.30.1            
+[13] GenomicRanges_1.60.0        GenomeInfoDb_1.44.0        
+[15] IRanges_2.42.0              S4Vectors_0.46.0           
+[17] BiocGenerics_0.54.0         generics_0.1.4             
+[19] genomation_1.40.1           kableExtra_1.4.0           
+[21] DT_0.33                     viridis_0.6.5              
+[23] viridisLite_0.4.2           data.table_1.17.8          
+[25] ComplexHeatmap_2.24.1       edgeR_4.6.3                
+[27] limma_3.64.1                lubridate_1.9.4            
+[29] forcats_1.0.0               stringr_1.5.1              
+[31] dplyr_1.1.4                 purrr_1.1.0                
+[33] readr_2.1.5                 tidyr_1.3.1                
+[35] tibble_3.3.0                ggplot2_3.5.2              
+[37] tidyverse_2.0.0             workflowr_1.7.1            
 
 loaded via a namespace (and not attached):
   [1] splines_4.5.1               later_1.4.2                
@@ -1305,7 +1409,7 @@ loaded via a namespace (and not attached):
   [5] XML_3.99-0.18               DirichletMultinomial_1.50.0
   [7] lifecycle_1.0.4             pwalign_1.4.0              
   [9] rstatix_0.7.2               doParallel_1.0.17          
- [11] rprojroot_2.0.4             vroom_1.6.5                
+ [11] rprojroot_2.1.0             vroom_1.6.5                
  [13] MASS_7.3-65                 processx_3.8.6             
  [15] lattice_0.22-7              backports_1.5.0            
  [17] magrittr_2.0.3              plotly_4.11.0              
@@ -1335,39 +1439,38 @@ loaded via a namespace (and not attached):
  [65] mime_0.13                   seqPattern_1.40.0          
  [67] textshaping_1.0.1           colorspace_2.1-1           
  [69] gtools_3.9.5                RSQLite_2.4.1              
- [71] utf8_1.2.6                  rtracklayer_1.68.0         
- [73] httr_1.4.7                  htmlwidgets_1.6.4          
- [75] S4Arrays_1.8.1              TFBSTools_1.46.0           
- [77] whisker_0.4.1               pkgconfig_2.0.3            
- [79] gtable_0.3.6                blob_1.2.4                 
- [81] impute_1.82.0               XVector_0.48.0             
- [83] htmltools_0.5.8.1           carData_3.0-5              
- [85] clue_0.3-66                 scales_1.4.0               
- [87] png_0.1-8                   knitr_1.50                 
- [89] rstudioapi_0.17.1           tzdb_0.5.0                 
- [91] reshape2_1.4.4              rjson_0.2.23               
- [93] curl_6.4.0                  cachem_1.1.0               
- [95] GlobalOptions_0.1.2         KernSmooth_2.23-26         
- [97] parallel_4.5.1              miniUI_0.1.2               
- [99] restfulr_0.0.16             pillar_1.11.0              
-[101] vctrs_0.6.5                 promises_1.3.3             
-[103] car_3.1-3                   xtable_1.8-4               
-[105] cluster_2.1.8.1             evaluate_1.0.4             
-[107] cli_3.6.5                   locfit_1.5-9.12            
-[109] compiler_4.5.1              Rsamtools_2.24.0           
-[111] rlang_1.1.6                 crayon_1.5.3               
-[113] ggsignif_0.6.4              labeling_0.4.3             
-[115] ps_1.9.1                    getPass_0.2-4              
-[117] plyr_1.8.9                  fs_1.6.6                   
-[119] stringi_1.8.7               gridBase_0.4-7             
-[121] BiocParallel_1.42.1         Biostrings_2.76.0          
-[123] lazyeval_0.2.2              quantreg_6.1               
-[125] Matrix_1.7-3                BSgenome_1.76.0            
-[127] hms_1.1.3                   bit64_4.6.0-1              
-[129] statmod_1.5.0               shiny_1.11.1               
-[131] broom_1.0.8                 memoise_2.0.1              
-[133] bslib_0.9.0                 bit_4.6.0                  
-[135] polynom_1.4-1              </code></pre>
+ [71] rtracklayer_1.68.0          httr_1.4.7                 
+ [73] htmlwidgets_1.6.4           S4Arrays_1.8.1             
+ [75] TFBSTools_1.46.0            whisker_0.4.1              
+ [77] pkgconfig_2.0.3             gtable_0.3.6               
+ [79] blob_1.2.4                  impute_1.82.0              
+ [81] XVector_0.48.0              htmltools_0.5.8.1          
+ [83] carData_3.0-5               clue_0.3-66                
+ [85] scales_1.4.0                png_0.1-8                  
+ [87] knitr_1.50                  rstudioapi_0.17.1          
+ [89] tzdb_0.5.0                  reshape2_1.4.4             
+ [91] rjson_0.2.23                curl_6.4.0                 
+ [93] cachem_1.1.0                GlobalOptions_0.1.2        
+ [95] KernSmooth_2.23-26          parallel_4.5.1             
+ [97] miniUI_0.1.2                restfulr_0.0.16            
+ [99] pillar_1.11.0               vctrs_0.6.5                
+[101] promises_1.3.3              car_3.1-3                  
+[103] xtable_1.8-4                cluster_2.1.8.1            
+[105] evaluate_1.0.4              cli_3.6.5                  
+[107] locfit_1.5-9.12             compiler_4.5.1             
+[109] Rsamtools_2.24.0            rlang_1.1.6                
+[111] crayon_1.5.3                ggsignif_0.6.4             
+[113] labeling_0.4.3              ps_1.9.1                   
+[115] getPass_0.2-4               plyr_1.8.9                 
+[117] fs_1.6.6                    stringi_1.8.7              
+[119] gridBase_0.4-7              BiocParallel_1.42.1        
+[121] Biostrings_2.76.0           lazyeval_0.2.2             
+[123] quantreg_6.1                Matrix_1.7-3               
+[125] BSgenome_1.76.0             hms_1.1.3                  
+[127] bit64_4.6.0-1               statmod_1.5.0              
+[129] shiny_1.11.1                broom_1.0.8                
+[131] memoise_2.0.1               bslib_0.9.0                
+[133] bit_4.6.0                   polynom_1.4-1              </code></pre>
 </div>
 </div>
 </div>
