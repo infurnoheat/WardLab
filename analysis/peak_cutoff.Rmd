@@ -1,0 +1,347 @@
+---
+title: "Peak Cut Off"
+author: "Steven Yu"
+date: "2025-07-14"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE,
+	dev = c("png","pdf")
+)
+```
+
+## Peak Anaylsis
+
+#### Loading Packages 
+```{r load packages}
+library(tidyverse)
+library(readr)
+library(edgeR)
+library(ComplexHeatmap)
+library(data.table)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(viridis)
+library(DT)
+library(kableExtra)
+library(genomation)
+library(GenomicRanges)
+library(chromVAR) ## For FRiP analysis and differential analysis
+library(DESeq2) ## For differential analysis section
+library(ggpubr) ## For customizing figures
+library(corrplot) ## For correlation plot
+library(ggpmisc)
+library(gcplyr)
+library(Rsubread)
+```
+
+#### Data Initialization
+```{r init}
+sampleinfo <- read_delim("data/sample_info.tsv", delim = "\t")
+multiqc_gene_stats_trim <- read_delim("data/multiqc_data_trim/multiqc_general_stats.txt",delim = "\t")
+multiqc_fastqc_trim <- read_delim("data/multiqc_data_trim/multiqc_fastqc.txt",delim = "\t")
+```
+
+#### Functions
+```{r functions}
+drug_pal <- c("#8B006D","#DF707E","#F1B72B", "#3386DD","#707031","#41B333")
+pca_plot <-
+  function(df,
+           col_var = NULL,
+           shape_var = NULL,
+           title = "") {
+    ggplot(df) + geom_point(aes_string(
+      x = "PC1",
+      y = "PC2",
+      color = col_var,
+      shape = shape_var
+    ),
+    size = 5) +
+      labs(title = title, x = "PC 1", y = "PC 2") +
+      scale_color_manual(values = c(
+        "#8B006D",
+        "#DF707E",
+        "#F1B72B",
+        "#3386DD",
+        "#707031",
+        "#41B333"
+      ))
+  }
+pca_var_plot <- function(pca) {
+  # x: class == prcomp
+  pca.var <- pca$sdev ^ 2
+  pca.prop <- pca.var / sum(pca.var)
+  var.plot <-
+    qplot(PC, prop, data = data.frame(PC = 1:length(pca.prop),
+                                      prop = pca.prop)) +
+    labs(title = 'Variance contributed by each PC',
+         x = 'PC', y = 'Proportion of variance')
+  plot(var.plot)
+}
+
+calc_pca <- function(x) {
+  # Performs principal components analysis with prcomp
+  # x: a sample-by-gene numeric matrix
+  prcomp(x, scale. = TRUE, retx = TRUE)
+}
+
+get_regr_pval <- function(mod) {
+  # Returns the p-value for the Fstatistic of a linear model
+  # mod: class lm
+  stopifnot(class(mod) == "lm")
+  fstat <- summary(mod)$fstatistic
+  pval <- 1 - pf(fstat[1], fstat[2], fstat[3])
+  return(pval)
+}
+
+plot_versus_pc <- function(df, pc_num, fac) {
+  # df: data.frame
+  # pc_num: numeric, specific PC for plotting
+  # fac: column name of df for plotting against PC
+  pc_char <- paste0("PC", pc_num)
+  # Calculate F-statistic p-value for linear model
+  pval <- get_regr_pval(lm(df[, pc_char] ~ df[, fac]))
+  if (is.numeric(df[, f])) {
+    ggplot(df, aes_string(x = f, y = pc_char)) + geom_point() +
+      geom_smooth(method = "lm") + labs(title = sprintf("p-val: %.2f", pval))
+  } else {
+    ggplot(df, aes_string(x = f, y = pc_char)) + geom_boxplot() +
+      labs(title = sprintf("p-val: %.2f", pval))
+  }
+}
+x_axis_labels = function(labels, every_nth = 1, ...) {
+  axis(side = 1,
+       at = seq_along(labels),
+       labels = F)
+  text(
+    x = (seq_along(labels))[seq_len(every_nth) == 1],
+    y = par("usr")[3] - 0.075 * (par("usr")[4] - par("usr")[3]),
+    labels = labels[seq_len(every_nth) == 1],
+    xpd = TRUE,
+    ...
+  )
+}
+```
+
+### Peak Cut Off Analysis via Elbow Method
+
+#### Cut Off Analysis for H3K27ac
+```{r peak cutoff H3K27ac 1, fig.width=14, fig.height=28}
+H3K27ac <- sampleinfo %>%
+  dplyr::filter(Histone_Mark=="H3K27ac")
+cutoff <- data.frame(matrix(nrow = 0, ncol = 6))
+colnames(cutoff) = c("Sample", "pscore", "qscore", "npeaks", "lpeaks", "avelpeak")
+for (sample in H3K27ac$`Library ID`) {
+  filename <- paste("data/peaks/H3K27ac/", sample, "_macs3_noModel_cutoff_analysis.txt", sep = "")
+  temp <- read_delim(filename, delim = "\t")
+  temp$Sample <- sample
+  cutoff <- rbind(cutoff, temp)
+}
+H3K27ac <- left_join(H3K27ac, cutoff, by =c("Library ID"="Sample"))
+H3K27ac %>%  
+  ggplot(., aes(x=H3K27ac$qscore, y=H3K27ac$npeaks, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K27ac$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Peak Counts",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r peak cutoff H3K27ac 2, fig.width=14, fig.height=28}
+H3K27ac %>%  
+  ggplot(., aes(x=H3K27ac$qscore, y=H3K27ac$lpeaks, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K27ac$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Total Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r peak cutoff H3K27ac 3, fig.width=14, fig.height=28}
+H3K27ac %>%  
+  ggplot(., aes(x=H3K27ac$qscore, y=H3K27ac$avelpeak, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K27ac$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Average Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+#### Cut Off Analysis for H3K27me3
+```{r peak cutoff H3K27me3 1, fig.width=14, fig.height=28}
+H3K27me3 <- sampleinfo %>%
+  dplyr::filter(Histone_Mark=="H3K27me3")
+cutoff <- data.frame(matrix(nrow = 0, ncol = 6))
+colnames(cutoff) = c("Sample", "pscore", "qscore", "npeaks", "lpeaks", "avelpeak")
+for (sample in H3K27me3$`Library ID`) {
+  filename <- paste("data/peaks/H3K27me3/", sample, "_macs3_cutoff_analysis.txt", sep = "")
+  temp <- read_delim(filename, delim = "\t")
+  temp$Sample <- sample
+  cutoff <- rbind(cutoff, temp)
+}
+H3K27me3 <- left_join(H3K27me3, cutoff, by =c("Library ID"="Sample"))
+
+H3K27me3 <- H3K27me3[(H3K27me3$pscore >= 0.6),]
+
+H3K27me3 %>%  
+  ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$npeaks, color = 'Library ID'))+
+  geom_line(size=1)+
+  # geom_point(size=2,alpha =0.7)+
+  scale_x_continuous(breaks = seq(0, max(H3K27me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Peak Counts",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r peak cutoff H3K27me3 2, fig.width=14, fig.height=28}
+H3K27me3 %>%  
+  ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$lpeaks, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K27me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Total Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r peak cutoff H3K27me3 3, fig.width=14, fig.height=28}
+H3K27me3 %>%  
+  ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$avelpeak, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K27me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Average Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+#### Cut Off Analysis for H3K36me3
+```{r peak cutoff H3K36me3 1, fig.width=14, fig.height=28}
+H3K36me3 <- sampleinfo %>%
+  dplyr::filter(Histone_Mark=="H3K36me3")
+cutoff <- data.frame(matrix(nrow = 0, ncol = 6))
+colnames(cutoff) = c("Sample", "pscore", "qscore", "npeaks", "lpeaks", "avelpeak")
+for (sample in H3K36me3$`Library ID`) {
+  filename = paste("data/peaks/H3K36me3/", sample, "_macs3_cutoff_analysis.txt", sep = "")
+  temp <- read_delim(filename, delim = "\t")
+  temp$Sample <- sample
+  cutoff <- rbind(cutoff, temp)
+}
+H3K36me3 <- left_join(H3K36me3, cutoff, by =c("Library ID"="Sample"))
+
+H3K36me3 <- H3K36me3[(H3K36me3$pscore >= 0.6),]
+
+H3K36me3 %>%  
+  ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$npeaks, color = 'Library ID'))+
+  geom_line(size=1)+
+  # geom_point(size=2,alpha =0.7)+
+  scale_x_continuous(breaks = seq(0, max(H3K36me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Peak Counts",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r peak cutoff H3K36me3 2, fig.width=14, fig.height=28}
+H3K36me3 %>%  
+  ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$lpeaks, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K36me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Total Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r peak cutoff H3K36me3 3, fig.width=14, fig.height=28}
+H3K36me3 %>%  
+  ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$avelpeak, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K36me3$qscore), by =1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Average Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+#### Cut Off Analysis for H3K9me3
+```{r peak cutoff H3K9me3 1, fig.width=14, fig.height=28}
+H3K9me3 <- sampleinfo %>%
+  dplyr::filter(Histone_Mark=="H3K9me3")
+cutoff <- data.frame(matrix(nrow = 0, ncol = 6))
+colnames(cutoff) = c("Sample", "pscore", "qscore", "npeaks", "lpeaks", "avelpeak")
+for (sample in H3K9me3$`Library ID`) {
+  filename = paste("data/peaks/H3K9me3/", sample, "_macs3_noModel_cutoff_analysis.txt", sep = "")
+  temp <- read_delim(filename, delim = "\t")
+  temp$Sample <- sample
+  cutoff <- rbind(cutoff, temp)
+}
+H3K9me3 <- left_join(H3K9me3, cutoff, by =c("Library ID"="Sample"))
+
+H3K9me3 %>%  
+  ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$npeaks, color = 'Library ID'))+
+  geom_line(size=1)+
+  # geom_point(size=2,alpha =0.7)+
+  scale_x_continuous(breaks = seq(0, max(H3K9me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Peak Counts",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r peak cutoff H3K9me3 2, fig.width=14, fig.height=28}
+H3K9me3 %>%  
+  ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$lpeaks, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K9me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Total Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r peak cutoff H3K9me3 3, fig.width=14, fig.width=28}
+H3K9me3 %>%  
+  ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$avelpeak, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K9me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Average Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
