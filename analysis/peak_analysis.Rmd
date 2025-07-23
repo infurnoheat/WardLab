@@ -513,7 +513,6 @@ questionable_frip = all_peak[(all_peak$FRiP < 0.02),]
 questionable_frip
 ```
 
-#### Renaming sample IDs
 ```{r rename}
 all_peak <- all_peak %>%
   mutate(Sample=paste0(Individual,"_",Treatment,"_",Timepoint,"_",Histone_Mark))
@@ -579,8 +578,8 @@ H3K27ac_iter_cor <- featurects_iter %>%
 
 annomat <- data.frame(sample=colnames(H3K27ac_merged_cor)) %>% 
   separate_wider_delim(sample,delim="_",names=c("Ind","Treatment","Timepoint",NA),cols_remove = FALSE) %>% 
-  mutate(trt=factor(Treatment, levels = c("VEH","5FU","DOX")),
-         time=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
+  mutate(Treatment=factor(Treatment, levels = c("VEH","5FU","DOX")),
+         Timepoint=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
   column_to_rownames("sample")
 heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
 
@@ -592,8 +591,8 @@ Heatmap(H3K27ac_merged_cor,
 ```{r H3K27ac HeatMap 2, fig.width=14,fig.height=14}
 annomat <- data.frame(sample=colnames(H3K27ac_cluster_cor)) %>% 
   separate_wider_delim(sample,delim="_",names=c("Ind","Treatment","Timepoint",NA),cols_remove = FALSE) %>% 
-  mutate(trt=factor(Treatment, levels = c("VEH","5FU","DOX")),
-         time=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
+  mutate(Treatment=factor(Treatment, levels = c("VEH","5FU","DOX")),
+         Timepoint=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
   column_to_rownames("sample")
 heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
 
@@ -602,13 +601,11 @@ Heatmap(H3K27ac_cluster_cor,
         column_title="Unfiltered log2cpm H3K27ac")
 ```
 
-
-
 ```{r H3K27ac HeatMap 3, fig.width=14,fig.height=14}
 annomat <- data.frame(sample=colnames(H3K27ac_iter_cor)) %>% 
   separate_wider_delim(sample,delim="_",names=c("Ind","Treatment","Timepoint",NA),cols_remove = FALSE) %>% 
-  mutate(trt=factor(Treatment, levels = c("VEH","5FU","DOX")),
-         time=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
+  mutate(Treatment=factor(Treatment, levels = c("VEH","5FU","DOX")),
+         Timepoint=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
   column_to_rownames("sample")
 heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
 
@@ -616,6 +613,40 @@ Heatmap(H3K27ac_iter_cor,
         top_annotation = heatmap_first,
         column_title="Unfiltered log2cpm H3K27ac")
 ```
+
+#### H3K27ac Fragments
+```{r frag ct, fig.width=14}
+all_peak %>%
+  mutate(Fragments=Fragments/1000000) %>% 
+  ggplot(., aes(x=interaction(Individual,Treatment,Timepoint), y=Fragments, fill=Treatment, group = Treatment))+
+  geom_col()+
+  geom_hline(yintercept =5)+
+  geom_text(aes(y = 0,label = Sample), vjust = 0.2, size = 3, angle = 90)+
+  theme_classic()+
+  facet_wrap(~Histone_Mark)+
+  ggtitle("Fragment count by histone and sample")+
+  ylab("Count of Fragments * 10^6")+
+  xlab("Samples")+
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r frag frip, fig.width=14}
+all_peak %>%
+  mutate(FRiP=FRiP * 100) %>% 
+  ggplot(., aes(x=interaction(Individual,Treatment,Timepoint), y=FRiP, fill=Treatment, group = Treatment))+
+  geom_col()+
+  geom_hline(yintercept =5)+
+  geom_text(aes(y = 0,label = Sample), vjust = 0.2, size = 3, angle = 90)+
+  theme_classic()+
+  facet_wrap(~Histone_Mark)+
+  ggtitle("Fragment count by histone and sample")+
+  ylab("Count of Fragments * 10^6")+
+  xlab("Samples")+
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
 ### H3K27me3 Count Analysis
 
 ### H3K36me3 Count Analysis
