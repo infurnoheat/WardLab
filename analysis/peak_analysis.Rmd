@@ -521,22 +521,100 @@ all_peak <- all_peak %>%
 
 ### Feature Counts
 ```{r feature_cts}
-
+featurects_merged <- read_delim("data/peaks/H3K27ac_merged_counts.txt", 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE, skip = 1)
+featurects_cluster <- read_delim("data/peaks/H3K27ac_cluster_counts.txt", 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE, skip = 1)
+featurects_iter <- read_delim("data/peaks/H3K27ac_iter_counts.txt", 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE, skip = 1)
+rename_list <- sampleinfo %>% 
+  mutate(stem= "_nobl.bam") %>% 
+  mutate(prefix=paste0("/scratch/10819/styu/MW_multiQC/peaks/",Histone_Mark,"/",Treatment,"/",Timepoint,"/")) %>%
+  mutate(oldname=paste0(prefix,`Library ID`,"/",`Library ID`,stem)) %>% 
+  mutate(newname=paste0(Individual,"_",Treatment,"_",Timepoint,"_",Histone_Mark)) %>% 
+  dplyr::select(oldname,newname)
+rename_vec <- setNames(rename_list$newname, rename_list$oldname)
+names(featurects_merged)[names(featurects_merged) %in% names(rename_vec)] <- rename_vec[names(featurects_merged)[names(featurects_merged) %in% names(rename_vec)]]
+names(featurects_cluster)[names(featurects_cluster) %in% names(rename_vec)] <- rename_vec[names(featurects_cluster)[names(featurects_cluster) %in% names(rename_vec)]]
+names(featurects_iter)[names(featurects_iter) %in% names(rename_vec)] <- rename_vec[names(featurects_iter)[names(featurects_iter) %in% names(rename_vec)]]
 ```
 
 ### H3K27ac Count Analysis
-```{r H3K27ac HeatMap 1}
-#H3K27ac_peaks <- all_peak %>% 
-#  dplyr::filter(Histone_Mark=="H3K27ac") %>%
-#  dplyr::select()
-#  cpm(., log = TRUE) %>% 
-#  cor()
+```{r H3K27ac HeatMap 1, fig.width=14,fig.height=14}
+H3K27ac_merged_raw <- featurects_merged %>% 
+  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %>% 
+  column_to_rownames("Geneid") %>% 
+  as.matrix()
 
-#H3K27ac_peaks_noModel <- all_peak_noModel %>% 
-#  dplyr::filter(Histone_Mark=="H3K27ac") %>%
-#  cpm(., log = TRUE) %>% 
-#  cor()
-# Waiting on Peak cutoff analysis and Feature Counts
+H3K27ac_cluster_raw <- featurects_cluster %>% 
+  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %>% 
+  column_to_rownames("Geneid") %>% 
+  as.matrix()
+
+H3K27ac_iter_raw <- featurects_iter %>% 
+  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %>% 
+  column_to_rownames("Geneid") %>% 
+  as.matrix()
+
+H3K27ac_merged_cor <- featurects_merged %>% 
+  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %>% 
+  column_to_rownames("Geneid") %>% 
+  cpm(., log = TRUE) %>% 
+  cor()
+
+H3K27ac_cluster_cor <- featurects_cluster %>% 
+  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %>% 
+  column_to_rownames("Geneid") %>% 
+  cpm(., log = TRUE) %>% 
+  cor()
+
+H3K27ac_iter_cor <- featurects_iter %>% 
+  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %>% 
+  column_to_rownames("Geneid") %>% 
+  cpm(., log = TRUE) %>% 
+  cor()
+
+annomat <- data.frame(sample=colnames(H3K27ac_merged_cor)) %>% 
+  separate_wider_delim(sample,delim="_",names=c("Ind","Treatment","Timepoint",NA),cols_remove = FALSE) %>% 
+  mutate(trt=factor(Treatment, levels = c("VEH","5FU","DOX")),
+         time=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
+  column_to_rownames("sample")
+heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
+
+Heatmap(H3K27ac_merged_cor, 
+        top_annotation = heatmap_first,
+        column_title="Unfiltered log2cpm H3K27ac")
+```
+
+```{r H3K27ac HeatMap 2, fig.width=14,fig.height=14}
+annomat <- data.frame(sample=colnames(H3K27ac_cluster_cor)) %>% 
+  separate_wider_delim(sample,delim="_",names=c("Ind","Treatment","Timepoint",NA),cols_remove = FALSE) %>% 
+  mutate(trt=factor(Treatment, levels = c("VEH","5FU","DOX")),
+         time=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
+  column_to_rownames("sample")
+heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
+
+Heatmap(H3K27ac_cluster_cor, 
+        top_annotation = heatmap_first,
+        column_title="Unfiltered log2cpm H3K27ac")
+```
+
+
+
+```{r H3K27ac HeatMap 3, fig.width=14,fig.height=14}
+annomat <- data.frame(sample=colnames(H3K27ac_iter_cor)) %>% 
+  separate_wider_delim(sample,delim="_",names=c("Ind","Treatment","Timepoint",NA),cols_remove = FALSE) %>% 
+  mutate(trt=factor(Treatment, levels = c("VEH","5FU","DOX")),
+         time=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
+  column_to_rownames("sample")
+heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
+
+Heatmap(H3K27ac_iter_cor, 
+        top_annotation = heatmap_first,
+        column_title="Unfiltered log2cpm H3K27ac")
 ```
 ### H3K27me3 Count Analysis
 
