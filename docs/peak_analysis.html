@@ -521,15 +521,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreed2f7f9a9071611be56bbb5010a5ca3ad22e5efdatargetblankd2f7f9aa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree1295ae00c41b26cadd378989414a81771e0c0037targetblank1295ae0a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/infurnoheat/WardLab/tree/d2f7f9a9071611be56bbb5010a5ca3ad22e5efda" target="_blank">d2f7f9a</a>
+<a href="https://github.com/infurnoheat/WardLab/tree/1295ae00c41b26cadd378989414a81771e0c0037" target="_blank">1295ae0</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreed2f7f9a9071611be56bbb5010a5ca3ad22e5efdatargetblankd2f7f9aa"
+id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree1295ae00c41b26cadd378989414a81771e0c0037targetblank1295ae0a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -539,7 +539,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/infurnoheat/WardLab/tree/d2f7f9a9071611be56bbb5010a5ca3ad22e5efda" target="_blank">d2f7f9a</a>.
+<a href="https://github.com/infurnoheat/WardLab/tree/1295ae00c41b26cadd378989414a81771e0c0037" target="_blank">1295ae0</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -614,6 +614,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/1295ae00c41b26cadd378989414a81771e0c0037/analysis/peak_analysis.Rmd" target="_blank">1295ae0</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-23
+</td>
+<td>
+wflow_publish("analysis/peak_analysis.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/infurnoheat/WardLab/d927f5c53ef8b3beaec7e7728de67977aff63b83/docs/peak_analysis.html" target="_blank">d927f5c</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-23
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -2137,9 +2171,6 @@ questionable_frip</code></pre>
 # ℹ 10 variables: Sample &lt;chr&gt;, Total_Reads &lt;dbl&gt;, Fragments &lt;dbl&gt;,
 #   Reads_in_Peaks &lt;dbl&gt;, FRiP &lt;dbl&gt;, Histone_Mark &lt;chr&gt;, Individual &lt;chr&gt;,
 #   Treatment &lt;chr&gt;, Timepoint &lt;chr&gt;, Count &lt;dbl&gt;</code></pre>
-</div>
-<div id="renaming-sample-ids" class="section level4">
-<h4>Renaming sample IDs</h4>
 <pre class="r"><code>all_peak &lt;- all_peak %&gt;%
   mutate(Sample=paste0(Individual,&quot;_&quot;,Treatment,&quot;_&quot;,Timepoint,&quot;_&quot;,Histone_Mark))</code></pre>
 </div>
@@ -2203,8 +2234,8 @@ H3K27ac_iter_cor &lt;- featurects_iter %&gt;%
 
 annomat &lt;- data.frame(sample=colnames(H3K27ac_merged_cor)) %&gt;% 
   separate_wider_delim(sample,delim=&quot;_&quot;,names=c(&quot;Ind&quot;,&quot;Treatment&quot;,&quot;Timepoint&quot;,NA),cols_remove = FALSE) %&gt;% 
-  mutate(trt=factor(Treatment, levels = c(&quot;VEH&quot;,&quot;5FU&quot;,&quot;DOX&quot;)),
-         time=factor(Timepoint, levels =c(&quot;24T&quot;,&quot;24R&quot;,&quot;144R&quot;))) %&gt;% 
+  mutate(Treatment=factor(Treatment, levels = c(&quot;VEH&quot;,&quot;5FU&quot;,&quot;DOX&quot;)),
+         Timepoint=factor(Timepoint, levels =c(&quot;24T&quot;,&quot;24R&quot;,&quot;144R&quot;))) %&gt;% 
   column_to_rownames(&quot;sample&quot;)
 heatmap_first &lt;- ComplexHeatmap::HeatmapAnnotation(df = annomat)
 
@@ -2212,10 +2243,47 @@ Heatmap(H3K27ac_merged_cor,
         top_annotation = heatmap_first,
         column_title=&quot;Unfiltered log2cpm H3K27ac&quot;)</code></pre>
 <p><img src="figure/peak_analysis.Rmd/H3K27ac%20HeatMap%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-H3K27ac-HeatMap-1-1">
+Past versions of "H3K27ac HeatMap 1-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-H3K27ac-HeatMap-1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/d927f5c53ef8b3beaec7e7728de67977aff63b83/docs/figure/peak_analysis.Rmd/H3K27ac HeatMap 1-1.png" target="_blank">d927f5c</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-23
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>annomat &lt;- data.frame(sample=colnames(H3K27ac_cluster_cor)) %&gt;% 
   separate_wider_delim(sample,delim=&quot;_&quot;,names=c(&quot;Ind&quot;,&quot;Treatment&quot;,&quot;Timepoint&quot;,NA),cols_remove = FALSE) %&gt;% 
-  mutate(trt=factor(Treatment, levels = c(&quot;VEH&quot;,&quot;5FU&quot;,&quot;DOX&quot;)),
-         time=factor(Timepoint, levels =c(&quot;24T&quot;,&quot;24R&quot;,&quot;144R&quot;))) %&gt;% 
+  mutate(Treatment=factor(Treatment, levels = c(&quot;VEH&quot;,&quot;5FU&quot;,&quot;DOX&quot;)),
+         Timepoint=factor(Timepoint, levels =c(&quot;24T&quot;,&quot;24R&quot;,&quot;144R&quot;))) %&gt;% 
   column_to_rownames(&quot;sample&quot;)
 heatmap_first &lt;- ComplexHeatmap::HeatmapAnnotation(df = annomat)
 
@@ -2223,18 +2291,125 @@ Heatmap(H3K27ac_cluster_cor,
         top_annotation = heatmap_first,
         column_title=&quot;Unfiltered log2cpm H3K27ac&quot;)</code></pre>
 <p><img src="figure/peak_analysis.Rmd/H3K27ac%20HeatMap%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-H3K27ac-HeatMap-2-1">
+Past versions of "H3K27ac HeatMap 2-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-H3K27ac-HeatMap-2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/d927f5c53ef8b3beaec7e7728de67977aff63b83/docs/figure/peak_analysis.Rmd/H3K27ac HeatMap 2-1.png" target="_blank">d927f5c</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-23
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>annomat &lt;- data.frame(sample=colnames(H3K27ac_iter_cor)) %&gt;% 
   separate_wider_delim(sample,delim=&quot;_&quot;,names=c(&quot;Ind&quot;,&quot;Treatment&quot;,&quot;Timepoint&quot;,NA),cols_remove = FALSE) %&gt;% 
-  mutate(trt=factor(Treatment, levels = c(&quot;VEH&quot;,&quot;5FU&quot;,&quot;DOX&quot;)),
-         time=factor(Timepoint, levels =c(&quot;24T&quot;,&quot;24R&quot;,&quot;144R&quot;))) %&gt;% 
+  mutate(Treatment=factor(Treatment, levels = c(&quot;VEH&quot;,&quot;5FU&quot;,&quot;DOX&quot;)),
+         Timepoint=factor(Timepoint, levels =c(&quot;24T&quot;,&quot;24R&quot;,&quot;144R&quot;))) %&gt;% 
   column_to_rownames(&quot;sample&quot;)
 heatmap_first &lt;- ComplexHeatmap::HeatmapAnnotation(df = annomat)
 
 Heatmap(H3K27ac_iter_cor, 
         top_annotation = heatmap_first,
         column_title=&quot;Unfiltered log2cpm H3K27ac&quot;)</code></pre>
-<p><img src="figure/peak_analysis.Rmd/H3K27ac%20HeatMap%203-1.png" width="1344" style="display: block; margin: auto;" />
-### H3K27me3 Count Analysis</p>
+<p><img src="figure/peak_analysis.Rmd/H3K27ac%20HeatMap%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-H3K27ac-HeatMap-3-1">
+Past versions of "H3K27ac HeatMap 3-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-H3K27ac-HeatMap-3-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/d927f5c53ef8b3beaec7e7728de67977aff63b83/docs/figure/peak_analysis.Rmd/H3K27ac HeatMap 3-1.png" target="_blank">d927f5c</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-23
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="h3k27ac-fragments" class="section level4">
+<h4>H3K27ac Fragments</h4>
+<pre class="r"><code>all_peak %&gt;%
+  mutate(Fragments=Fragments/1000000) %&gt;% 
+  ggplot(., aes(x=interaction(Individual,Treatment,Timepoint), y=Fragments, fill=Treatment, group = Treatment))+
+  geom_col()+
+  geom_hline(yintercept =5)+
+  geom_text(aes(y = 0,label = Sample), vjust = 0.2, size = 3, angle = 90)+
+  theme_classic()+
+  facet_wrap(~Histone_Mark)+
+  ggtitle(&quot;Fragment count by histone and sample&quot;)+
+  ylab(&quot;Count of Fragments * 10^6&quot;)+
+  xlab(&quot;Samples&quot;)+
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/peak_analysis.Rmd/frag%20ct-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak %&gt;%
+  mutate(FRiP=FRiP * 100) %&gt;% 
+  ggplot(., aes(x=interaction(Individual,Treatment,Timepoint), y=FRiP, fill=Treatment, group = Treatment))+
+  geom_col()+
+  geom_hline(yintercept =5)+
+  geom_text(aes(y = 0,label = Sample), vjust = 0.2, size = 3, angle = 90)+
+  theme_classic()+
+  facet_wrap(~Histone_Mark)+
+  ggtitle(&quot;Fragment count by histone and sample&quot;)+
+  ylab(&quot;Count of Fragments * 10^6&quot;)+
+  xlab(&quot;Samples&quot;)+
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/peak_analysis.Rmd/frag%20frip-1.png" width="1344" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="h3k27me3-count-analysis" class="section level3">
+<h3>H3K27me3 Count Analysis</h3>
 </div>
 <div id="h3k36me3-count-analysis" class="section level3">
 <h3>H3K36me3 Count Analysis</h3>
