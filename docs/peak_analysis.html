@@ -390,7 +390,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2025-07-23
+<strong>Last updated:</strong> 2025-07-24
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -521,15 +521,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree1295ae00c41b26cadd378989414a81771e0c0037targetblank1295ae0a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree5fae1b0dcc48901e5fe3dd32af64dc5458ff3010targetblank5fae1b0a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/infurnoheat/WardLab/tree/1295ae00c41b26cadd378989414a81771e0c0037" target="_blank">1295ae0</a>
+<a href="https://github.com/infurnoheat/WardLab/tree/5fae1b0dcc48901e5fe3dd32af64dc5458ff3010" target="_blank">5fae1b0</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree1295ae00c41b26cadd378989414a81771e0c0037targetblank1295ae0a"
+id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree5fae1b0dcc48901e5fe3dd32af64dc5458ff3010targetblank5fae1b0a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -539,7 +539,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/infurnoheat/WardLab/tree/1295ae00c41b26cadd378989414a81771e0c0037" target="_blank">1295ae0</a>.
+<a href="https://github.com/infurnoheat/WardLab/tree/5fae1b0dcc48901e5fe3dd32af64dc5458ff3010" target="_blank">5fae1b0</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -614,6 +614,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/5fae1b0dcc48901e5fe3dd32af64dc5458ff3010/analysis/peak_analysis.Rmd" target="_blank">5fae1b0</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-24
+</td>
+<td>
+wflow_publish("analysis/peak_analysis.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/infurnoheat/WardLab/389b9982288ea8288a3908e6ad26a200445fdf7c/docs/peak_analysis.html" target="_blank">389b998</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-23
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1961,8 +1995,8 @@ infurnoheat
 <div id="peak-calling-for-q0.005-and-broad0.01-with-lambda"
 class="section level3">
 <h3>Peak Calling for Q=0.005 and Broad=0.01 with Lambda</h3>
-<div id="data-initialization-6" class="section level4">
-<h4>Data Initialization</h4>
+<div id="data-initializationx" class="section level4">
+<h4>Data Initializationx</h4>
 <pre class="r"><code>peak_ct &lt;- read_delim(&quot;data/peaks/peaks_cts_lq5e3b1e2.txt&quot;, delim = &quot;\t&quot;)
 H3K27ac_peaks &lt;- read_delim(&quot;data/peaks/H3K27ac_final_results.tsv&quot;,delim = &quot;\t&quot;)
 H3K27me3_peaks &lt;- read_delim(&quot;data/peaks/H3K27me3_lq5e3b1e2_results.tsv&quot;,delim = &quot;\t&quot;)
@@ -2200,34 +2234,34 @@ names(featurects_iter)[names(featurects_iter) %in% names(rename_vec)] &lt;- rena
 <div id="h3k27ac-count-analysis" class="section level3">
 <h3>H3K27ac Count Analysis</h3>
 <pre class="r"><code>H3K27ac_merged_raw &lt;- featurects_merged %&gt;% 
-  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %&gt;% 
+  dplyr::select(Geneid,contains(&quot;Ind&quot;)) %&gt;% 
   column_to_rownames(&quot;Geneid&quot;) %&gt;% 
   as.matrix()
 
 H3K27ac_cluster_raw &lt;- featurects_cluster %&gt;% 
-  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %&gt;% 
+  dplyr::select(Geneid,contains(&quot;Ind&quot;)) %&gt;% 
   column_to_rownames(&quot;Geneid&quot;) %&gt;% 
   as.matrix()
 
 H3K27ac_iter_raw &lt;- featurects_iter %&gt;% 
-  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %&gt;% 
+  dplyr::select(Geneid,contains(&quot;Ind&quot;)) %&gt;% 
   column_to_rownames(&quot;Geneid&quot;) %&gt;% 
   as.matrix()
 
 H3K27ac_merged_cor &lt;- featurects_merged %&gt;% 
-  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %&gt;% 
+  dplyr::select(Geneid,contains(&quot;Ind&quot;)) %&gt;% 
   column_to_rownames(&quot;Geneid&quot;) %&gt;% 
   cpm(., log = TRUE) %&gt;% 
   cor()
 
 H3K27ac_cluster_cor &lt;- featurects_cluster %&gt;% 
-  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %&gt;% 
+  dplyr::select(Geneid,contains(&quot;Ind&quot;)) %&gt;% 
   column_to_rownames(&quot;Geneid&quot;) %&gt;% 
   cpm(., log = TRUE) %&gt;% 
   cor()
 
 H3K27ac_iter_cor &lt;- featurects_iter %&gt;% 
-  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %&gt;% 
+  dplyr::select(Geneid,contains(&quot;Ind&quot;)) %&gt;% 
   column_to_rownames(&quot;Geneid&quot;) %&gt;% 
   cpm(., log = TRUE) %&gt;% 
   cor()
@@ -2265,6 +2299,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/389b9982288ea8288a3908e6ad26a200445fdf7c/docs/figure/peak_analysis.Rmd/H3K27ac HeatMap 1-1.png" target="_blank">389b998</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-23
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/infurnoheat/WardLab/blob/d927f5c53ef8b3beaec7e7728de67977aff63b83/docs/figure/peak_analysis.Rmd/H3K27ac HeatMap 1-1.png" target="_blank">d927f5c</a>
@@ -2315,6 +2360,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/infurnoheat/WardLab/blob/389b9982288ea8288a3908e6ad26a200445fdf7c/docs/figure/peak_analysis.Rmd/H3K27ac HeatMap 2-1.png" target="_blank">389b998</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-23
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/infurnoheat/WardLab/blob/d927f5c53ef8b3beaec7e7728de67977aff63b83/docs/figure/peak_analysis.Rmd/H3K27ac HeatMap 2-1.png" target="_blank">d927f5c</a>
 </td>
 <td>
@@ -2363,6 +2419,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/infurnoheat/WardLab/blob/389b9982288ea8288a3908e6ad26a200445fdf7c/docs/figure/peak_analysis.Rmd/H3K27ac HeatMap 3-1.png" target="_blank">389b998</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-23
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/infurnoheat/WardLab/blob/d927f5c53ef8b3beaec7e7728de67977aff63b83/docs/figure/peak_analysis.Rmd/H3K27ac HeatMap 3-1.png" target="_blank">d927f5c</a>
 </td>
 <td>
@@ -2392,6 +2459,43 @@ infurnoheat
   theme(axis.text.x=element_text(vjust = .2,angle=90))+
   scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
 <p><img src="figure/peak_analysis.Rmd/frag%20ct-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-frag-ct-1">
+Past versions of "frag ct-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-frag-ct-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/389b9982288ea8288a3908e6ad26a200445fdf7c/docs/figure/peak_analysis.Rmd/frag ct-1.png" target="_blank">389b998</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-23
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>all_peak %&gt;%
   mutate(FRiP=FRiP * 100) %&gt;% 
   ggplot(., aes(x=interaction(Individual,Treatment,Timepoint), y=FRiP, fill=Treatment, group = Treatment))+
@@ -2406,6 +2510,43 @@ infurnoheat
   theme(axis.text.x=element_text(vjust = .2,angle=90))+
   scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
 <p><img src="figure/peak_analysis.Rmd/frag%20frip-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-frag-frip-1">
+Past versions of "frag frip-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-frag-frip-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/389b9982288ea8288a3908e6ad26a200445fdf7c/docs/figure/peak_analysis.Rmd/frag frip-1.png" target="_blank">389b998</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-23
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="h3k27me3-count-analysis" class="section level3">
