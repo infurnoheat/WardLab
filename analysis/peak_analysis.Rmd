@@ -614,7 +614,13 @@ Heatmap(H3K27ac_iter_cor,
         column_title="Unfiltered log2cpm H3K27ac")
 ```
 
-#### H3K27ac Fragments
+### H3K27me3 Count Analysis
+
+### H3K36me3 Count Analysis
+
+### H3K9me3 Count Analysis
+
+#### Fragment Analysis
 ```{r frag ct, fig.width=14}
 all_peak %>%
   mutate(Fragments=Fragments/1000000) %>% 
@@ -646,11 +652,3 @@ all_peak %>%
   theme(axis.text.x=element_text(vjust = .2,angle=90))+
   scale_y_continuous( expand = expansion(mult = c(0, .1)))
 ```
-
-### H3K27me3 Count Analysis
-
-### H3K36me3 Count Analysis
-
-### H3K9me3 Count Analysis
-
-
