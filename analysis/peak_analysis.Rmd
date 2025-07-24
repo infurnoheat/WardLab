@@ -446,7 +446,7 @@ all_peak_var %>%
 
 ### Peak Calling for Q=0.005 and Broad=0.01 with Lambda
 
-#### Data Initialization
+#### Data Initializationx
 ```{r peak data lq5e3b1e2}
 peak_ct <- read_delim("data/peaks/peaks_cts_lq5e3b1e2.txt", delim = "\t")
 H3K27ac_peaks <- read_delim("data/peaks/H3K27ac_final_results.tsv",delim = "\t")
@@ -544,34 +544,34 @@ names(featurects_iter)[names(featurects_iter) %in% names(rename_vec)] <- rename_
 ### H3K27ac Count Analysis
 ```{r H3K27ac HeatMap 1, fig.width=14,fig.height=14}
 H3K27ac_merged_raw <- featurects_merged %>% 
-  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %>% 
+  dplyr::select(Geneid,contains("Ind")) %>% 
   column_to_rownames("Geneid") %>% 
   as.matrix()
 
 H3K27ac_cluster_raw <- featurects_cluster %>% 
-  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %>% 
+  dplyr::select(Geneid,contains("Ind")) %>% 
   column_to_rownames("Geneid") %>% 
   as.matrix()
 
 H3K27ac_iter_raw <- featurects_iter %>% 
-  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %>% 
+  dplyr::select(Geneid,contains("Ind")) %>% 
   column_to_rownames("Geneid") %>% 
   as.matrix()
 
 H3K27ac_merged_cor <- featurects_merged %>% 
-  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %>% 
+  dplyr::select(Geneid,contains("Ind")) %>% 
   column_to_rownames("Geneid") %>% 
   cpm(., log = TRUE) %>% 
   cor()
 
 H3K27ac_cluster_cor <- featurects_cluster %>% 
-  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %>% 
+  dplyr::select(Geneid,contains("Ind")) %>% 
   column_to_rownames("Geneid") %>% 
   cpm(., log = TRUE) %>% 
   cor()
 
 H3K27ac_iter_cor <- featurects_iter %>% 
-  dplyr::select(Geneid,`Ind3_VEH_24R_H3K27ac`:`Ind3_DOX_24R_H3K27ac`) %>% 
+  dplyr::select(Geneid,contains("Ind")) %>% 
   column_to_rownames("Geneid") %>% 
   cpm(., log = TRUE) %>% 
   cor()
