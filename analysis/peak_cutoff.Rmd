@@ -45,8 +45,6 @@ library(Rsubread)
 #### Data Initialization
 ```{r init}
 sampleinfo <- read_delim("data/sample_info.tsv", delim = "\t")
-multiqc_gene_stats_trim <- read_delim("data/multiqc_data_trim/multiqc_general_stats.txt",delim = "\t")
-multiqc_fastqc_trim <- read_delim("data/multiqc_data_trim/multiqc_fastqc.txt",delim = "\t")
 ```
 
 #### Functions
@@ -342,6 +340,172 @@ H3K9me3 %>%
   labs(title = "",
        x = "Q Score",
        y = "Average Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+### Cut Off For Broad Peaks as Narrow
+```{r H3K27me3 narrow 1, fig.width=14, fig.height=28}
+H3K27me3 <- sampleinfo %>%
+  dplyr::filter(Histone_Mark=="H3K27me3") %>%
+  dplyr::filter(!Treatment=="5FU")
+cutoff <- data.frame(matrix(nrow = 0, ncol = 6))
+colnames(cutoff) = c("Sample", "pscore", "qscore", "npeaks", "lpeaks", "avelpeak")
+for (sample in H3K27me3$`Library ID`) {
+  filename <- paste("data/peaks/H3K27me3/", sample, "_narrow_cutoff_analysis.txt", sep = "")
+  temp <- read_delim(filename, delim = "\t")
+  temp$Sample <- sample
+  cutoff <- rbind(cutoff, temp)
+}
+H3K27me3 <- left_join(H3K27me3, cutoff, by =c("Library ID"="Sample"))
+
+H3K27me3 <- H3K27me3 %>%
+  dplyr::filter(qscore > 0.6)
+
+H3K27me3 %>%  
+  ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$npeaks, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K27me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Total Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r H3K27me3 narrow 2, fig.width=14, fig.height=28}
+H3K27me3 %>%  
+  ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$lpeaks, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K27me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Total Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r H3K27me3 narrow 3, fig.width=14, fig.height=28}
+H3K27me3 %>%  
+  ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$avelpeak, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K27me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Total Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r H3K36me3 narrow 1, fig.width=14, fig.height=28}
+H3K36me3 <- sampleinfo %>%
+  dplyr::filter(Histone_Mark=="H3K36me3") %>%
+  dplyr::filter(!Treatment=="5FU")
+cutoff <- data.frame(matrix(nrow = 0, ncol = 6))
+colnames(cutoff) = c("Sample", "pscore", "qscore", "npeaks", "lpeaks", "avelpeak")
+for (sample in H3K36me3$`Library ID`) {
+  filename <- paste("data/peaks/H3K36me3/", sample, "_narrow_cutoff_analysis.txt", sep = "")
+  temp <- read_delim(filename, delim = "\t")
+  temp$Sample <- sample
+  cutoff <- rbind(cutoff, temp)
+}
+H3K36me3 <- left_join(H3K36me3, cutoff, by =c("Library ID"="Sample"))
+
+H3K36me3 <- H3K36me3 %>%
+  dplyr::filter(qscore > 0.6)
+
+H3K36me3 %>%  
+  ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$npeaks, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K36me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Total Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r H3K36me3 narrow 2, fig.width=14, fig.height=28}
+H3K36me3 %>%  
+  ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$lpeaks, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K36me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Total Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r H3K36me3 narow 3, fig.width=14, fig.height=28}
+H3K36me3 %>%  
+  ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$avelpeak, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K36me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Total Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r H3K9me3 narrow 1, fig.width=14, fig.height=28}
+H3K9me3 <- sampleinfo %>%
+  dplyr::filter(Histone_Mark=="H3K9me3") %>%
+  dplyr::filter(!Treatment=="5FU")
+cutoff <- data.frame(matrix(nrow = 0, ncol = 6))
+colnames(cutoff) = c("Sample", "pscore", "qscore", "npeaks", "lpeaks", "avelpeak")
+for (sample in H3K9me3$`Library ID`) {
+  filename <- paste("data/peaks/H3K9me3/", sample, "_narrow_cutoff_analysis.txt", sep = "")
+  temp <- read_delim(filename, delim = "\t")
+  temp$Sample <- sample
+  cutoff <- rbind(cutoff, temp)
+}
+H3K9me3 <- left_join(H3K9me3, cutoff, by =c("Library ID"="Sample"))
+
+H3K9me3 <- H3K9me3 %>%
+  dplyr::filter(qscore > 0.6)
+
+H3K9me3 %>%  
+  ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$lpeaks, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K9me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Total Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r H3K9me3 narrow 2, fig.width=14, fig.height=28}
+H3K9me3 %>%  
+  ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$lpeaks, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K9me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Total Peak Lengths",
+       color= "Sample")+
+  theme_minimal()
+```
+
+```{r H3K9me3 narow 3, fig.width=14, fig.height=28}
+H3K9me3 %>%  
+  ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$avelpeak, color = 'Library ID'))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K9me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = "free", ncol = 5, switch = "y")+
+  labs(title = "",
+       x = "Q Score",
+       y = "Total Peak Lengths",
        color= "Sample")+
   theme_minimal()
 ```
