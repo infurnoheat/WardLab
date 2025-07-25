@@ -585,7 +585,7 @@ heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
 
 Heatmap(H3K27ac_merged_cor, 
         top_annotation = heatmap_first,
-        column_title="Unfiltered log2cpm H3K27ac")
+        column_title="Unfiltered log2cpm H3K27ac with Standard Merging")
 ```
 
 ```{r H3K27ac HeatMap 2, fig.width=14,fig.height=14}
@@ -598,7 +598,7 @@ heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
 
 Heatmap(H3K27ac_cluster_cor, 
         top_annotation = heatmap_first,
-        column_title="Unfiltered log2cpm H3K27ac")
+        column_title="Unfiltered log2cpm H3K27ac with Cluster Merging")
 ```
 
 ```{r H3K27ac HeatMap 3, fig.width=14,fig.height=14}
@@ -611,7 +611,7 @@ heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
 
 Heatmap(H3K27ac_iter_cor, 
         top_annotation = heatmap_first,
-        column_title="Unfiltered log2cpm H3K27ac")
+        column_title="Unfiltered log2cpm H3K27ac with Iterative Merging")
 ```
 
 ### H3K27me3 Count Analysis
@@ -620,7 +620,7 @@ Heatmap(H3K27ac_iter_cor,
 
 ### H3K9me3 Count Analysis
 
-#### Fragment Analysis
+### Fragment Analysis
 ```{r frag ct, fig.width=14}
 all_peak %>%
   mutate(Fragments=Fragments/1000000) %>% 
