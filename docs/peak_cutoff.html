@@ -390,7 +390,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2025-07-22
+<strong>Last updated:</strong> 2025-07-25
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -521,15 +521,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree95b9db587852f6a612088ae121cf73151db767d3targetblank95b9db5a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreefcda18241a0e1a16368bb23120478d4eecf7fa86targetblankfcda182a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/infurnoheat/WardLab/tree/95b9db587852f6a612088ae121cf73151db767d3" target="_blank">95b9db5</a>
+<a href="https://github.com/infurnoheat/WardLab/tree/fcda18241a0e1a16368bb23120478d4eecf7fa86" target="_blank">fcda182</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree95b9db587852f6a612088ae121cf73151db767d3targetblank95b9db5a"
+id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreefcda18241a0e1a16368bb23120478d4eecf7fa86targetblankfcda182a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -539,7 +539,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/infurnoheat/WardLab/tree/95b9db587852f6a612088ae121cf73151db767d3" target="_blank">95b9db5</a>.
+<a href="https://github.com/infurnoheat/WardLab/tree/fcda18241a0e1a16368bb23120478d4eecf7fa86" target="_blank">fcda182</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -556,7 +556,6 @@ were generated:
 Ignored files:
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
-    Ignored:    analysis/figure/
 
 Untracked files:
     Untracked:  data/RUVs_DEG.tsv
@@ -571,7 +570,6 @@ Untracked files:
 
 Unstaged changes:
     Modified:   README.md
-    Modified:   analysis/peak_analysis.Rmd
 
 </code></pre>
 <p>
@@ -616,6 +614,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/fcda18241a0e1a16368bb23120478d4eecf7fa86/analysis/peak_cutoff.Rmd" target="_blank">fcda182</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-25
+</td>
+<td>
+wflow_publish("analysis/peak_cutoff.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/infurnoheat/WardLab/3d6bcff87fc1a360dc8a0b6c67a149f42be70a68/docs/peak_cutoff.html" target="_blank">3d6bcff</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-22
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -667,9 +699,7 @@ library(Rsubread)</code></pre>
 </div>
 <div id="data-initialization" class="section level4">
 <h4>Data Initialization</h4>
-<pre class="r"><code>sampleinfo &lt;- read_delim(&quot;data/sample_info.tsv&quot;, delim = &quot;\t&quot;)
-multiqc_gene_stats_trim &lt;- read_delim(&quot;data/multiqc_data_trim/multiqc_general_stats.txt&quot;,delim = &quot;\t&quot;)
-multiqc_fastqc_trim &lt;- read_delim(&quot;data/multiqc_data_trim/multiqc_fastqc.txt&quot;,delim = &quot;\t&quot;)</code></pre>
+<pre class="r"><code>sampleinfo &lt;- read_delim(&quot;data/sample_info.tsv&quot;, delim = &quot;\t&quot;)</code></pre>
 </div>
 <div id="functions" class="section level4">
 <h4>Functions</h4>
@@ -777,6 +807,43 @@ H3K27ac %&gt;%
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/peak_cutoff.Rmd/peak%20cutoff%20H3K27ac%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-peak-cutoff-H3K27ac-1-1">
+Past versions of "peak cutoff H3K27ac 1-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-peak-cutoff-H3K27ac-1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/3d6bcff87fc1a360dc8a0b6c67a149f42be70a68/docs/figure/peak_cutoff.Rmd/peak cutoff H3K27ac 1-1.png" target="_blank">3d6bcff</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-22
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>H3K27ac %&gt;%  
   ggplot(., aes(x=H3K27ac$qscore, y=H3K27ac$lpeaks, color = &#39;Library ID&#39;))+
   geom_line(size=1)+
@@ -788,6 +855,43 @@ H3K27ac %&gt;%
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/peak_cutoff.Rmd/peak%20cutoff%20H3K27ac%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-peak-cutoff-H3K27ac-2-1">
+Past versions of "peak cutoff H3K27ac 2-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-peak-cutoff-H3K27ac-2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/3d6bcff87fc1a360dc8a0b6c67a149f42be70a68/docs/figure/peak_cutoff.Rmd/peak cutoff H3K27ac 2-1.png" target="_blank">3d6bcff</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-22
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>H3K27ac %&gt;%  
   ggplot(., aes(x=H3K27ac$qscore, y=H3K27ac$avelpeak, color = &#39;Library ID&#39;))+
   geom_line(size=1)+
@@ -799,6 +903,43 @@ H3K27ac %&gt;%
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/peak_cutoff.Rmd/peak%20cutoff%20H3K27ac%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-peak-cutoff-H3K27ac-3-1">
+Past versions of "peak cutoff H3K27ac 3-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-peak-cutoff-H3K27ac-3-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/3d6bcff87fc1a360dc8a0b6c67a149f42be70a68/docs/figure/peak_cutoff.Rmd/peak cutoff H3K27ac 3-1.png" target="_blank">3d6bcff</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-22
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="cut-off-analysis-for-h3k27me3" class="section level4">
 <h4>Cut Off Analysis for H3K27me3</h4>
@@ -828,6 +969,43 @@ H3K27me3 %&gt;%
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/peak_cutoff.Rmd/peak%20cutoff%20H3K27me3%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-peak-cutoff-H3K27me3-1-1">
+Past versions of "peak cutoff H3K27me3 1-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-peak-cutoff-H3K27me3-1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/3d6bcff87fc1a360dc8a0b6c67a149f42be70a68/docs/figure/peak_cutoff.Rmd/peak cutoff H3K27me3 1-1.png" target="_blank">3d6bcff</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-22
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>H3K27me3 %&gt;%  
   ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$lpeaks, color = &#39;Library ID&#39;))+
   geom_line(size=1)+
@@ -839,6 +1017,43 @@ H3K27me3 %&gt;%
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/peak_cutoff.Rmd/peak%20cutoff%20H3K27me3%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-peak-cutoff-H3K27me3-2-1">
+Past versions of "peak cutoff H3K27me3 2-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-peak-cutoff-H3K27me3-2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/3d6bcff87fc1a360dc8a0b6c67a149f42be70a68/docs/figure/peak_cutoff.Rmd/peak cutoff H3K27me3 2-1.png" target="_blank">3d6bcff</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-22
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>H3K27me3 %&gt;%  
   ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$avelpeak, color = &#39;Library ID&#39;))+
   geom_line(size=1)+
@@ -850,6 +1065,43 @@ H3K27me3 %&gt;%
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/peak_cutoff.Rmd/peak%20cutoff%20H3K27me3%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-peak-cutoff-H3K27me3-3-1">
+Past versions of "peak cutoff H3K27me3 3-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-peak-cutoff-H3K27me3-3-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/3d6bcff87fc1a360dc8a0b6c67a149f42be70a68/docs/figure/peak_cutoff.Rmd/peak cutoff H3K27me3 3-1.png" target="_blank">3d6bcff</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-22
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="cut-off-analysis-for-h3k36me3" class="section level4">
 <h4>Cut Off Analysis for H3K36me3</h4>
@@ -879,6 +1131,43 @@ H3K36me3 %&gt;%
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/peak_cutoff.Rmd/peak%20cutoff%20H3K36me3%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-peak-cutoff-H3K36me3-1-1">
+Past versions of "peak cutoff H3K36me3 1-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-peak-cutoff-H3K36me3-1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/3d6bcff87fc1a360dc8a0b6c67a149f42be70a68/docs/figure/peak_cutoff.Rmd/peak cutoff H3K36me3 1-1.png" target="_blank">3d6bcff</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-22
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>H3K36me3 %&gt;%  
   ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$lpeaks, color = &#39;Library ID&#39;))+
   geom_line(size=1)+
@@ -890,6 +1179,43 @@ H3K36me3 %&gt;%
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/peak_cutoff.Rmd/peak%20cutoff%20H3K36me3%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-peak-cutoff-H3K36me3-2-1">
+Past versions of "peak cutoff H3K36me3 2-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-peak-cutoff-H3K36me3-2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/3d6bcff87fc1a360dc8a0b6c67a149f42be70a68/docs/figure/peak_cutoff.Rmd/peak cutoff H3K36me3 2-1.png" target="_blank">3d6bcff</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-22
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>H3K36me3 %&gt;%  
   ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$avelpeak, color = &#39;Library ID&#39;))+
   geom_line(size=1)+
@@ -901,6 +1227,43 @@ H3K36me3 %&gt;%
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/peak_cutoff.Rmd/peak%20cutoff%20H3K36me3%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-peak-cutoff-H3K36me3-3-1">
+Past versions of "peak cutoff H3K36me3 3-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-peak-cutoff-H3K36me3-3-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/3d6bcff87fc1a360dc8a0b6c67a149f42be70a68/docs/figure/peak_cutoff.Rmd/peak cutoff H3K36me3 3-1.png" target="_blank">3d6bcff</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-22
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="cut-off-analysis-for-h3k9me3" class="section level4">
 <h4>Cut Off Analysis for H3K9me3</h4>
@@ -928,6 +1291,43 @@ H3K9me3 %&gt;%
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/peak_cutoff.Rmd/peak%20cutoff%20H3K9me3%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-peak-cutoff-H3K9me3-1-1">
+Past versions of "peak cutoff H3K9me3 1-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-peak-cutoff-H3K9me3-1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/3d6bcff87fc1a360dc8a0b6c67a149f42be70a68/docs/figure/peak_cutoff.Rmd/peak cutoff H3K9me3 1-1.png" target="_blank">3d6bcff</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-22
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>H3K9me3 %&gt;%  
   ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$lpeaks, color = &#39;Library ID&#39;))+
   geom_line(size=1)+
@@ -939,6 +1339,43 @@ H3K9me3 %&gt;%
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/peak_cutoff.Rmd/peak%20cutoff%20H3K9me3%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-peak-cutoff-H3K9me3-2-1">
+Past versions of "peak cutoff H3K9me3 2-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-peak-cutoff-H3K9me3-2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/3d6bcff87fc1a360dc8a0b6c67a149f42be70a68/docs/figure/peak_cutoff.Rmd/peak cutoff H3K9me3 2-1.png" target="_blank">3d6bcff</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-22
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>H3K9me3 %&gt;%  
   ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$avelpeak, color = &#39;Library ID&#39;))+
   geom_line(size=1)+
@@ -950,6 +1387,194 @@ H3K9me3 %&gt;%
        color= &quot;Sample&quot;)+
   theme_minimal()</code></pre>
 <p><img src="figure/peak_cutoff.Rmd/peak%20cutoff%20H3K9me3%203-1.png" width="2688" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-peak-cutoff-H3K9me3-3-1">
+Past versions of "peak cutoff H3K9me3 3-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-peak-cutoff-H3K9me3-3-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/3d6bcff87fc1a360dc8a0b6c67a149f42be70a68/docs/figure/peak_cutoff.Rmd/peak cutoff H3K9me3 3-1.png" target="_blank">3d6bcff</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-22
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="cut-off-for-broad-peaks-as-narrow" class="section level3">
+<h3>Cut Off For Broad Peaks as Narrow</h3>
+<pre class="r"><code>H3K27me3 &lt;- sampleinfo %&gt;%
+  dplyr::filter(Histone_Mark==&quot;H3K27me3&quot;) %&gt;%
+  dplyr::filter(!Treatment==&quot;5FU&quot;)
+cutoff &lt;- data.frame(matrix(nrow = 0, ncol = 6))
+colnames(cutoff) = c(&quot;Sample&quot;, &quot;pscore&quot;, &quot;qscore&quot;, &quot;npeaks&quot;, &quot;lpeaks&quot;, &quot;avelpeak&quot;)
+for (sample in H3K27me3$`Library ID`) {
+  filename &lt;- paste(&quot;data/peaks/H3K27me3/&quot;, sample, &quot;_narrow_cutoff_analysis.txt&quot;, sep = &quot;&quot;)
+  temp &lt;- read_delim(filename, delim = &quot;\t&quot;)
+  temp$Sample &lt;- sample
+  cutoff &lt;- rbind(cutoff, temp)
+}
+H3K27me3 &lt;- left_join(H3K27me3, cutoff, by =c(&quot;Library ID&quot;=&quot;Sample&quot;))
+
+H3K27me3 &lt;- H3K27me3 %&gt;%
+  dplyr::filter(qscore &gt; 0.6)
+
+H3K27me3 %&gt;%  
+  ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$npeaks, color = &#39;Library ID&#39;))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K27me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
+  labs(title = &quot;&quot;,
+       x = &quot;Q Score&quot;,
+       y = &quot;Total Peak Lengths&quot;,
+       color= &quot;Sample&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="figure/peak_cutoff.Rmd/H3K27me3%20narrow%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>H3K27me3 %&gt;%  
+  ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$lpeaks, color = &#39;Library ID&#39;))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K27me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
+  labs(title = &quot;&quot;,
+       x = &quot;Q Score&quot;,
+       y = &quot;Total Peak Lengths&quot;,
+       color= &quot;Sample&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="figure/peak_cutoff.Rmd/H3K27me3%20narrow%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>H3K27me3 %&gt;%  
+  ggplot(., aes(x=H3K27me3$qscore, y=H3K27me3$avelpeak, color = &#39;Library ID&#39;))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K27me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
+  labs(title = &quot;&quot;,
+       x = &quot;Q Score&quot;,
+       y = &quot;Total Peak Lengths&quot;,
+       color= &quot;Sample&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="figure/peak_cutoff.Rmd/H3K27me3%20narrow%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>H3K36me3 &lt;- sampleinfo %&gt;%
+  dplyr::filter(Histone_Mark==&quot;H3K36me3&quot;) %&gt;%
+  dplyr::filter(!Treatment==&quot;5FU&quot;)
+cutoff &lt;- data.frame(matrix(nrow = 0, ncol = 6))
+colnames(cutoff) = c(&quot;Sample&quot;, &quot;pscore&quot;, &quot;qscore&quot;, &quot;npeaks&quot;, &quot;lpeaks&quot;, &quot;avelpeak&quot;)
+for (sample in H3K36me3$`Library ID`) {
+  filename &lt;- paste(&quot;data/peaks/H3K36me3/&quot;, sample, &quot;_narrow_cutoff_analysis.txt&quot;, sep = &quot;&quot;)
+  temp &lt;- read_delim(filename, delim = &quot;\t&quot;)
+  temp$Sample &lt;- sample
+  cutoff &lt;- rbind(cutoff, temp)
+}
+H3K36me3 &lt;- left_join(H3K36me3, cutoff, by =c(&quot;Library ID&quot;=&quot;Sample&quot;))
+
+H3K36me3 &lt;- H3K36me3 %&gt;%
+  dplyr::filter(qscore &gt; 0.6)
+
+H3K36me3 %&gt;%  
+  ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$npeaks, color = &#39;Library ID&#39;))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K36me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
+  labs(title = &quot;&quot;,
+       x = &quot;Q Score&quot;,
+       y = &quot;Total Peak Lengths&quot;,
+       color= &quot;Sample&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="figure/peak_cutoff.Rmd/H3K36me3%20narrow%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>H3K36me3 %&gt;%  
+  ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$lpeaks, color = &#39;Library ID&#39;))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K36me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
+  labs(title = &quot;&quot;,
+       x = &quot;Q Score&quot;,
+       y = &quot;Total Peak Lengths&quot;,
+       color= &quot;Sample&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="figure/peak_cutoff.Rmd/H3K36me3%20narrow%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>H3K36me3 %&gt;%  
+  ggplot(., aes(x=H3K36me3$qscore, y=H3K36me3$avelpeak, color = &#39;Library ID&#39;))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K36me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
+  labs(title = &quot;&quot;,
+       x = &quot;Q Score&quot;,
+       y = &quot;Total Peak Lengths&quot;,
+       color= &quot;Sample&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="figure/peak_cutoff.Rmd/H3K36me3%20narow%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>H3K9me3 &lt;- sampleinfo %&gt;%
+  dplyr::filter(Histone_Mark==&quot;H3K9me3&quot;) %&gt;%
+  dplyr::filter(!Treatment==&quot;5FU&quot;)
+cutoff &lt;- data.frame(matrix(nrow = 0, ncol = 6))
+colnames(cutoff) = c(&quot;Sample&quot;, &quot;pscore&quot;, &quot;qscore&quot;, &quot;npeaks&quot;, &quot;lpeaks&quot;, &quot;avelpeak&quot;)
+for (sample in H3K9me3$`Library ID`) {
+  filename &lt;- paste(&quot;data/peaks/H3K9me3/&quot;, sample, &quot;_narrow_cutoff_analysis.txt&quot;, sep = &quot;&quot;)
+  temp &lt;- read_delim(filename, delim = &quot;\t&quot;)
+  temp$Sample &lt;- sample
+  cutoff &lt;- rbind(cutoff, temp)
+}
+H3K9me3 &lt;- left_join(H3K9me3, cutoff, by =c(&quot;Library ID&quot;=&quot;Sample&quot;))
+
+H3K9me3 &lt;- H3K9me3 %&gt;%
+  dplyr::filter(qscore &gt; 0.6)
+
+H3K9me3 %&gt;%  
+  ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$lpeaks, color = &#39;Library ID&#39;))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K9me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
+  labs(title = &quot;&quot;,
+       x = &quot;Q Score&quot;,
+       y = &quot;Total Peak Lengths&quot;,
+       color= &quot;Sample&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="figure/peak_cutoff.Rmd/H3K9me3%20narrow%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>H3K9me3 %&gt;%  
+  ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$lpeaks, color = &#39;Library ID&#39;))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K9me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
+  labs(title = &quot;&quot;,
+       x = &quot;Q Score&quot;,
+       y = &quot;Total Peak Lengths&quot;,
+       color= &quot;Sample&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="figure/peak_cutoff.Rmd/H3K9me3%20narrow%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>H3K9me3 %&gt;%  
+  ggplot(., aes(x=H3K9me3$qscore, y=H3K9me3$avelpeak, color = &#39;Library ID&#39;))+
+  geom_line(size=1)+
+  scale_x_continuous(breaks = seq(0, max(H3K9me3$qscore), by = 1))+
+  facet_wrap(~`Library ID`, scales = &quot;free&quot;, ncol = 5, switch = &quot;y&quot;)+
+  labs(title = &quot;&quot;,
+       x = &quot;Q Score&quot;,
+       y = &quot;Total Peak Lengths&quot;,
+       color= &quot;Sample&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="figure/peak_cutoff.Rmd/H3K9me3%20narow%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1069,7 +1694,6 @@ loaded via a namespace (and not attached):
 [129] shiny_1.11.1                broom_1.0.8                
 [131] memoise_2.0.1               bslib_0.9.0                
 [133] bit_4.6.0                   polynom_1.4-1              </code></pre>
-</div>
 </div>
 </div>
 </div>
