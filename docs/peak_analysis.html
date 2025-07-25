@@ -521,15 +521,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree3c31bea1c8b890378aa0aaee70e43be94069ab06targetblank3c31beaa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree876d279a0f781486710310a6caa8bc964813ac15targetblank876d279a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/infurnoheat/WardLab/tree/3c31bea1c8b890378aa0aaee70e43be94069ab06" target="_blank">3c31bea</a>
+<a href="https://github.com/infurnoheat/WardLab/tree/876d279a0f781486710310a6caa8bc964813ac15" target="_blank">876d279</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree3c31bea1c8b890378aa0aaee70e43be94069ab06targetblank3c31beaa"
+id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree876d279a0f781486710310a6caa8bc964813ac15targetblank876d279a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -539,7 +539,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/infurnoheat/WardLab/tree/3c31bea1c8b890378aa0aaee70e43be94069ab06" target="_blank">3c31bea</a>.
+<a href="https://github.com/infurnoheat/WardLab/tree/876d279a0f781486710310a6caa8bc964813ac15" target="_blank">876d279</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -614,6 +614,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/876d279a0f781486710310a6caa8bc964813ac15/analysis/peak_analysis.Rmd" target="_blank">876d279</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-24
+</td>
+<td>
+wflow_publish("analysis/peak_analysis.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/infurnoheat/WardLab/9f8e50939f0d576b575bb2c4328f91b6257c7c5d/docs/peak_analysis.html" target="_blank">9f8e509</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-24
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -2309,7 +2343,7 @@ heatmap_first &lt;- ComplexHeatmap::HeatmapAnnotation(df = annomat)
 
 Heatmap(H3K27ac_merged_cor, 
         top_annotation = heatmap_first,
-        column_title=&quot;Unfiltered log2cpm H3K27ac&quot;)</code></pre>
+        column_title=&quot;Unfiltered log2cpm H3K27ac with Standard Merging&quot;)</code></pre>
 <p><img src="figure/peak_analysis.Rmd/H3K27ac%20HeatMap%201-1.png" width="1344" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-H3K27ac-HeatMap-1-1">
@@ -2379,7 +2413,7 @@ heatmap_first &lt;- ComplexHeatmap::HeatmapAnnotation(df = annomat)
 
 Heatmap(H3K27ac_cluster_cor, 
         top_annotation = heatmap_first,
-        column_title=&quot;Unfiltered log2cpm H3K27ac&quot;)</code></pre>
+        column_title=&quot;Unfiltered log2cpm H3K27ac with Cluster Merging&quot;)</code></pre>
 <p><img src="figure/peak_analysis.Rmd/H3K27ac%20HeatMap%202-1.png" width="1344" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-H3K27ac-HeatMap-2-1">
@@ -2449,7 +2483,7 @@ heatmap_first &lt;- ComplexHeatmap::HeatmapAnnotation(df = annomat)
 
 Heatmap(H3K27ac_iter_cor, 
         top_annotation = heatmap_first,
-        column_title=&quot;Unfiltered log2cpm H3K27ac&quot;)</code></pre>
+        column_title=&quot;Unfiltered log2cpm H3K27ac with Iterative Merging&quot;)</code></pre>
 <p><img src="figure/peak_analysis.Rmd/H3K27ac%20HeatMap%203-1.png" width="1344" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-H3K27ac-HeatMap-3-1">
@@ -2519,8 +2553,9 @@ infurnoheat
 </div>
 <div id="h3k9me3-count-analysis" class="section level3">
 <h3>H3K9me3 Count Analysis</h3>
-<div id="fragment-analysis" class="section level4">
-<h4>Fragment Analysis</h4>
+</div>
+<div id="fragment-analysis" class="section level3">
+<h3>Fragment Analysis</h3>
 <pre class="r"><code>all_peak %&gt;%
   mutate(Fragments=Fragments/1000000) %&gt;% 
   ggplot(., aes(x=interaction(Individual,Treatment,Timepoint), y=Fragments, fill=Treatment, group = Treatment))+
@@ -2742,7 +2777,6 @@ loaded via a namespace (and not attached):
 [129] shiny_1.11.1                broom_1.0.8                
 [131] memoise_2.0.1               bslib_0.9.0                
 [133] bit_4.6.0                   polynom_1.4-1              </code></pre>
-</div>
 </div>
 </div>
 </div>
