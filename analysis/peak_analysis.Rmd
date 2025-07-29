@@ -446,7 +446,7 @@ all_peak_var %>%
 
 ### Peak Calling for Q=0.005 and Broad=0.01 with Lambda
 
-#### Data Initializationx
+#### Data Initialization
 ```{r peak data lq5e3b1e2}
 peak_ct <- read_delim("data/peaks/peaks_cts_lq5e3b1e2.txt", delim = "\t")
 H3K27ac_peaks <- read_delim("data/peaks/H3K27ac_final_results.tsv",delim = "\t")
@@ -507,15 +507,281 @@ all_peak_var %>%
   ggtitle("Peak count across histones")
 ```
 
+### Picard with Broad Peaks
+```{r peak data picard broad 1}
+peak_ct <- read_delim("data/peaks/peaks_cts_picard_broad.txt", delim = "\t")
+H3K27ac_peaks <- read_delim("data/peaks/H3K27ac_picard_results.tsv",delim = "\t")
+H3K27me3_peaks <- read_delim("data/peaks/H3K27me3_picard_broad_results.tsv",delim = "\t")
+H3K36me3_peaks <- read_delim("data/peaks/H3K36me3_picard_broad_results.tsv",delim = "\t")
+H3K9me3_peaks <- read_delim("data/peaks/H3K9me3_picard_broad_results.tsv",delim = "\t")
+
+all_peak_pb <- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_pb <- all_peak_pb %>%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %>%
+  left_join(.,sampleinfo, by=c("Sample"="Library ID")) %>%
+  left_join(.,peak_ct, by=c("Sample"="Sample"))
+all_peak_pb <- all_peak_pb[(!all_peak_pb$Treatment %in% "5FU"),]
+```
+
+```{r peak ct picard broad, fig.width=14}
+all_peak_pb %>% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak number for all samples")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r peak ct box picard_broad}
+all_peak_pb %>% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptx picard_broad}
+all_peak_pb %>% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptime picard_broad}
+all_peak_pb %>% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+### Picard with Broad as Narrow Peaks
+```{r peak data picard_narrow}
+peak_ct <- read_delim("data/peaks/peaks_cts_picard_narrow.txt", delim = "\t")
+H3K27ac_peaks <- read_delim("data/peaks/H3K27ac_picard_results.tsv",delim = "\t")
+H3K27me3_peaks <- read_delim("data/peaks/H3K27me3_picard_narrow_results.tsv",delim = "\t")
+H3K36me3_peaks <- read_delim("data/peaks/H3K36me3_picard_narrow_results.tsv",delim = "\t")
+H3K9me3_peaks <- read_delim("data/peaks/H3K9me3_picard_narrow_results.tsv",delim = "\t")
+
+all_peak_pn <- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_pn <- all_peak_pn %>%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %>%
+  left_join(.,sampleinfo, by=c("Sample"="Library ID")) %>%
+  left_join(.,peak_ct, by=c("Sample"="Sample"))
+all_peak_pn <- all_peak_pn[(!all_peak_pn$Treatment %in% "5FU"),]
+```
+
+```{r peak ct peak_narrow, fig.width=14}
+all_peak_pn %>% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak number for all samples")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r peak ct box picard_narrow}
+all_peak_pn %>% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptx picard_narrow}
+all_peak_pn %>% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptime picard_narrow}
+all_peak_pn %>% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+### Picard with Broad as Stringent Narrow Peaks
+```{r peak data 1e3_narrow 1}
+peak_ct <- read_delim("data/peaks/peaks_cts_1e3_narrow.txt", delim = "\t")
+H3K27ac_peaks <- read_delim("data/peaks/H3K27ac_picard_results.tsv",delim = "\t")
+H3K27me3_peaks <- read_delim("data/peaks/H3K27me3_1e3_narrow_results.tsv",delim = "\t")
+H3K36me3_peaks <- read_delim("data/peaks/H3K36me3_1e3_narrow_results.tsv",delim = "\t")
+H3K9me3_peaks <- read_delim("data/peaks/H3K9me3_1e3_narrow_results.tsv",delim = "\t")
+
+all_peak_sn <- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_sn <- all_peak_sn %>%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %>%
+  left_join(.,sampleinfo, by=c("Sample"="Library ID")) %>%
+  left_join(.,peak_ct, by=c("Sample"="Sample"))
+all_peak_sn <- all_peak_sn[(!all_peak_sn$Treatment %in% "5FU"),]
+```
+
+```{r peak ct 1e3_narrow, fig.width=14}
+all_peak_sn %>% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak number for all samples")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r peak ct box 1e3_narrow}
+all_peak_sn %>% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptx 1e3_narrow}
+all_peak_sn %>% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptime 1e3_narrow}
+all_peak_sn %>% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
 #### Tagging Questionable Libraries by FRiP
 ```{r frip tag}
 questionable_frip = all_peak[(all_peak$FRiP < 0.02),]
 questionable_frip
 ```
 
-```{r rename}
-all_peak <- all_peak %>%
-  mutate(Sample=paste0(Individual,"_",Treatment,"_",Timepoint,"_",Histone_Mark))
+### Peak Widths
+
+#### Peak Width Function
+```{r peak withs}
+histone_list <- c("H3K27ac", "H3K27me3", "H3K9me3", "H3K36me3")
+get_peak_widths_long_split <- function(histone, var) {
+  path <- file.path("data/peaks", histone)
+  if (histone == "H3K27ac"){
+    file_list = list.files(path = path, pattern = paste0("picard_peaks.narrowPeak$", sep=""), full.names = TRUE)
+  } else {
+    file_list = list.files(path = path, pattern = paste0(var,"_peaks.(narrowPeak|broadPeak)$", sep=""), full.names = TRUE)
+  }
+  process_peak <- function(file_path, label) {
+    filename <- basename(file_path)
+    peak_df <- fread(file_path, header = FALSE) %>%
+      transmute(
+        row = row_number(),
+        width = abs(V3 - V2),
+        file = paste0(histone, "-", filename),
+        group = label
+      )
+    return(peak_df)
+  }
+  peak_list <- list(map(file_list, process_peak, label = var)) %>% flatten()
+  bind_rows(peak_list)
+}
+```
+
+#### Broad Visualization
+```{r picard broad length}
+all_peak_widths <- purrr::map_df(histone_list, get_peak_widths_long_split, var = "picard_broad")
+
+anno_peak_width_long <- all_peak_widths %>% 
+  mutate(file= gsub("_picard_broad_peaks.broadPeak","",file)) %>%
+  separate_wider_delim(., cols=file, delim="-",names=c("histone","sample")) %>% 
+  left_join(sampleinfo, by =c("sample"="Library ID"))
+
+anno_peak_width_long %>%
+  # distinct(histone)
+  ggplot(.,aes(x=histone, y = width, fill = histone))+
+  geom_violin()+
+  # scale_fill_viridis_a(discrete = TRUE, begin = 0.1, end = 0.55, option = "magma", alpha = 0.8) +
+  #   scale_color_viridis_a(discrete = TRUE, begin = 0.1, end = 0.9) +
+    scale_y_continuous(trans = "log", breaks = c(400, 3000, 22000)) +
+    theme_bw(base_size = 18) +
+    ylab("Width of Peaks") +
+    xlab("")+
+  ggtitle("Width of all peaks with Broad Peaks")
+```
+
+#### Broad as Narrow Visualization
+```{r picard narrow length}
+all_peak_widths <- purrr::map_df(histone_list, get_peak_widths_long_split, var = "picard_narrow")
+
+anno_peak_width_long <- all_peak_widths %>% 
+  mutate(file= gsub("_picard_narrow_peaks.narrowPeak","",file)) %>%
+  separate_wider_delim(., cols=file, delim="-",names=c("histone","sample")) %>% 
+  left_join(sampleinfo, by =c("sample"="Library ID"))
+
+anno_peak_width_long %>%
+  # distinct(histone)
+  ggplot(.,aes(x=histone, y = width, fill = histone))+
+  geom_violin()+
+  # scale_fill_viridis_a(discrete = TRUE, begin = 0.1, end = 0.55, option = "magma", alpha = 0.8) +
+  #   scale_color_viridis_a(discrete = TRUE, begin = 0.1, end = 0.9) +
+    scale_y_continuous(trans = "log", breaks = c(400, 3000, 22000)) +
+    theme_bw(base_size = 18) +
+    ylab("Width of Peaks") +
+    xlab("")+
+  ggtitle("Width of all peaks with Broad as Narrow")
+```
+
+#### Broad as Narrow Stringent Visualization
+```{r stringent narrow length}
+all_peak_widths <- purrr::map_df(histone_list, get_peak_widths_long_split, var = "1e3_narrow")
+
+anno_peak_width_long <- all_peak_widths %>% 
+  mutate(file= gsub("_1e3_narrow_peaks.narrowPeak","",file)) %>%
+  separate_wider_delim(., cols=file, delim="-",names=c("histone","sample")) %>% 
+  left_join(sampleinfo, by =c("sample"="Library ID"))
+
+anno_peak_width_long %>%
+  # distinct(histone)
+  ggplot(.,aes(x=histone, y = width, fill = histone))+
+  geom_violin()+
+  # scale_fill_viridis_a(discrete = TRUE, begin = 0.1, end = 0.55, option = "magma", alpha = 0.8) +
+  #   scale_color_viridis_a(discrete = TRUE, begin = 0.1, end = 0.9) +
+    scale_y_continuous(trans = "log", breaks = c(400, 3000, 22000)) +
+    theme_bw(base_size = 18) +
+    ylab("Width of Peaks") +
+    xlab("")+
+  ggtitle("Width of all peaks with Broad as Stringent Narrow")
 ```
 
 ### Feature Counts
