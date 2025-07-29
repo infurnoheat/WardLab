@@ -390,7 +390,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2025-07-24
+<strong>Last updated:</strong> 2025-07-29
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -521,15 +521,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree876d279a0f781486710310a6caa8bc964813ac15targetblank876d279a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree63f0b60ed4c457bf95563e3e1e5fbdb5949e05c8targetblank63f0b60a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/infurnoheat/WardLab/tree/876d279a0f781486710310a6caa8bc964813ac15" target="_blank">876d279</a>
+<a href="https://github.com/infurnoheat/WardLab/tree/63f0b60ed4c457bf95563e3e1e5fbdb5949e05c8" target="_blank">63f0b60</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree876d279a0f781486710310a6caa8bc964813ac15targetblank876d279a"
+id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree63f0b60ed4c457bf95563e3e1e5fbdb5949e05c8targetblank63f0b60a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -539,7 +539,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/infurnoheat/WardLab/tree/876d279a0f781486710310a6caa8bc964813ac15" target="_blank">876d279</a>.
+<a href="https://github.com/infurnoheat/WardLab/tree/63f0b60ed4c457bf95563e3e1e5fbdb5949e05c8" target="_blank">63f0b60</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -561,6 +561,8 @@ Untracked files:
     Untracked:  data/RUVs_DEG.tsv
     Untracked:  data/bam_final/
     Untracked:  data/bam_no_multi/
+    Untracked:  data/cutoff_narrow.tsv
+    Untracked:  data/cutoff_narrow.tsv.txt
     Untracked:  data/cutoffs.tsv
     Untracked:  data/metadata.txt
     Untracked:  data/multiqc_data_trim/
@@ -614,6 +616,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/63f0b60ed4c457bf95563e3e1e5fbdb5949e05c8/analysis/peak_analysis.Rmd" target="_blank">63f0b60</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-29
+</td>
+<td>
+wflow_publish("analysis/peak_analysis.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/infurnoheat/WardLab/1160ce2352f4221d245885326e8a8d523e03fa3f/docs/peak_analysis.html" target="_blank">1160ce2</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-24
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -2063,8 +2099,8 @@ infurnoheat
 <div id="peak-calling-for-q0.005-and-broad0.01-with-lambda"
 class="section level3">
 <h3>Peak Calling for Q=0.005 and Broad=0.01 with Lambda</h3>
-<div id="data-initializationx" class="section level4">
-<h4>Data Initializationx</h4>
+<div id="data-initialization-6" class="section level4">
+<h4>Data Initialization</h4>
 <pre class="r"><code>peak_ct &lt;- read_delim(&quot;data/peaks/peaks_cts_lq5e3b1e2.txt&quot;, delim = &quot;\t&quot;)
 H3K27ac_peaks &lt;- read_delim(&quot;data/peaks/H3K27ac_final_results.tsv&quot;,delim = &quot;\t&quot;)
 H3K27me3_peaks &lt;- read_delim(&quot;data/peaks/H3K27me3_lq5e3b1e2_results.tsv&quot;,delim = &quot;\t&quot;)
@@ -2265,6 +2301,157 @@ infurnoheat
 </div>
 </div>
 </div>
+</div>
+<div id="picard-with-broad-peaks" class="section level3">
+<h3>Picard with Broad Peaks</h3>
+<pre class="r"><code>peak_ct &lt;- read_delim(&quot;data/peaks/peaks_cts_picard_broad.txt&quot;, delim = &quot;\t&quot;)
+H3K27ac_peaks &lt;- read_delim(&quot;data/peaks/H3K27ac_picard_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K27me3_peaks &lt;- read_delim(&quot;data/peaks/H3K27me3_picard_broad_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K36me3_peaks &lt;- read_delim(&quot;data/peaks/H3K36me3_picard_broad_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K9me3_peaks &lt;- read_delim(&quot;data/peaks/H3K9me3_picard_broad_results.tsv&quot;,delim = &quot;\t&quot;)
+
+all_peak_pb &lt;- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_pb &lt;- all_peak_pb %&gt;%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %&gt;%
+  left_join(.,sampleinfo, by=c(&quot;Sample&quot;=&quot;Library ID&quot;)) %&gt;%
+  left_join(.,peak_ct, by=c(&quot;Sample&quot;=&quot;Sample&quot;))
+all_peak_pb &lt;- all_peak_pb[(!all_peak_pb$Treatment %in% &quot;5FU&quot;),]</code></pre>
+<pre class="r"><code>all_peak_pb %&gt;% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak number for all samples&quot;)+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20picard%20broad-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_pb %&gt;% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20box%20picard_broad-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_pb %&gt;% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptx%20picard_broad-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_pb %&gt;% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptime%20picard_broad-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="picard-with-broad-as-narrow-peaks" class="section level3">
+<h3>Picard with Broad as Narrow Peaks</h3>
+<pre class="r"><code>peak_ct &lt;- read_delim(&quot;data/peaks/peaks_cts_picard_narrow.txt&quot;, delim = &quot;\t&quot;)
+H3K27ac_peaks &lt;- read_delim(&quot;data/peaks/H3K27ac_picard_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K27me3_peaks &lt;- read_delim(&quot;data/peaks/H3K27me3_picard_narrow_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K36me3_peaks &lt;- read_delim(&quot;data/peaks/H3K36me3_picard_narrow_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K9me3_peaks &lt;- read_delim(&quot;data/peaks/H3K9me3_picard_narrow_results.tsv&quot;,delim = &quot;\t&quot;)
+
+all_peak_pn &lt;- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_pn &lt;- all_peak_pn %&gt;%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %&gt;%
+  left_join(.,sampleinfo, by=c(&quot;Sample&quot;=&quot;Library ID&quot;)) %&gt;%
+  left_join(.,peak_ct, by=c(&quot;Sample&quot;=&quot;Sample&quot;))
+all_peak_pn &lt;- all_peak_pn[(!all_peak_pn$Treatment %in% &quot;5FU&quot;),]</code></pre>
+<pre class="r"><code>all_peak_pn %&gt;% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak number for all samples&quot;)+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20peak_narrow-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_pn %&gt;% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20box%20picard_narrow-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_pn %&gt;% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptx%20picard_narrow-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_pn %&gt;% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptime%20picard_narrow-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="picard-with-broad-as-stringent-narrow-peaks"
+class="section level3">
+<h3>Picard with Broad as Stringent Narrow Peaks</h3>
+<pre class="r"><code>peak_ct &lt;- read_delim(&quot;data/peaks/peaks_cts_1e3_narrow.txt&quot;, delim = &quot;\t&quot;)
+H3K27ac_peaks &lt;- read_delim(&quot;data/peaks/H3K27ac_picard_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K27me3_peaks &lt;- read_delim(&quot;data/peaks/H3K27me3_1e3_narrow_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K36me3_peaks &lt;- read_delim(&quot;data/peaks/H3K36me3_1e3_narrow_results.tsv&quot;,delim = &quot;\t&quot;)
+H3K9me3_peaks &lt;- read_delim(&quot;data/peaks/H3K9me3_1e3_narrow_results.tsv&quot;,delim = &quot;\t&quot;)
+
+all_peak_sn &lt;- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_sn &lt;- all_peak_sn %&gt;%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %&gt;%
+  left_join(.,sampleinfo, by=c(&quot;Sample&quot;=&quot;Library ID&quot;)) %&gt;%
+  left_join(.,peak_ct, by=c(&quot;Sample&quot;=&quot;Sample&quot;))
+all_peak_sn &lt;- all_peak_sn[(!all_peak_sn$Treatment %in% &quot;5FU&quot;),]</code></pre>
+<pre class="r"><code>all_peak_sn %&gt;% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak number for all samples&quot;)+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%201e3_narrow-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_sn %&gt;% 
+  ggplot(., aes (x=Histone_Mark, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20box%201e3_narrow-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_sn %&gt;% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptx%201e3_narrow-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all_peak_sn %&gt;% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab(&quot;Count&quot;)+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle(&quot;Peak count across histones&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/peak%20ct%20grouptime%201e3_narrow-1.png" width="672" style="display: block; margin: auto;" /></p>
 <div id="tagging-questionable-libraries-by-frip" class="section level4">
 <h4>Tagging Questionable Libraries by FRiP</h4>
 <pre class="r"><code>questionable_frip = all_peak[(all_peak$FRiP &lt; 0.02),]
@@ -2273,8 +2460,101 @@ questionable_frip</code></pre>
 # ℹ 10 variables: Sample &lt;chr&gt;, Total_Reads &lt;dbl&gt;, Fragments &lt;dbl&gt;,
 #   Reads_in_Peaks &lt;dbl&gt;, FRiP &lt;dbl&gt;, Histone_Mark &lt;chr&gt;, Individual &lt;chr&gt;,
 #   Treatment &lt;chr&gt;, Timepoint &lt;chr&gt;, Count &lt;dbl&gt;</code></pre>
-<pre class="r"><code>all_peak &lt;- all_peak %&gt;%
-  mutate(Sample=paste0(Individual,&quot;_&quot;,Treatment,&quot;_&quot;,Timepoint,&quot;_&quot;,Histone_Mark))</code></pre>
+</div>
+</div>
+<div id="peak-widths" class="section level3">
+<h3>Peak Widths</h3>
+<div id="peak-width-function" class="section level4">
+<h4>Peak Width Function</h4>
+<pre class="r"><code>histone_list &lt;- c(&quot;H3K27ac&quot;, &quot;H3K27me3&quot;, &quot;H3K9me3&quot;, &quot;H3K36me3&quot;)
+get_peak_widths_long_split &lt;- function(histone, var) {
+  path &lt;- file.path(&quot;data/peaks&quot;, histone)
+  if (histone == &quot;H3K27ac&quot;){
+    file_list = list.files(path = path, pattern = paste0(&quot;picard_peaks.narrowPeak$&quot;, sep=&quot;&quot;), full.names = TRUE)
+  } else {
+    file_list = list.files(path = path, pattern = paste0(var,&quot;_peaks.(narrowPeak|broadPeak)$&quot;, sep=&quot;&quot;), full.names = TRUE)
+  }
+  process_peak &lt;- function(file_path, label) {
+    filename &lt;- basename(file_path)
+    peak_df &lt;- fread(file_path, header = FALSE) %&gt;%
+      transmute(
+        row = row_number(),
+        width = abs(V3 - V2),
+        file = paste0(histone, &quot;-&quot;, filename),
+        group = label
+      )
+    return(peak_df)
+  }
+  peak_list &lt;- list(map(file_list, process_peak, label = var)) %&gt;% flatten()
+  bind_rows(peak_list)
+}</code></pre>
+</div>
+<div id="broad-visualization" class="section level4">
+<h4>Broad Visualization</h4>
+<pre class="r"><code>all_peak_widths &lt;- purrr::map_df(histone_list, get_peak_widths_long_split, var = &quot;picard_broad&quot;)
+
+anno_peak_width_long &lt;- all_peak_widths %&gt;% 
+  mutate(file= gsub(&quot;_picard_broad_peaks.broadPeak&quot;,&quot;&quot;,file)) %&gt;%
+  separate_wider_delim(., cols=file, delim=&quot;-&quot;,names=c(&quot;histone&quot;,&quot;sample&quot;)) %&gt;% 
+  left_join(sampleinfo, by =c(&quot;sample&quot;=&quot;Library ID&quot;))
+
+anno_peak_width_long %&gt;%
+  # distinct(histone)
+  ggplot(.,aes(x=histone, y = width, fill = histone))+
+  geom_violin()+
+  # scale_fill_viridis_a(discrete = TRUE, begin = 0.1, end = 0.55, option = &quot;magma&quot;, alpha = 0.8) +
+  #   scale_color_viridis_a(discrete = TRUE, begin = 0.1, end = 0.9) +
+    scale_y_continuous(trans = &quot;log&quot;, breaks = c(400, 3000, 22000)) +
+    theme_bw(base_size = 18) +
+    ylab(&quot;Width of Peaks&quot;) +
+    xlab(&quot;&quot;)+
+  ggtitle(&quot;Width of all peaks with Broad Peaks&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/picard%20broad%20length-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="broad-as-narrow-visualization" class="section level4">
+<h4>Broad as Narrow Visualization</h4>
+<pre class="r"><code>all_peak_widths &lt;- purrr::map_df(histone_list, get_peak_widths_long_split, var = &quot;picard_narrow&quot;)
+
+anno_peak_width_long &lt;- all_peak_widths %&gt;% 
+  mutate(file= gsub(&quot;_picard_narrow_peaks.narrowPeak&quot;,&quot;&quot;,file)) %&gt;%
+  separate_wider_delim(., cols=file, delim=&quot;-&quot;,names=c(&quot;histone&quot;,&quot;sample&quot;)) %&gt;% 
+  left_join(sampleinfo, by =c(&quot;sample&quot;=&quot;Library ID&quot;))
+
+anno_peak_width_long %&gt;%
+  # distinct(histone)
+  ggplot(.,aes(x=histone, y = width, fill = histone))+
+  geom_violin()+
+  # scale_fill_viridis_a(discrete = TRUE, begin = 0.1, end = 0.55, option = &quot;magma&quot;, alpha = 0.8) +
+  #   scale_color_viridis_a(discrete = TRUE, begin = 0.1, end = 0.9) +
+    scale_y_continuous(trans = &quot;log&quot;, breaks = c(400, 3000, 22000)) +
+    theme_bw(base_size = 18) +
+    ylab(&quot;Width of Peaks&quot;) +
+    xlab(&quot;&quot;)+
+  ggtitle(&quot;Width of all peaks with Broad as Narrow&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/picard%20narrow%20length-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="broad-as-narrow-stringent-visualization"
+class="section level4">
+<h4>Broad as Narrow Stringent Visualization</h4>
+<pre class="r"><code>all_peak_widths &lt;- purrr::map_df(histone_list, get_peak_widths_long_split, var = &quot;1e3_narrow&quot;)
+
+anno_peak_width_long &lt;- all_peak_widths %&gt;% 
+  mutate(file= gsub(&quot;_1e3_narrow_peaks.narrowPeak&quot;,&quot;&quot;,file)) %&gt;%
+  separate_wider_delim(., cols=file, delim=&quot;-&quot;,names=c(&quot;histone&quot;,&quot;sample&quot;)) %&gt;% 
+  left_join(sampleinfo, by =c(&quot;sample&quot;=&quot;Library ID&quot;))
+
+anno_peak_width_long %&gt;%
+  # distinct(histone)
+  ggplot(.,aes(x=histone, y = width, fill = histone))+
+  geom_violin()+
+  # scale_fill_viridis_a(discrete = TRUE, begin = 0.1, end = 0.55, option = &quot;magma&quot;, alpha = 0.8) +
+  #   scale_color_viridis_a(discrete = TRUE, begin = 0.1, end = 0.9) +
+    scale_y_continuous(trans = &quot;log&quot;, breaks = c(400, 3000, 22000)) +
+    theme_bw(base_size = 18) +
+    ylab(&quot;Width of Peaks&quot;) +
+    xlab(&quot;&quot;)+
+  ggtitle(&quot;Width of all peaks with Broad as Stringent Narrow&quot;)</code></pre>
+<p><img src="figure/peak_analysis.Rmd/stringent%20narrow%20length-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="feature-counts" class="section level3">
@@ -2369,6 +2649,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/infurnoheat/WardLab/blob/1160ce2352f4221d245885326e8a8d523e03fa3f/docs/figure/peak_analysis.Rmd/H3K27ac HeatMap 1-1.png" target="_blank">1160ce2</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-24
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/infurnoheat/WardLab/blob/66c1fa7e757e3a893e27aefd432384a375c9940d/docs/figure/peak_analysis.Rmd/H3K27ac HeatMap 1-1.png" target="_blank">66c1fa7</a>
 </td>
 <td>
@@ -2439,6 +2730,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/infurnoheat/WardLab/blob/1160ce2352f4221d245885326e8a8d523e03fa3f/docs/figure/peak_analysis.Rmd/H3K27ac HeatMap 2-1.png" target="_blank">1160ce2</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-24
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/infurnoheat/WardLab/blob/66c1fa7e757e3a893e27aefd432384a375c9940d/docs/figure/peak_analysis.Rmd/H3K27ac HeatMap 2-1.png" target="_blank">66c1fa7</a>
 </td>
 <td>
@@ -2507,6 +2809,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/1160ce2352f4221d245885326e8a8d523e03fa3f/docs/figure/peak_analysis.Rmd/H3K27ac HeatMap 3-1.png" target="_blank">1160ce2</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-07-24
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/infurnoheat/WardLab/blob/66c1fa7e757e3a893e27aefd432384a375c9940d/docs/figure/peak_analysis.Rmd/H3K27ac HeatMap 3-1.png" target="_blank">66c1fa7</a>
