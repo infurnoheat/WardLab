@@ -13,3 +13,5 @@ editor_options:
 [Peak Cutoff](https://infurnoheat.github.io/WardLab/docs/peak_cutoff.html)
 
 [Peak Analysis](https://infurnoheat.github.io/WardLab/docs/peak_analysis.html)
+
+[Peak Width](https://infurnoheat.github.io/WardLab/docs/peak_width.html)
