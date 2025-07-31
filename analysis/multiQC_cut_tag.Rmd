@@ -518,7 +518,7 @@ for (s in peaks$sample) {
     dplyr::filter(sample==s) %>%
     dplyr::select(Col1, weight)
   weights$smooth <- smooth_data(x = weights$Col1, y = weights$weight, sm_method = "moving-average", window_width_n = 15)
-  weights$peak <-find_peaks(weights$smooth, span = 31, ignore_threshold = 0.01)
+  weights$peak <- find_peaks(weights$smooth, span = 31, global.threshold = 0.01)
   peaks[peaks$sample == s,"peakNum"] <- sum(as.numeric(weights$peak[-1:-150]))
 }
 questionable_frag = peaks[(peaks$peakNum == 0),]
@@ -665,7 +665,7 @@ for (s in peaks$sample) {
     dplyr::filter(sample==s) %>%
     dplyr::select(Col1, weight)
   weights$smooth <- smooth_data(x = weights$Col1, y = weights$weight, sm_method = "moving-average", window_width_n = 15)
-  weights$peak <-find_peaks(weights$smooth, span = 31, ignore_threshold = 0.01)
+  weights$peak <- ggpmisc::find_peaks(weights$smooth, span = 31, global.threshold = 0.01)
   peaks[peaks$sample == s,"peakNum"] <- sum(as.numeric(weights$peak[-1:-150]))
 }
 questionable_frag_filter = peaks[(peaks$peakNum == 0),]
