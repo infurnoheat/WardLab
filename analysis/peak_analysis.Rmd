@@ -130,32 +130,6 @@ x_axis_labels = function(labels, every_nth = 1, ...) {
     ...
   )
 }
-
-volcanosig <- function(df, psig.lvl) {
-    df <- df %>% 
-    mutate(threshold = ifelse(adj.P.Val > psig.lvl, "A", ifelse(adj.P.Val <= psig.lvl & logFC<=0,"B","C")))
-      # ifelse(adj.P.Val <= psig.lvl & logFC >= 0,"B", "C")))
-    ##This is where I could add labels, but I have taken out
-    # df <- df %>% mutate(genelabels = "")
-    # df$genelabels[1:topg] <- df$rownames[1:topg]
-    
-  ggplot(df, aes(x=logFC, y=-log10(P.Value))) + 
-    ggrastr::geom_point_rast(aes(color=threshold))+
-    # geom_text_repel(aes(label = genelabels), segment.curvature = -1e-20,force = 1,size=2.5,
-    # arrow = arrow(length = unit(0.015, "npc")), max.overlaps = Inf) +
-    #geom_hline(yintercept = -log10(psig.lvl))+
-    xlab(expression("Log"[2]*" FC"))+
-    ylab(expression("-log"[10]*"P Value"))+
-    scale_color_manual(values = c("black", "red","blue"))+
-    theme_cowplot()+
-    ylim(0,25)+
-    xlim(-6,6)+
-    theme(legend.position = "none",
-              plot.title = element_text(size = rel(1.5), hjust = 0.5),
-              axis.title = element_text(size = rel(0.8))) 
-}
-
-
 ```
 
 ### Peak Calling for Q=0.01 and Broad=0.1 with No Lambda
