@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Peak Anaylsis
+## Peak Cutoff
 
 #### Loading Packages 
 ```{r load packages}
