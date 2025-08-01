@@ -1,0 +1,666 @@
+---
+title: "Final Analysis"
+author: "Steven Yu"
+date: "2025-08-01"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE,
+	dev = c("png","pdf")
+)
+```
+
+## Final Anaylsis
+
+#### Loading Packages 
+```{r load packages}
+library(tidyverse)
+library(readr)
+library(edgeR)
+library(ComplexHeatmap)
+library(data.table)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(viridis)
+library(DT)
+library(kableExtra)
+library(genomation)
+library(GenomicRanges)
+library(chromVAR) ## For FRiP analysis and differential analysis
+library(DESeq2) ## For differential analysis section
+library(ggpubr) ## For customizing figures
+library(corrplot) ## For correlation plot
+library(ggpmisc)
+library(gcplyr)
+library(Rsubread)
+library(limma)
+library(ggrastr)
+library(cowplot)
+library(smplot2)
+```
+
+#### Data Initialization
+```{r init}
+sampleinfo <- read_delim("data/sample_info.tsv", delim = "\t")
+```
+
+#### Functions
+```{r functions}
+drug_pal <- c("#8B006D","#DF707E","#F1B72B", "#3386DD","#707031","#41B333")
+pca_plot <-
+  function(df,
+           col_var = NULL,
+           shape_var = NULL,
+           title = "") {
+    ggplot(df) + geom_point(aes_string(
+      x = "PC1",
+      y = "PC2",
+      color = col_var,
+      shape = shape_var
+    ),
+    size = 5) +
+      labs(title = title, x = "PC 1", y = "PC 2") +
+      scale_color_manual(values = c(
+        "#8B006D",
+        "#DF707E",
+        "#F1B72B",
+        "#3386DD",
+        "#707031",
+        "#41B333"
+      ))
+  }
+pca_var_plot <- function(pca) {
+  # x: class == prcomp
+  pca.var <- pca$sdev ^ 2
+  pca.prop <- pca.var / sum(pca.var)
+  var.plot <-
+    qplot(PC, prop, data = data.frame(PC = 1:length(pca.prop),
+                                      prop = pca.prop)) +
+    labs(title = 'Variance contributed by each PC',
+         x = 'PC', y = 'Proportion of variance')
+  plot(var.plot)
+}
+
+calc_pca <- function(x) {
+  # Performs principal components analysis with prcomp
+  # x: a sample-by-gene numeric matrix
+  prcomp(x, scale. = TRUE, retx = TRUE)
+}
+
+get_regr_pval <- function(mod) {
+  # Returns the p-value for the Fstatistic of a linear model
+  # mod: class lm
+  stopifnot(class(mod) == "lm")
+  fstat <- summary(mod)$fstatistic
+  pval <- 1 - pf(fstat[1], fstat[2], fstat[3])
+  return(pval)
+}
+
+plot_versus_pc <- function(df, pc_num, fac) {
+  # df: data.frame
+  # pc_num: numeric, specific PC for plotting
+  # fac: column name of df for plotting against PC
+  pc_char <- paste0("PC", pc_num)
+  # Calculate F-statistic p-value for linear model
+  pval <- get_regr_pval(lm(df[, pc_char] ~ df[, fac]))
+  if (is.numeric(df[, f])) {
+    ggplot(df, aes_string(x = f, y = pc_char)) + geom_point() +
+      geom_smooth(method = "lm") + labs(title = sprintf("p-val: %.2f", pval))
+  } else {
+    ggplot(df, aes_string(x = f, y = pc_char)) + geom_boxplot() +
+      labs(title = sprintf("p-val: %.2f", pval))
+  }
+}
+x_axis_labels = function(labels, every_nth = 1, ...) {
+  axis(side = 1,
+       at = seq_along(labels),
+       labels = F)
+  text(
+    x = (seq_along(labels))[seq_len(every_nth) == 1],
+    y = par("usr")[3] - 0.075 * (par("usr")[4] - par("usr")[3]),
+    labels = labels[seq_len(every_nth) == 1],
+    xpd = TRUE,
+    ...
+  )
+}
+
+volcanosig <- function(df, psig.lvl) {
+    df <- df %>% 
+    mutate(threshold = ifelse(adj.P.Val > psig.lvl, "A", ifelse(adj.P.Val <= psig.lvl & logFC<=0,"B","C")))
+      # ifelse(adj.P.Val <= psig.lvl & logFC >= 0,"B", "C")))
+    ##This is where I could add labels, but I have taken out
+    # df <- df %>% mutate(genelabels = "")
+    # df$genelabels[1:topg] <- df$rownames[1:topg]
+    
+  ggplot(df, aes(x=logFC, y=-log10(P.Value))) + 
+    ggrastr::geom_point_rast(aes(color=threshold))+
+    # geom_text_repel(aes(label = genelabels), segment.curvature = -1e-20,force = 1,size=2.5,
+    # arrow = arrow(length = unit(0.015, "npc")), max.overlaps = Inf) +
+    #geom_hline(yintercept = -log10(psig.lvl))+
+    xlab(expression("Log"[2]*" FC"))+
+    ylab(expression("-log"[10]*"P Value"))+
+    scale_color_manual(values = c("black", "red","blue"))+
+    theme_cowplot()+
+    ylim(0,25)+
+    xlim(-6,6)+
+    theme(legend.position = "none",
+              plot.title = element_text(size = rel(1.5), hjust = 0.5),
+              axis.title = element_text(size = rel(0.8))) 
+}
+
+
+```
+
+### Final Analysis
+
+```{r peak data FINAL 1}
+peak_ct <- read_delim("data/peaks/peaks_cts_FINAL.txt", delim = "\t")
+H3K27ac_peaks <- read_delim("data/peaks/H3K27ac_FINAl_results.tsv",delim = "\t")
+H3K27me3_peaks <- read_delim("data/peaks/H3K27me3_FINAL_results.tsv",delim = "\t")
+H3K36me3_peaks <- read_delim("data/peaks/H3K36me3_FINAL_results.tsv",delim = "\t")
+H3K9me3_peaks <- read_delim("data/peaks/H3K9me3_FINAL_results.tsv",delim = "\t")
+
+all_peak_final <- rbind(H3K27ac_peaks, H3K27me3_peaks, H3K36me3_peaks, H3K9me3_peaks)
+
+all_peak_final <- all_peak_final %>%
+  dplyr::select(Sample, Total_Reads, Fragments, Reads_in_Peaks, FRiP) %>%
+  left_join(.,sampleinfo, by=c("Sample"="Library ID")) %>%
+  left_join(.,peak_ct, by=c("Sample"="Sample"))
+all_peak_final <- all_peak_final[(!all_peak_final$Treatment %in% "5FU"),]
+```
+
+```{r peak ct final, fig.width=14}
+all_peak_final %>% 
+   ggplot(.,aes(x=Sample, y=Count,fill=Histone_Mark))+
+   geom_col()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak number for all samples")+ 
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r peak ct grouptx final}
+all_peak_final %>% 
+  ggplot(., aes (x=Treatment, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+```{r peak ct grouptime 1e3_narrow}
+all_peak_final %>% 
+  ggplot(., aes (x=Timepoint, y = Count, fill = Histone_Mark))+
+  geom_boxplot()+
+   ylab("Count")+
+   theme_classic()+
+  # facet_wrap(~histone)+
+  ggtitle("Peak count across histones")
+```
+
+#### Tagging Questionable Libraries by FRiP
+```{r frip tag}
+questionable_frip = all_peak_final[(all_peak_final$FRiP < 0.02),]
+questionable_frip
+```
+
+### Feature Counts
+```{r feature_cts}
+H3K27ac_merged <- read_delim("data/peaks/H3K27ac_FINAL_counts.txt", 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE, skip = 1)
+H3K27me3_merged <- read_delim("data/peaks/H3K27me3_FINAL_counts.txt", 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE, skip = 1)
+H3K36me3_merged <- read_delim("data/peaks/H3K36me3_FINAL_counts.txt", 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE, skip = 1)
+H3K9me3_merged <- read_delim("data/peaks/H3K9me3_FINAL_counts.txt", 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE, skip = 1)
+rename_list <- sampleinfo %>% 
+  mutate(stem= "_nobl.bam") %>% 
+  mutate(prefix=paste0("/scratch/10819/styu/MW_multiQC/peaks/",Histone_Mark,"/",Treatment,"/",Timepoint,"/")) %>%
+  mutate(oldname=paste0(prefix,`Library ID`,"/",`Library ID`,stem)) %>% 
+  mutate(newname=paste0(Individual,"_",Treatment,"_",Timepoint)) %>% 
+  dplyr::select(oldname,newname)
+rename_vec <- setNames(rename_list$newname, rename_list$oldname)
+names(H3K27ac_merged)[names(H3K27ac_merged) %in% names(rename_vec)] <- rename_vec[names(H3K27ac_merged)[names(H3K27ac_merged) %in% names(rename_vec)]]
+names(H3K27me3_merged)[names(H3K27me3_merged) %in% names(rename_vec)] <- rename_vec[names(H3K27me3_merged)[names(H3K27me3_merged) %in% names(rename_vec)]]
+names(H3K36me3_merged)[names(H3K36me3_merged) %in% names(rename_vec)] <- rename_vec[names(H3K36me3_merged)[names(H3K36me3_merged) %in% names(rename_vec)]]
+names(H3K9me3_merged)[names(H3K9me3_merged) %in% names(rename_vec)] <- rename_vec[names(H3K9me3_merged)[names(H3K9me3_merged) %in% names(rename_vec)]]
+```
+
+### H3K27ac Count Analysis
+```{r H3K27ac HeatMap 1, fig.width=14,fig.height=14}
+H3K27ac_merged_raw <- H3K27ac_merged %>% 
+  dplyr::select(Geneid,contains("Ind")) %>% 
+  column_to_rownames("Geneid") %>% 
+  as.matrix()
+
+H3K27ac_merged_cor <- H3K27ac_merged %>% 
+  dplyr::select(Geneid,contains("Ind")) %>% 
+  column_to_rownames("Geneid") %>% 
+  cpm(., log = TRUE) %>% 
+  cor()
+
+annomat <- data.frame(sample=colnames(H3K27ac_merged_cor)) %>% 
+  separate_wider_delim(sample,delim="_",names=c("Ind","Treatment","Timepoint"),cols_remove = FALSE) %>% 
+  mutate(Treatment=factor(Treatment, levels = c("VEH","5FU","DOX")),
+         Timepoint=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
+  column_to_rownames("sample")
+heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
+
+Heatmap(H3K27ac_merged_cor, 
+        top_annotation = heatmap_first,
+        column_title="Unfiltered log2cpm H3K27ac with Standard Merging")
+```
+
+### H3K27me3 Count Analysis
+```{r H3K27me3 HeatMap 1, fig.width=14,fig.height=14}
+H3K27me3_merged_raw <- H3K27me3_merged %>% 
+  dplyr::select(Geneid,contains("Ind")) %>% 
+  column_to_rownames("Geneid") %>% 
+  as.matrix()
+
+H3K27me3_merged_cor <- H3K27me3_merged %>% 
+  dplyr::select(Geneid,contains("Ind")) %>% 
+  column_to_rownames("Geneid") %>% 
+  cpm(., log = TRUE) %>% 
+  cor()
+
+annomat <- data.frame(sample=colnames(H3K27me3_merged_cor)) %>% 
+  separate_wider_delim(sample,delim="_",names=c("Ind","Treatment","Timepoint"),cols_remove = FALSE) %>% 
+  mutate(Treatment=factor(Treatment, levels = c("VEH","5FU","DOX")),
+         Timepoint=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
+  column_to_rownames("sample")
+heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
+
+Heatmap(H3K27me3_merged_cor, 
+        top_annotation = heatmap_first,
+        column_title="Unfiltered log2cpm H3K27me3 with Standard Merging")
+```
+
+### H3K36me3 Count Analysis
+```{r H3K36me3 HeatMap 1, fig.width=14,fig.height=14}
+H3K36me3_merged_raw <- H3K36me3_merged %>% 
+  dplyr::select(Geneid,contains("Ind")) %>% 
+  column_to_rownames("Geneid") %>% 
+  as.matrix()
+
+H3K36me3_merged_cor <- H3K36me3_merged %>% 
+  dplyr::select(Geneid,contains("Ind")) %>% 
+  column_to_rownames("Geneid") %>% 
+  cpm(., log = TRUE) %>% 
+  cor()
+
+annomat <- data.frame(sample=colnames(H3K36me3_merged_cor)) %>% 
+  separate_wider_delim(sample,delim="_",names=c("Ind","Treatment","Timepoint"),cols_remove = FALSE) %>% 
+  mutate(Treatment=factor(Treatment, levels = c("VEH","5FU","DOX")),
+         Timepoint=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
+  column_to_rownames("sample")
+heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
+
+Heatmap(H3K36me3_merged_cor, 
+        top_annotation = heatmap_first,
+        column_title="Unfiltered log2cpm H3K36me3 with Standard Merging")
+```
+
+### H3K9me3 Count Analysis
+```{r H3K9me3 HeatMap 1, fig.width=14,fig.height=14}
+H3K9me3_merged_raw <- H3K9me3_merged %>% 
+  dplyr::select(Geneid,contains("Ind")) %>% 
+  column_to_rownames("Geneid") %>% 
+  as.matrix()
+
+H3K9me3_merged_cor <- H3K9me3_merged %>% 
+  dplyr::select(Geneid,contains("Ind")) %>% 
+  column_to_rownames("Geneid") %>% 
+  cpm(., log = TRUE) %>% 
+  cor()
+
+annomat <- data.frame(sample=colnames(H3K9me3_merged_cor)) %>% 
+  separate_wider_delim(sample,delim="_",names=c("Ind","Treatment","Timepoint"),cols_remove = FALSE) %>% 
+  mutate(Treatment=factor(Treatment, levels = c("VEH","5FU","DOX")),
+         Timepoint=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
+  column_to_rownames("sample")
+heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
+
+Heatmap(H3K9me3_merged_cor, 
+        top_annotation = heatmap_first,
+        column_title="Unfiltered log2cpm H3K9me3 with Standard Merging")
+```
+
+### Fragment Analysis
+```{r frag ct, fig.width=14}
+all_peak_final %>%
+  mutate(Fragments=Fragments/1000000) %>% 
+  ggplot(., aes(x=interaction(Individual,Treatment,Timepoint), y=Fragments, fill=Treatment, group = Treatment))+
+  geom_col()+
+  geom_text(aes(y = 0,label = Sample), vjust = 0.2, size = 3, angle = 90)+
+  theme_classic()+
+  facet_wrap(~Histone_Mark)+
+  ggtitle("Fragment count by histone and sample")+
+  ylab("Count of Fragments * 10^6")+
+  xlab("Samples")+
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+```{r frag frip, fig.width=14}
+all_peak_final %>%
+  mutate(FRiP=FRiP * 100) %>% 
+  ggplot(., aes(x=interaction(Individual,Treatment,Timepoint), y=FRiP, fill=Treatment, group = Treatment))+
+  geom_col()+
+  geom_text(aes(y = 0,label = Sample), vjust = 0.2, size = 3, angle = 90)+
+  theme_classic()+
+  facet_wrap(~Histone_Mark)+
+  ggtitle("Frip Percent by histone and sample")+
+  ylab("Frip %")+
+  xlab("Samples")+
+  theme(axis.text.x=element_text(vjust = .2,angle=90))+
+  scale_y_continuous( expand = expansion(mult = c(0, .1)))
+```
+
+### Differential Analysis
+
+#### Filtering Sex Chromosome
+```{r filtering Y}
+H3K27ac_merged_raw <- H3K27ac_merged_raw[rowMeans(H3K27ac_merged_cor)>0,]
+H3K27ac_merged_raw <- H3K27ac_merged_raw[!grepl("chrY",rownames(H3K27ac_merged_raw)),]
+
+H3K27me3_merged_raw <- H3K27me3_merged_raw[rowMeans(H3K27me3_merged_cor)>0,]
+H3K27me3_merged_raw <- H3K27me3_merged_raw[!grepl("chrY",rownames(H3K27me3_merged_raw)),]
+
+H3K36me3_merged_raw <- H3K36me3_merged_raw[rowMeans(H3K36me3_merged_cor)>0,]
+H3K36me3_merged_raw <- H3K36me3_merged_raw[!grepl("chrY",rownames(H3K36me3_merged_raw)),]
+
+H3K9me3_merged_raw <- H3K9me3_merged_raw[rowMeans(H3K9me3_merged_cor)>0,]
+H3K9me3_merged_raw <- H3K9me3_merged_raw[!grepl("chrY",rownames(H3K9me3_merged_raw)),]
+```
+
+#### Setting up Matrix
+```{r matrix}
+H3K27ac_annomat <- data.frame(timeset=colnames(H3K27ac_merged_raw)) %>% 
+  mutate(sample=timeset) %>% 
+  separate(timeset, into = c("ind","tx","time")) %>% 
+  mutate(tx=factor(tx, levels = c("VEH", "DOX")),
+         time=factor(time, levels =c("24T","24R","144R"))) %>%
+  mutate(ind = gsub("Ind", "", ind)) %>%
+  mutate(txtime = paste0(tx, "_", time)) %>%
+  mutate(group = txtime)
+H3K27ac_annomat$group <- H3K27ac_annomat$group %>%
+  gsub("DOX_24T", "1", .) %>%
+  gsub("DOX_24R", "2", .) %>%
+  gsub("DOX_144R", "3", .) %>%
+  gsub("VEH_24T", "4", .) %>%
+  gsub("VEH_24R", "5", .) %>%
+  gsub("VEH_144R", "6", .)
+
+H3K27me3_annomat <- data.frame(timeset=colnames(H3K27me3_merged_raw)) %>% 
+  mutate(sample=timeset) %>% 
+  separate(timeset, into = c("ind","tx","time")) %>% 
+  mutate(tx=factor(tx, levels = c("VEH", "DOX")),
+         time=factor(time, levels =c("24T","24R","144R"))) %>%
+  mutate(ind = gsub("Ind", "", ind)) %>%
+  mutate(txtime = paste0(tx, "_", time)) %>%
+  mutate(group = txtime)
+H3K27me3_annomat$group <- H3K27me3_annomat$group %>%
+  gsub("DOX_24T", "1", .) %>%
+  gsub("DOX_24R", "2", .) %>%
+  gsub("DOX_144R", "3", .) %>%
+  gsub("VEH_24T", "4", .) %>%
+  gsub("VEH_24R", "5", .) %>%
+  gsub("VEH_144R", "6", .)
+
+H3K36me3_annomat <- data.frame(timeset=colnames(H3K36me3_merged_raw)) %>% 
+  mutate(sample=timeset) %>% 
+  separate(timeset, into = c("ind","tx","time")) %>% 
+  mutate(tx=factor(tx, levels = c("VEH", "DOX")),
+         time=factor(time, levels =c("24T","24R","144R"))) %>%
+  mutate(ind = gsub("Ind", "", ind)) %>%
+  mutate(txtime = paste0(tx, "_", time)) %>%
+  mutate(group = txtime)
+H3K36me3_annomat$group <- H3K36me3_annomat$group %>%
+  gsub("DOX_24T", "1", .) %>%
+  gsub("DOX_24R", "2", .) %>%
+  gsub("DOX_144R", "3", .) %>%
+  gsub("VEH_24T", "4", .) %>%
+  gsub("VEH_24R", "5", .) %>%
+  gsub("VEH_144R", "6", .)
+
+H3K9me3_annomat <- data.frame(timeset=colnames(H3K9me3_merged_raw)) %>% 
+  mutate(sample=timeset) %>% 
+  separate(timeset, into = c("ind","tx","time")) %>% 
+  mutate(tx=factor(tx, levels = c("VEH", "DOX")),
+         time=factor(time, levels =c("24T","24R","144R"))) %>%
+  mutate(ind = gsub("Ind", "", ind)) %>%
+  mutate(txtime = paste0(tx, "_", time)) %>%
+  mutate(group = txtime)
+H3K9me3_annomat$group <- H3K9me3_annomat$group %>%
+  gsub("DOX_24T", "1", .) %>%
+  gsub("DOX_24R", "2", .) %>%
+  gsub("DOX_144R", "3", .) %>%
+  gsub("VEH_24T", "4", .) %>%
+  gsub("VEH_24R", "5", .) %>%
+  gsub("VEH_144R", "6", .)
+
+dge_H3K27ac <- edgeR::DGEList(counts = H3K27ac_merged_raw, group = H3K27ac_annomat$group, genes = row.names(H3K27ac_merged_raw))
+dge_H3K27me3 <- edgeR::DGEList(counts = H3K27me3_merged_raw, group = H3K27me3_annomat$group, genes = row.names(H3K27me3_merged_raw))
+dge_H3K36me3 <- edgeR::DGEList(counts = H3K36me3_merged_raw, group = H3K36me3_annomat$group, genes = row.names(H3K36me3_merged_raw))
+dge_H3K9me3 <- edgeR::DGEList(counts = H3K9me3_merged_raw, group = H3K9me3_annomat$group, genes = row.names(H3K9me3_merged_raw))
+
+dge_H3K27ac <- edgeR::calcNormFactors(dge_H3K27ac)
+dge_H3K27me3 <- edgeR::calcNormFactors(dge_H3K27me3)
+dge_H3K36me3 <- edgeR::calcNormFactors(dge_H3K36me3)
+dge_H3K9me3 <- edgeR::calcNormFactors(dge_H3K9me3)
+
+mm_H3K27ac <- model.matrix(~0 + H3K27ac_annomat$txtime)
+colnames(mm_H3K27ac) <- H3K27ac_annomat$txtime %>% unique()
+
+mm_H3K27me3 <- model.matrix(~0 + H3K27me3_annomat$txtime)
+colnames(mm_H3K27me3) <- H3K27me3_annomat$txtime %>% unique()
+
+mm_H3K36me3 <- model.matrix(~0 + H3K36me3_annomat$txtime)
+colnames(mm_H3K36me3) <- H3K36me3_annomat$txtime %>% unique()
+
+mm_H3K9me3 <- model.matrix(~0 + H3K9me3_annomat$txtime)
+colnames(mm_H3K9me3) <- H3K9me3_annomat$txtime %>% unique()
+```
+
+### Volcano Plots
+
+#### H3K27ac
+```{r H3K27ac volcano 1}
+y <- voom(dge_H3K27ac, mm_H3K27ac, plot = FALSE)
+corfit <- duplicateCorrelation(y, mm_H3K27ac, block = H3K27ac_annomat$ind)
+v <- voom(dge_H3K27ac, mm_H3K27ac, block = H3K27ac_annomat$ind, correlation = corfit$consensus.correlation)
+fit <- lmFit(v, mm_H3K27ac, block = H3K27ac_annomat$ind, correlation = corfit$consensus.correlation)
+cm <- makeContrasts(
+  DOX_24T.VEH_24T = DOX_24T-VEH_24T,
+  DOX_24R.VEH_24R = DOX_24R-VEH_24R,
+  DOX_144R.VEH_144R = DOX_144R-VEH_144R,
+  levels = mm_H3K27ac)
+
+fit2<- contrasts.fit(fit, contrasts=cm)
+efit2 <- eBayes(fit2)
+
+results = decideTests(efit2)
+
+summary(results)
+```
+
+```{r H3K27ac volcano 2}
+plotSA(efit2, main="Mean-Variance trend for final model for H3K27ac")
+```
+
+```{r H3K27ac volcano 3, fig.width=14}
+V.24T.top= topTable(efit2, coef=1, adjust.method="BH", number=Inf, sort.by="p")
+V.24R.top= topTable(efit2, coef=2, adjust.method="BH", number=Inf, sort.by="p")
+V.144R.top= topTable(efit2, coef=3, adjust.method="BH", number=Inf, sort.by="p")
+
+v1 <- volcanosig(V.24T.top, 0.05)+ ggtitle("DOX 24T")
+v2 <- volcanosig(V.24R.top, 0.05)+ ggtitle("DOX 24R")+ylab("")
+v3 <- volcanosig(V.144R.top, 0.05)+ ggtitle("DOX 144R")+ylab("")
+plot_grid(v1,v2, v3, rel_widths =c(1,1,1))
+```
+
+#### H3K27me3
+```{r H3K27me3 volcano 1}
+y <- voom(dge_H3K27me3, mm_H3K27me3, plot = FALSE)
+corfit <- duplicateCorrelation(y, mm_H3K27me3, block = H3K27me3_annomat$ind)
+v <- voom(dge_H3K27me3, mm_H3K27me3, block = H3K27me3_annomat$ind, correlation = corfit$consensus.correlation)
+fit <- lmFit(v, mm_H3K27me3, block = H3K27me3_annomat$ind, correlation = corfit$consensus.correlation)
+cm <- makeContrasts(
+  DOX_24T.VEH_24T = DOX_24T-VEH_24T,
+  DOX_24R.VEH_24R = DOX_24R-VEH_24R,
+  DOX_144R.VEH_144R = DOX_144R-VEH_144R,
+  levels = mm_H3K27me3)
+
+fit2<- contrasts.fit(fit, contrasts=cm)
+efit2 <- eBayes(fit2)
+
+results = decideTests(efit2)
+
+summary(results)
+```
+
+```{r H3K27me3 volcano 2}
+plotSA(efit2, main="Mean-Variance trend for final model for H3K27me3")
+```
+
+```{r H3K27me3 volcano 3, fig.width=14}
+V.24T.top= topTable(efit2, coef=1, adjust.method="BH", number=Inf, sort.by="p")
+V.24R.top= topTable(efit2, coef=2, adjust.method="BH", number=Inf, sort.by="p")
+V.144R.top= topTable(efit2, coef=3, adjust.method="BH", number=Inf, sort.by="p")
+
+v1 <- volcanosig(V.24T.top, 0.05)+ ggtitle("DOX 24T")
+v2 <- volcanosig(V.24R.top, 0.05)+ ggtitle("DOX 24R")+ylab("")
+v3 <- volcanosig(V.144R.top, 0.05)+ ggtitle("DOX 144R")+ylab("")
+plot_grid(v1,v2, v3, rel_widths =c(1,1,1))
+```
+
+#### H3K36me3
+```{r H3K36me3 volcano 1}
+y <- voom(dge_H3K36me3, mm_H3K36me3, plot = FALSE)
+corfit <- duplicateCorrelation(y, mm_H3K36me3, block = H3K36me3_annomat$ind)
+v <- voom(dge_H3K36me3, mm_H3K36me3, block = H3K36me3_annomat$ind, correlation = corfit$consensus.correlation)
+fit <- lmFit(v, mm_H3K36me3, block = H3K36me3_annomat$ind, correlation = corfit$consensus.correlation)
+cm <- makeContrasts(
+  DOX_24T.VEH_24T = DOX_24T-VEH_24T,
+  DOX_24R.VEH_24R = DOX_24R-VEH_24R,
+  DOX_144R.VEH_144R = DOX_144R-VEH_144R,
+  levels = mm_H3K36me3)
+
+fit2<- contrasts.fit(fit, contrasts=cm)
+efit2 <- eBayes(fit2)
+
+results = decideTests(efit2)
+
+summary(results)
+```
+
+```{r H3K36me3 volcano 2}
+plotSA(efit2, main="Mean-Variance trend for final model for H3K36me3")
+```
+
+```{r H3K36me3 volcano 3, fig.width=14}
+V.24T.top= topTable(efit2, coef=1, adjust.method="BH", number=Inf, sort.by="p")
+V.24R.top= topTable(efit2, coef=2, adjust.method="BH", number=Inf, sort.by="p")
+V.144R.top= topTable(efit2, coef=3, adjust.method="BH", number=Inf, sort.by="p")
+
+v1 <- volcanosig(V.24T.top, 0.05)+ ggtitle("DOX 24T")
+v2 <- volcanosig(V.24R.top, 0.05)+ ggtitle("DOX 24R")+ylab("")
+v3 <- volcanosig(V.144R.top, 0.05)+ ggtitle("DOX 144R")+ylab("")
+plot_grid(v1,v2, v3, rel_widths =c(1,1,1))
+```
+
+#### H3K9me3
+```{r H3K9me3 volcano 1}
+y <- voom(dge_H3K9me3, mm_H3K9me3, plot = FALSE)
+corfit <- duplicateCorrelation(y, mm_H3K9me3, block = H3K9me3_annomat$ind)
+v <- voom(dge_H3K9me3, mm_H3K9me3, block = H3K9me3_annomat$ind, correlation = corfit$consensus.correlation)
+fit <- lmFit(v, mm_H3K9me3, block = H3K9me3_annomat$ind, correlation = corfit$consensus.correlation)
+cm <- makeContrasts(
+  DOX_24T.VEH_24T = DOX_24T-VEH_24T,
+  DOX_24R.VEH_24R = DOX_24R-VEH_24R,
+  DOX_144R.VEH_144R = DOX_144R-VEH_144R,
+  levels = mm_H3K9me3)
+
+fit2<- contrasts.fit(fit, contrasts=cm)
+efit2 <- eBayes(fit2)
+
+results = decideTests(efit2)
+
+summary(results)
+```
+
+```{r H3K9me3 volcano 2}
+plotSA(efit2, main="Mean-Variance trend for final model for H3K9me3")
+```
+
+```{r H3K9me3 volcano 3, fig.width=14}
+V.24T.top= topTable(efit2, coef=1, adjust.method="BH", number=Inf, sort.by="p")
+V.24R.top= topTable(efit2, coef=2, adjust.method="BH", number=Inf, sort.by="p")
+V.144R.top= topTable(efit2, coef=3, adjust.method="BH", number=Inf, sort.by="p")
+
+v1 <- volcanosig(V.24T.top, 0.05)+ ggtitle("DOX 24T")
+v2 <- volcanosig(V.24R.top, 0.05)+ ggtitle("DOX 24R")+ylab("")
+v3 <- volcanosig(V.144R.top, 0.05)+ ggtitle("DOX 144R")+ylab("")
+plot_grid(v1,v2, v3, rel_widths =c(1,1,1))
+```
+
+### PCA Plots
+
+#### H3K27ac
+```{r H3K27ac PCA_var}
+pca_H3K27ac <- calc_pca(H3K27ac_merged_raw)
+#pca_H3K27ac <- pca_H3K27ac$x %>% cbind(.,H3K27ac_annomat)
+#pca_var_plot(pca_H3K27ac, col_var = tx, shape_var = ind)
+```
+
+```{r H3K27ac PCA}
+#pca_plot(pca_H3K27ac, col_var = )
+```
+
+#### H3K27me3
+```{r H3K27me3 PCA_var}
+#pca_H3K27me3 <- calc_pca(H3K27me3_merged_raw)
+#pca_var_plot(pca_H3K27me3)
+```
+
+```{r H3K27me3 PCA}
+#pca_plot(pca_H3K27me3)
+```
+
+#### H3K36me3
+```{r H3K36me3 PCA_var}
+#pca_H3K36me3 <- calc_pca(H3K36me3_merged_raw)
+#pca_var_plot(pca_H3K36me3)
+```
+
+```{r H3K36me3 PCA}
+#pca_plot(pca_H3K36me3)
+```
+
+#### H3K9me3
+```{r H3K9me3 PCA_var}
+#pca_H3K9me3 <- calc_pca(H3K9me3_merged_raw)
+#pca_var_plot(pca_H3K9me3)
+```
+
+```{r H3K9me3 PCA}
+#pca_plot(pca_H3K9me3)
+```
+
+### Venn Diagrams
