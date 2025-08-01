@@ -40,13 +40,15 @@ library(corrplot) ## For correlation plot
 library(ggpmisc)
 library(gcplyr)
 library(Rsubread)
+library(limma)
+library(ggrastr)
+library(cowplot)
+library(smplot2)
 ```
 
 #### Data Initialization
 ```{r init}
 sampleinfo <- read_delim("data/sample_info.tsv", delim = "\t")
-multiqc_gene_stats_trim <- read_delim("data/multiqc_data_trim/multiqc_general_stats.txt",delim = "\t")
-multiqc_fastqc_trim <- read_delim("data/multiqc_data_trim/multiqc_fastqc.txt",delim = "\t")
 ```
 
 #### Functions
@@ -128,6 +130,32 @@ x_axis_labels = function(labels, every_nth = 1, ...) {
     ...
   )
 }
+
+volcanosig <- function(df, psig.lvl) {
+    df <- df %>% 
+    mutate(threshold = ifelse(adj.P.Val > psig.lvl, "A", ifelse(adj.P.Val <= psig.lvl & logFC<=0,"B","C")))
+      # ifelse(adj.P.Val <= psig.lvl & logFC >= 0,"B", "C")))
+    ##This is where I could add labels, but I have taken out
+    # df <- df %>% mutate(genelabels = "")
+    # df$genelabels[1:topg] <- df$rownames[1:topg]
+    
+  ggplot(df, aes(x=logFC, y=-log10(P.Value))) + 
+    ggrastr::geom_point_rast(aes(color=threshold))+
+    # geom_text_repel(aes(label = genelabels), segment.curvature = -1e-20,force = 1,size=2.5,
+    # arrow = arrow(length = unit(0.015, "npc")), max.overlaps = Inf) +
+    #geom_hline(yintercept = -log10(psig.lvl))+
+    xlab(expression("Log"[2]*" FC"))+
+    ylab(expression("-log"[10]*"P Value"))+
+    scale_color_manual(values = c("black", "red","blue"))+
+    theme_cowplot()+
+    ylim(0,25)+
+    xlim(-6,6)+
+    theme(legend.position = "none",
+              plot.title = element_text(size = rel(1.5), hjust = 0.5),
+              axis.title = element_text(size = rel(0.8))) 
+}
+
+
 ```
 
 ### Peak Calling for Q=0.01 and Broad=0.1 with No Lambda
@@ -682,239 +710,4 @@ all_peak_sn %>%
    theme_classic()+
   # facet_wrap(~histone)+
   ggtitle("Peak count across histones")
-```
-
-#### Tagging Questionable Libraries by FRiP
-```{r frip tag}
-questionable_frip = all_peak[(all_peak$FRiP < 0.02),]
-questionable_frip
-```
-
-### Peak Widths
-
-#### Peak Width Function
-```{r peak withs}
-histone_list <- c("H3K27ac", "H3K27me3", "H3K9me3", "H3K36me3")
-get_peak_widths_long_split <- function(histone, var) {
-  path <- file.path("data/peaks", histone)
-  if (histone == "H3K27ac"){
-    file_list = list.files(path = path, pattern = paste0("picard_peaks.narrowPeak$", sep=""), full.names = TRUE)
-  } else {
-    file_list = list.files(path = path, pattern = paste0(var,"_peaks.(narrowPeak|broadPeak)$", sep=""), full.names = TRUE)
-  }
-  process_peak <- function(file_path, label) {
-    filename <- basename(file_path)
-    peak_df <- fread(file_path, header = FALSE) %>%
-      transmute(
-        row = row_number(),
-        width = abs(V3 - V2),
-        file = paste0(histone, "-", filename),
-        group = label
-      )
-    return(peak_df)
-  }
-  peak_list <- list(map(file_list, process_peak, label = var)) %>% flatten()
-  bind_rows(peak_list)
-}
-```
-
-#### Broad Visualization
-```{r picard broad length}
-all_peak_widths <- purrr::map_df(histone_list, get_peak_widths_long_split, var = "picard_broad")
-
-anno_peak_width_long <- all_peak_widths %>% 
-  mutate(file= gsub("_picard_broad_peaks.broadPeak","",file)) %>%
-  separate_wider_delim(., cols=file, delim="-",names=c("histone","sample")) %>% 
-  left_join(sampleinfo, by =c("sample"="Library ID"))
-
-anno_peak_width_long %>%
-  # distinct(histone)
-  ggplot(.,aes(x=histone, y = width, fill = histone))+
-  geom_violin()+
-  # scale_fill_viridis_a(discrete = TRUE, begin = 0.1, end = 0.55, option = "magma", alpha = 0.8) +
-  #   scale_color_viridis_a(discrete = TRUE, begin = 0.1, end = 0.9) +
-    scale_y_continuous(trans = "log", breaks = c(400, 3000, 22000)) +
-    theme_bw(base_size = 18) +
-    ylab("Width of Peaks") +
-    xlab("")+
-  ggtitle("Width of all peaks with Broad Peaks")
-```
-
-#### Broad as Narrow Visualization
-```{r picard narrow length}
-all_peak_widths <- purrr::map_df(histone_list, get_peak_widths_long_split, var = "picard_narrow")
-
-anno_peak_width_long <- all_peak_widths %>% 
-  mutate(file= gsub("_picard_narrow_peaks.narrowPeak","",file)) %>%
-  separate_wider_delim(., cols=file, delim="-",names=c("histone","sample")) %>% 
-  left_join(sampleinfo, by =c("sample"="Library ID"))
-
-anno_peak_width_long %>%
-  # distinct(histone)
-  ggplot(.,aes(x=histone, y = width, fill = histone))+
-  geom_violin()+
-  # scale_fill_viridis_a(discrete = TRUE, begin = 0.1, end = 0.55, option = "magma", alpha = 0.8) +
-  #   scale_color_viridis_a(discrete = TRUE, begin = 0.1, end = 0.9) +
-    scale_y_continuous(trans = "log", breaks = c(400, 3000, 22000)) +
-    theme_bw(base_size = 18) +
-    ylab("Width of Peaks") +
-    xlab("")+
-  ggtitle("Width of all peaks with Broad as Narrow")
-```
-
-#### Broad as Narrow Stringent Visualization
-```{r stringent narrow length}
-all_peak_widths <- purrr::map_df(histone_list, get_peak_widths_long_split, var = "1e3_narrow")
-
-anno_peak_width_long <- all_peak_widths %>% 
-  mutate(file= gsub("_1e3_narrow_peaks.narrowPeak","",file)) %>%
-  separate_wider_delim(., cols=file, delim="-",names=c("histone","sample")) %>% 
-  left_join(sampleinfo, by =c("sample"="Library ID"))
-
-anno_peak_width_long %>%
-  # distinct(histone)
-  ggplot(.,aes(x=histone, y = width, fill = histone))+
-  geom_violin()+
-  # scale_fill_viridis_a(discrete = TRUE, begin = 0.1, end = 0.55, option = "magma", alpha = 0.8) +
-  #   scale_color_viridis_a(discrete = TRUE, begin = 0.1, end = 0.9) +
-    scale_y_continuous(trans = "log", breaks = c(400, 3000, 22000)) +
-    theme_bw(base_size = 18) +
-    ylab("Width of Peaks") +
-    xlab("")+
-  ggtitle("Width of all peaks with Broad as Stringent Narrow")
-```
-
-### Feature Counts
-```{r feature_cts}
-featurects_merged <- read_delim("data/peaks/H3K27ac_merged_counts.txt", 
-    delim = "\t", escape_double = FALSE, 
-    trim_ws = TRUE, skip = 1)
-featurects_cluster <- read_delim("data/peaks/H3K27ac_cluster_counts.txt", 
-    delim = "\t", escape_double = FALSE, 
-    trim_ws = TRUE, skip = 1)
-featurects_iter <- read_delim("data/peaks/H3K27ac_iter_counts.txt", 
-    delim = "\t", escape_double = FALSE, 
-    trim_ws = TRUE, skip = 1)
-rename_list <- sampleinfo %>% 
-  mutate(stem= "_nobl.bam") %>% 
-  mutate(prefix=paste0("/scratch/10819/styu/MW_multiQC/peaks/",Histone_Mark,"/",Treatment,"/",Timepoint,"/")) %>%
-  mutate(oldname=paste0(prefix,`Library ID`,"/",`Library ID`,stem)) %>% 
-  mutate(newname=paste0(Individual,"_",Treatment,"_",Timepoint,"_",Histone_Mark)) %>% 
-  dplyr::select(oldname,newname)
-rename_vec <- setNames(rename_list$newname, rename_list$oldname)
-names(featurects_merged)[names(featurects_merged) %in% names(rename_vec)] <- rename_vec[names(featurects_merged)[names(featurects_merged) %in% names(rename_vec)]]
-names(featurects_cluster)[names(featurects_cluster) %in% names(rename_vec)] <- rename_vec[names(featurects_cluster)[names(featurects_cluster) %in% names(rename_vec)]]
-names(featurects_iter)[names(featurects_iter) %in% names(rename_vec)] <- rename_vec[names(featurects_iter)[names(featurects_iter) %in% names(rename_vec)]]
-```
-
-### H3K27ac Count Analysis
-```{r H3K27ac HeatMap 1, fig.width=14,fig.height=14}
-H3K27ac_merged_raw <- featurects_merged %>% 
-  dplyr::select(Geneid,contains("Ind")) %>% 
-  column_to_rownames("Geneid") %>% 
-  as.matrix()
-
-H3K27ac_cluster_raw <- featurects_cluster %>% 
-  dplyr::select(Geneid,contains("Ind")) %>% 
-  column_to_rownames("Geneid") %>% 
-  as.matrix()
-
-H3K27ac_iter_raw <- featurects_iter %>% 
-  dplyr::select(Geneid,contains("Ind")) %>% 
-  column_to_rownames("Geneid") %>% 
-  as.matrix()
-
-H3K27ac_merged_cor <- featurects_merged %>% 
-  dplyr::select(Geneid,contains("Ind")) %>% 
-  column_to_rownames("Geneid") %>% 
-  cpm(., log = TRUE) %>% 
-  cor()
-
-H3K27ac_cluster_cor <- featurects_cluster %>% 
-  dplyr::select(Geneid,contains("Ind")) %>% 
-  column_to_rownames("Geneid") %>% 
-  cpm(., log = TRUE) %>% 
-  cor()
-
-H3K27ac_iter_cor <- featurects_iter %>% 
-  dplyr::select(Geneid,contains("Ind")) %>% 
-  column_to_rownames("Geneid") %>% 
-  cpm(., log = TRUE) %>% 
-  cor()
-
-annomat <- data.frame(sample=colnames(H3K27ac_merged_cor)) %>% 
-  separate_wider_delim(sample,delim="_",names=c("Ind","Treatment","Timepoint",NA),cols_remove = FALSE) %>% 
-  mutate(Treatment=factor(Treatment, levels = c("VEH","5FU","DOX")),
-         Timepoint=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
-  column_to_rownames("sample")
-heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
-
-Heatmap(H3K27ac_merged_cor, 
-        top_annotation = heatmap_first,
-        column_title="Unfiltered log2cpm H3K27ac with Standard Merging")
-```
-
-```{r H3K27ac HeatMap 2, fig.width=14,fig.height=14}
-annomat <- data.frame(sample=colnames(H3K27ac_cluster_cor)) %>% 
-  separate_wider_delim(sample,delim="_",names=c("Ind","Treatment","Timepoint",NA),cols_remove = FALSE) %>% 
-  mutate(Treatment=factor(Treatment, levels = c("VEH","5FU","DOX")),
-         Timepoint=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
-  column_to_rownames("sample")
-heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
-
-Heatmap(H3K27ac_cluster_cor, 
-        top_annotation = heatmap_first,
-        column_title="Unfiltered log2cpm H3K27ac with Cluster Merging")
-```
-
-```{r H3K27ac HeatMap 3, fig.width=14,fig.height=14}
-annomat <- data.frame(sample=colnames(H3K27ac_iter_cor)) %>% 
-  separate_wider_delim(sample,delim="_",names=c("Ind","Treatment","Timepoint",NA),cols_remove = FALSE) %>% 
-  mutate(Treatment=factor(Treatment, levels = c("VEH","5FU","DOX")),
-         Timepoint=factor(Timepoint, levels =c("24T","24R","144R"))) %>% 
-  column_to_rownames("sample")
-heatmap_first <- ComplexHeatmap::HeatmapAnnotation(df = annomat)
-
-Heatmap(H3K27ac_iter_cor, 
-        top_annotation = heatmap_first,
-        column_title="Unfiltered log2cpm H3K27ac with Iterative Merging")
-```
-
-### H3K27me3 Count Analysis
-
-### H3K36me3 Count Analysis
-
-### H3K9me3 Count Analysis
-
-### Fragment Analysis
-```{r frag ct, fig.width=14}
-all_peak %>%
-  mutate(Fragments=Fragments/1000000) %>% 
-  ggplot(., aes(x=interaction(Individual,Treatment,Timepoint), y=Fragments, fill=Treatment, group = Treatment))+
-  geom_col()+
-  geom_hline(yintercept =5)+
-  geom_text(aes(y = 0,label = Sample), vjust = 0.2, size = 3, angle = 90)+
-  theme_classic()+
-  facet_wrap(~Histone_Mark)+
-  ggtitle("Fragment count by histone and sample")+
-  ylab("Count of Fragments * 10^6")+
-  xlab("Samples")+
-  theme(axis.text.x=element_text(vjust = .2,angle=90))+
-  scale_y_continuous( expand = expansion(mult = c(0, .1)))
-```
-
-```{r frag frip, fig.width=14}
-all_peak %>%
-  mutate(FRiP=FRiP * 100) %>% 
-  ggplot(., aes(x=interaction(Individual,Treatment,Timepoint), y=FRiP, fill=Treatment, group = Treatment))+
-  geom_col()+
-  geom_hline(yintercept =5)+
-  geom_text(aes(y = 0,label = Sample), vjust = 0.2, size = 3, angle = 90)+
-  theme_classic()+
-  facet_wrap(~Histone_Mark)+
-  ggtitle("Fragment count by histone and sample")+
-  ylab("Count of Fragments * 10^6")+
-  xlab("Samples")+
-  theme(axis.text.x=element_text(vjust = .2,angle=90))+
-  scale_y_continuous( expand = expansion(mult = c(0, .1)))
 ```
