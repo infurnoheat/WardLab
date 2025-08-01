@@ -521,15 +521,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree38c1eef9fad0c8dc386f00a58372a0324142b091targetblank38c1eefa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreef5674cf20ab9337ddefc3c329ac95a06879c4caatargetblankf5674cfa">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/infurnoheat/WardLab/tree/38c1eef9fad0c8dc386f00a58372a0324142b091" target="_blank">38c1eef</a>
+<a href="https://github.com/infurnoheat/WardLab/tree/f5674cf20ab9337ddefc3c329ac95a06879c4caa" target="_blank">f5674cf</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtree38c1eef9fad0c8dc386f00a58372a0324142b091targetblank38c1eefa"
+id="strongRepositoryversionstrongahrefhttpsgithubcominfurnoheatWardLabtreef5674cf20ab9337ddefc3c329ac95a06879c4caatargetblankf5674cfa"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -539,7 +539,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/infurnoheat/WardLab/tree/38c1eef9fad0c8dc386f00a58372a0324142b091" target="_blank">38c1eef</a>.
+<a href="https://github.com/infurnoheat/WardLab/tree/f5674cf20ab9337ddefc3c329ac95a06879c4caa" target="_blank">f5674cf</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -622,6 +622,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/infurnoheat/WardLab/blob/f5674cf20ab9337ddefc3c329ac95a06879c4caa/analysis/peak_analysis.Rmd" target="_blank">f5674cf</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-08-01
+</td>
+<td>
+wflow_publish("analysis/peak_analysis.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/infurnoheat/WardLab/cb5da29bf83b01058e4f06c1c1c4e860e53e3faa/docs/peak_analysis.html" target="_blank">cb5da29</a>
+</td>
+<td>
+infurnoheat
+</td>
+<td>
+2025-08-01
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1063,30 +1097,6 @@ x_axis_labels = function(labels, every_nth = 1, ...) {
     xpd = TRUE,
     ...
   )
-}
-
-volcanosig &lt;- function(df, psig.lvl) {
-    df &lt;- df %&gt;% 
-    mutate(threshold = ifelse(adj.P.Val &gt; psig.lvl, &quot;A&quot;, ifelse(adj.P.Val &lt;= psig.lvl &amp; logFC&lt;=0,&quot;B&quot;,&quot;C&quot;)))
-      # ifelse(adj.P.Val &lt;= psig.lvl &amp; logFC &gt;= 0,&quot;B&quot;, &quot;C&quot;)))
-    ##This is where I could add labels, but I have taken out
-    # df &lt;- df %&gt;% mutate(genelabels = &quot;&quot;)
-    # df$genelabels[1:topg] &lt;- df$rownames[1:topg]
-    
-  ggplot(df, aes(x=logFC, y=-log10(P.Value))) + 
-    ggrastr::geom_point_rast(aes(color=threshold))+
-    # geom_text_repel(aes(label = genelabels), segment.curvature = -1e-20,force = 1,size=2.5,
-    # arrow = arrow(length = unit(0.015, &quot;npc&quot;)), max.overlaps = Inf) +
-    #geom_hline(yintercept = -log10(psig.lvl))+
-    xlab(expression(&quot;Log&quot;[2]*&quot; FC&quot;))+
-    ylab(expression(&quot;-log&quot;[10]*&quot;P Value&quot;))+
-    scale_color_manual(values = c(&quot;black&quot;, &quot;red&quot;,&quot;blue&quot;))+
-    theme_cowplot()+
-    ylim(0,25)+
-    xlim(-6,6)+
-    theme(legend.position = &quot;none&quot;,
-              plot.title = element_text(size = rel(1.5), hjust = 0.5),
-              axis.title = element_text(size = rel(0.8))) 
 }</code></pre>
 </div>
 <div id="peak-calling-for-q0.01-and-broad0.1-with-no-lambda"
