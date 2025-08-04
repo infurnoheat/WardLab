@@ -44,6 +44,7 @@ library(limma)
 library(ggrastr)
 library(cowplot)
 library(smplot2)
+library(ggVennDiagram)
 ```
 
 #### Data Initialization
@@ -58,15 +59,12 @@ pca_plot <-
   function(df,
            col_var = NULL,
            shape_var = NULL,
+           text_var = NULL,
            title = "") {
-    ggplot(df) + geom_point(aes_string(
-      x = "PC1",
-      y = "PC2",
-      color = col_var,
-      shape = shape_var
-    ),
-    size = 5) +
+    ggplot(df, aes_string(x = "PC1", y = "PC2")) +
+      geom_point(aes_string(color = col_var, shape = shape_var), size = 5) +
       labs(title = title, x = "PC 1", y = "PC 2") +
+      ggrepel::geom_text_repel(label = text_var, vjust = -.5, max.overlaps = 30) +
       scale_color_manual(values = c(
         "#8B006D",
         "#DF707E",
@@ -248,10 +246,11 @@ H3K27ac_merged_raw <- H3K27ac_merged %>%
   column_to_rownames("Geneid") %>% 
   as.matrix()
 
-H3K27ac_merged_cor <- H3K27ac_merged %>% 
+H3K27ac_merged_lcpm <- H3K27ac_merged %>% 
   dplyr::select(Geneid,contains("Ind")) %>% 
   column_to_rownames("Geneid") %>% 
-  cpm(., log = TRUE) %>% 
+  cpm(., log = TRUE)
+H3K27ac_merged_cor <- H3K27ac_merged_lcpm %>% 
   cor()
 
 annomat <- data.frame(sample=colnames(H3K27ac_merged_cor)) %>% 
@@ -273,10 +272,11 @@ H3K27me3_merged_raw <- H3K27me3_merged %>%
   column_to_rownames("Geneid") %>% 
   as.matrix()
 
-H3K27me3_merged_cor <- H3K27me3_merged %>% 
+H3K27me3_merged_lcpm <- H3K27me3_merged %>% 
   dplyr::select(Geneid,contains("Ind")) %>% 
   column_to_rownames("Geneid") %>% 
-  cpm(., log = TRUE) %>% 
+  cpm(., log = TRUE)
+H3K27me3_merged_cor <- H3K27me3_merged_lcpm %>% 
   cor()
 
 annomat <- data.frame(sample=colnames(H3K27me3_merged_cor)) %>% 
@@ -298,10 +298,11 @@ H3K36me3_merged_raw <- H3K36me3_merged %>%
   column_to_rownames("Geneid") %>% 
   as.matrix()
 
-H3K36me3_merged_cor <- H3K36me3_merged %>% 
+H3K36me3_merged_lcpm <- H3K36me3_merged %>% 
   dplyr::select(Geneid,contains("Ind")) %>% 
   column_to_rownames("Geneid") %>% 
-  cpm(., log = TRUE) %>% 
+  cpm(., log = TRUE)
+H3K36me3_merged_cor <- H3K36me3_merged_lcpm %>% 
   cor()
 
 annomat <- data.frame(sample=colnames(H3K36me3_merged_cor)) %>% 
@@ -323,10 +324,11 @@ H3K9me3_merged_raw <- H3K9me3_merged %>%
   column_to_rownames("Geneid") %>% 
   as.matrix()
 
-H3K9me3_merged_cor <- H3K9me3_merged %>% 
+H3K9me3_merged_lcpm <- H3K9me3_merged %>% 
   dplyr::select(Geneid,contains("Ind")) %>% 
   column_to_rownames("Geneid") %>% 
-  cpm(., log = TRUE) %>% 
+  cpm(., log = TRUE)
+H3K9me3_merged_cor <- H3K9me3_merged_lcpm %>% 
   cor()
 
 annomat <- data.frame(sample=colnames(H3K9me3_merged_cor)) %>% 
@@ -509,10 +511,10 @@ V.24T.top= topTable(efit2, coef=1, adjust.method="BH", number=Inf, sort.by="p")
 V.24R.top= topTable(efit2, coef=2, adjust.method="BH", number=Inf, sort.by="p")
 V.144R.top= topTable(efit2, coef=3, adjust.method="BH", number=Inf, sort.by="p")
 
-v1 <- volcanosig(V.24T.top, 0.05)+ ggtitle("DOX 24T")
-v2 <- volcanosig(V.24R.top, 0.05)+ ggtitle("DOX 24R")+ylab("")
-v3 <- volcanosig(V.144R.top, 0.05)+ ggtitle("DOX 144R")+ylab("")
-plot_grid(v1,v2, v3, rel_widths =c(1,1,1))
+H3K27ac_24T <- volcanosig(V.24T.top, 0.05)+ ggtitle("DOX 24T")
+H3K27ac_24R <- volcanosig(V.24R.top, 0.05)+ ggtitle("DOX 24R")+ylab("")
+H3K27ac_144R <- volcanosig(V.144R.top, 0.05)+ ggtitle("DOX 144R")+ylab("")
+plot_grid(H3K27ac_24T, H3K27ac_24R, H3K27ac_144R, rel_widths =c(1,1,1))
 ```
 
 #### H3K27me3
@@ -544,10 +546,10 @@ V.24T.top= topTable(efit2, coef=1, adjust.method="BH", number=Inf, sort.by="p")
 V.24R.top= topTable(efit2, coef=2, adjust.method="BH", number=Inf, sort.by="p")
 V.144R.top= topTable(efit2, coef=3, adjust.method="BH", number=Inf, sort.by="p")
 
-v1 <- volcanosig(V.24T.top, 0.05)+ ggtitle("DOX 24T")
-v2 <- volcanosig(V.24R.top, 0.05)+ ggtitle("DOX 24R")+ylab("")
-v3 <- volcanosig(V.144R.top, 0.05)+ ggtitle("DOX 144R")+ylab("")
-plot_grid(v1,v2, v3, rel_widths =c(1,1,1))
+H3K27me3_24T <- volcanosig(V.24T.top, 0.05)+ ggtitle("DOX 24T")
+H3K27me3_24R <- volcanosig(V.24R.top, 0.05)+ ggtitle("DOX 24R")+ylab("")
+H3K27me3_144R <- volcanosig(V.144R.top, 0.05)+ ggtitle("DOX 144R")+ylab("")
+plot_grid(H3K27me3_24T, H3K27me3_24R, H3K27me3_144R, rel_widths =c(1,1,1))
 ```
 
 #### H3K36me3
@@ -579,10 +581,10 @@ V.24T.top= topTable(efit2, coef=1, adjust.method="BH", number=Inf, sort.by="p")
 V.24R.top= topTable(efit2, coef=2, adjust.method="BH", number=Inf, sort.by="p")
 V.144R.top= topTable(efit2, coef=3, adjust.method="BH", number=Inf, sort.by="p")
 
-v1 <- volcanosig(V.24T.top, 0.05)+ ggtitle("DOX 24T")
-v2 <- volcanosig(V.24R.top, 0.05)+ ggtitle("DOX 24R")+ylab("")
-v3 <- volcanosig(V.144R.top, 0.05)+ ggtitle("DOX 144R")+ylab("")
-plot_grid(v1,v2, v3, rel_widths =c(1,1,1))
+H3K36me3_24T <- volcanosig(V.24T.top, 0.05)+ ggtitle("DOX 24T")
+H3K36me3_24R <- volcanosig(V.24R.top, 0.05)+ ggtitle("DOX 24R")+ylab("")
+H3K36me3_144R <- volcanosig(V.144R.top, 0.05)+ ggtitle("DOX 144R")+ylab("")
+plot_grid(H3K36me3_24T, H3K36me3_24R, H3K36me3_144R, rel_widths =c(1,1,1))
 ```
 
 #### H3K9me3
@@ -614,53 +616,95 @@ V.24T.top= topTable(efit2, coef=1, adjust.method="BH", number=Inf, sort.by="p")
 V.24R.top= topTable(efit2, coef=2, adjust.method="BH", number=Inf, sort.by="p")
 V.144R.top= topTable(efit2, coef=3, adjust.method="BH", number=Inf, sort.by="p")
 
-v1 <- volcanosig(V.24T.top, 0.05)+ ggtitle("DOX 24T")
-v2 <- volcanosig(V.24R.top, 0.05)+ ggtitle("DOX 24R")+ylab("")
-v3 <- volcanosig(V.144R.top, 0.05)+ ggtitle("DOX 144R")+ylab("")
-plot_grid(v1,v2, v3, rel_widths =c(1,1,1))
+H3K9me3_24T <- volcanosig(V.24T.top, 0.05)+ ggtitle("DOX 24T")
+H3K9me3_24R <- volcanosig(V.24R.top, 0.05)+ ggtitle("DOX 24R")+ylab("")
+H3K9me3_144R <- volcanosig(V.144R.top, 0.05)+ ggtitle("DOX 144R")+ylab("")
+plot_grid(H3K9me3_24T, H3K9me3_24R, H3K9me3_144R, rel_widths =c(1,1,1))
 ```
 
 ### PCA Plots
 
 #### H3K27ac
 ```{r H3K27ac PCA_var}
-pca_H3K27ac <- calc_pca(H3K27ac_merged_raw)
-#pca_H3K27ac <- pca_H3K27ac$x %>% cbind(.,H3K27ac_annomat)
-#pca_var_plot(pca_H3K27ac, col_var = tx, shape_var = ind)
+pca_H3K27ac <- calc_pca(t(H3K27ac_merged_lcpm))
+pca_var_plot(pca_H3K27ac)
 ```
 
 ```{r H3K27ac PCA}
-#pca_plot(pca_H3K27ac, col_var = )
+pca_H3K27ac <- pca_H3K27ac$x %>% cbind(., H3K27ac_annomat)
+pca_plot(pca_H3K27ac, col_var = "time", shape_var = "tx", text_var = pca_H3K27ac$ind, title = "H3K27ac lcpm PCA")
 ```
 
 #### H3K27me3
 ```{r H3K27me3 PCA_var}
-#pca_H3K27me3 <- calc_pca(H3K27me3_merged_raw)
-#pca_var_plot(pca_H3K27me3)
+pca_H3K27me3 <- calc_pca(t(H3K27me3_merged_lcpm))
+pca_var_plot(pca_H3K27me3)
 ```
 
 ```{r H3K27me3 PCA}
-#pca_plot(pca_H3K27me3)
+pca_H3K27me3 <- pca_H3K27me3$x %>% cbind(., H3K27me3_annomat)
+pca_plot(pca_H3K27me3, col_var = "time", shape_var = "tx", text_var = pca_H3K27me3$ind, title = "H3K27me3 lcpm PCA")
 ```
 
 #### H3K36me3
 ```{r H3K36me3 PCA_var}
-#pca_H3K36me3 <- calc_pca(H3K36me3_merged_raw)
-#pca_var_plot(pca_H3K36me3)
+pca_H3K36me3 <- calc_pca(t(H3K36me3_merged_lcpm))
+pca_var_plot(pca_H3K36me3)
 ```
 
 ```{r H3K36me3 PCA}
-#pca_plot(pca_H3K36me3)
+pca_H3K36me3 <- pca_H3K36me3$x %>% cbind(., H3K36me3_annomat)
+pca_plot(pca_H3K36me3, col_var = "time", shape_var = "tx", text_var = pca_H3K36me3$ind, title = "H3K36me3 lcpm PCA")
 ```
 
 #### H3K9me3
 ```{r H3K9me3 PCA_var}
-#pca_H3K9me3 <- calc_pca(H3K9me3_merged_raw)
-#pca_var_plot(pca_H3K9me3)
+pca_H3K9me3 <- calc_pca(t(H3K9me3_merged_lcpm))
+pca_var_plot(pca_H3K9me3)
 ```
 
 ```{r H3K9me3 PCA}
-#pca_plot(pca_H3K9me3)
+pca_H3K9me3 <- pca_H3K9me3$x %>% cbind(., H3K9me3_annomat)
+pca_plot(pca_H3K9me3, col_var = "time", shape_var = "tx", text_var = pca_H3K9me3$ind, title = "H3K9me3 lcpm PCA")
 ```
 
 ### Venn Diagrams
+
+#### Venn Set Up
+```{r Venn Set Up}
+genes_H3K27ac_24T <- H3K27ac_24T$data$genes[(H3K27ac_24T$data$adj.P.Val < 0.05)]
+genes_H3K27ac_24R <- H3K27ac_24R$data$genes[(H3K27ac_24R$data$adj.P.Val < 0.05)]
+genes_H3K27ac_144R <- H3K27ac_144R$data$genes[(H3K27ac_144R$data$adj.P.Val < 0.05)]
+
+genes_H3K27me3_24T <- H3K27me3_24T$data$genes[(H3K27me3_24T$data$adj.P.Val < 0.05)]
+genes_H3K27me3_24R <- H3K27me3_24R$data$genes[(H3K27me3_24R$data$adj.P.Val < 0.05)]
+genes_H3K27me3_144R <- H3K27me3_144R$data$genes[(H3K27me3_144R$data$adj.P.Val < 0.05)]
+
+genes_H3K36me3_24T <- H3K36me3_24T$data$genes[(H3K36me3_24T$data$adj.P.Val < 0.05)]
+genes_H3K36me3_24R <- H3K36me3_24R$data$genes[(H3K36me3_24R$data$adj.P.Val < 0.05)]
+genes_H3K36me3_144R <- H3K36me3_144R$data$genes[(H3K36me3_144R$data$adj.P.Val < 0.05)]
+
+genes_H3K9me3_24T <- H3K9me3_24T$data$genes[(H3K9me3_24T$data$adj.P.Val < 0.05)]
+genes_H3K9me3_24R <- H3K9me3_24R$data$genes[(H3K9me3_24R$data$adj.P.Val < 0.05)]
+genes_H3K9me3_144R <- H3K9me3_144R$data$genes[(H3K9me3_144R$data$adj.P.Val < 0.05)]
+```
+
+#### H3K27ac Venn Diagrams
+```{r H3K27ac Venn}
+ggVennDiagram(list("24T regions"=genes_H3K27ac_24T,"24R regions"=genes_H3K27ac_24R, "144R regions"=genes_H3K27ac_144R))
+```
+
+#### H3K27me3 Venn Diagrams
+```{r H3K27me3 Venn}
+ggVennDiagram(list("24T regions"=genes_H3K27me3_24T,"24R regions"=genes_H3K27me3_24R, "144R regions"=genes_H3K27me3_144R))
+``` 
+
+#### H3K36me3 Venn Diagrams
+```{r H3K36me3 Venn}
+ggVennDiagram(list("24T regions"=genes_H3K36me3_24T,"24R regions"=genes_H3K36me3_24R, "144R regions"=genes_H3K36me3_144R))
+``` 
+
+#### H3K9me3 Venn Diagrams
+```{r H3K9me3 Venn}
+ggVennDiagram(list("24T regions"=genes_H3K9me3_24T,"24R regions"=genes_H3K9me3_24R, "144R regions"=genes_H3K9me3_144R))
+``` 
